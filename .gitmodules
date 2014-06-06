@@ -1,0 +1,21 @@
+[submodule "nornir-web"]
+	path = nornir-web
+	url = ../nornir-web.git
+[submodule "nornir-volumecontroller"]
+	path = nornir-volumecontroller
+	url = ../nornir-volumecontroller.git
+[submodule "nornir-volumemodel"]
+	path = nornir-volumemodel
+	url = ../nornir-volumemodel.git
+[submodule "nornir-pools"]
+	path = nornir-pools
+	url = git@github.com:jamesra/nornir-pools
+[submodule "nornir-shared"]
+	path = nornir-shared
+	url = ../nornir-shared.git
+[submodule "nornir-buildmanager"]
+	path = nornir-buildmanager
+	url = ../nornir-buildmanager.git
+[submodule "nornir-imageregistration"]
+	path = nornir-imageregistration
+	url = ../nornir-imageregistration.git
