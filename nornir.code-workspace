@@ -1,0 +1,63 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			".ssh": true,
+			"**/.project": true,
+			"**/.pydevproject": true,
+			"**/*.egg-info": true,
+			"**/.idea": true,
+		},
+		"python.analysis.include": [
+			"../nornir-*/**"
+		], 
+		"python.analysis.ignore": [
+			"**/__pycache__", "**/build", "**/dist/"],
+		"python.analysis.indexing": true,
+		"python.analysis.extraPaths": [
+			"nornir-buildmanager/",
+			"nornir-imageregistration/",
+			"nornir-pools/",
+			"nornir-shared/",
+			"nornir-pyre",
+			"nornir-*/**"
+		],
+		"python.analysis.packageIndexDepths": [
+			{
+				"path": "nornir_buildmanager",
+				"maxDepth": 5,
+				"includeAllSymbols": true				
+			},
+			{
+				"path": "nornir_imageregistration",
+				"maxDepth": 5,
+				"includeAllSymbols": true				
+			},
+			{
+				"path": "nornir_pools",
+				"maxDepth": 5,
+				"includeAllSymbols": true				
+			},
+			{
+				"path": "nornir_shared",
+				"maxDepth": 5,
+				"includeAllSymbols": true				
+			},
+			{
+				"path": "pyre",
+				"maxDepth": 5,
+				"includeAllSymbols": true				
+			},
+		],
+		"python.analysis.typeCheckingMode": "basic",
+		"python.linting.enabled": true,
+		"python.analysis.diagnosticMode": "workspace"
+
+		
+		
+	}
+}

@@ -1,0 +1,16 @@
+{
+    "include": [
+    "nornir-buildmanager",
+    "nornir-shared",
+    "nornir-imageregistration",
+    "nornir-pools",
+    "nornir-buildmanager/nornir_buildmanager",
+    "nornir-shared/nornir_shared",
+    "nornir-imageregistration/nornir_imageregistration",
+    "nornir-pools/nornir_pools",
+],
+"exclude": [
+    "**/__pycache__",
+  ],
+"verboseOutput": true,
+}
