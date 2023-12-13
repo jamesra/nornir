@@ -19,3 +19,6 @@
 [submodule "nornir-imageregistration"]
 	path = nornir-imageregistration
 	url = ../nornir-imageregistration.git
+[submodule "dm4reader"]
+	path = dm4reader
+	url = ../dm4reader.git
