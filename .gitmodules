@@ -22,3 +22,6 @@
 [submodule "dm4reader"]
 	path = dm4reader
 	url = ../dm4reader.git
+[submodule "nornir-pyre"]
+	path = nornir-pyre
+	url = https://github.com/jamesra/nornir-pyre.git
