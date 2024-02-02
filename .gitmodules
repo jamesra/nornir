@@ -9,7 +9,7 @@
 	url = ../nornir-volumemodel.git
 [submodule "nornir-pools"]
 	path = nornir-pools
-	url = git@github.com:jamesra/nornir-pools
+	url = ../nornir-pools
 [submodule "nornir-shared"]
 	path = nornir-shared
 	url = ../nornir-shared.git
