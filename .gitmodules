@@ -21,4 +21,4 @@
 	url = ../nornir-imageregistration.git
 [submodule "dm4reader"]
 	path = dm4reader
-	url = ../dm4reader.git
+	url = https://github.com/jamesra/dm4reader.git
