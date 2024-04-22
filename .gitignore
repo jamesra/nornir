@@ -24,6 +24,10 @@ var/
 .installed.cfg
 *.egg
 
+#Python virtual environments
+venv
+
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
@@ -39,7 +43,287 @@ coverage.xml
 # Translations
 *.mo
 
-# Mr Developer
+# Mpi@pimini:~ $ sudo btmon
+Bluetooth monitor ver 5.55
+= Note: Linux version 6.1.21-v7+ (armv7l)                              0.224231
+= Note: Bluetooth subsystem version 2.22                               0.224243
+= New Index: 04:42:1A:57:9E:C0 (Primary,USB,hci0)               [hci0] 0.224247
+= Open Index: 04:42:1A:57:9E:C0                                 [hci0] 0.224252
+= Index Info: 04:42:1A:5.. (Realtek Semiconductor Corporation)  [hci0] 0.224254
+@ MGMT Open: bluetoothd (privileged) version 1.22             {0x0001} 0.224258
+> HCI Event: Disconnect Complete (0x05) plen 4               #1 [hci0] 9.105256
+        Status: Success (0x00)
+        Handle: 16
+        Reason: Remote User Terminated Connection (0x13)
+@ MGMT Event: Device Disconnected (0x000c) plen 8      {0x0001} [hci0] 9.105331
+        LE Address: C4:19:D1:A2:40:45 (Telink Semiconductor (Shanghai) Co., Ltd.)
+        Reason: Connection terminated by remote host (0x03)
+@ MGMT Event: Command Complete (0x0001) plen 10        {0x0001} [hci0] 9.142380
+      Pair Device (0x0019) plen 7
+        Status: Disconnected (0x0e)
+        LE Address: C4:19:D1:A2:40:45 (Telink Semiconductor (Shanghai) Co., Ltd.)
+< HCI Command: Vendor (0x3f|0x0019) plen 2                   #2 [hci0] 9.182592
+        00 00                                            ..
+> HCI Event: Command Complete (0x0e) plen 4                  #3 [hci0] 9.184272
+      Vendor (0x3f|0x0019) ncmd 2
+        Status: Success (0x00)
+@ MGMT Command: Pair Device (0x0019) plen 8           {0x0001} [hci0] 10.631168
+        LE Address: C4:19:D1:A2:40:45 (Telink Semiconductor (Shanghai) Co., Ltd.)
+        Capability: KeyboardDisplay (0x04)
+< HCI Command: LE Set Extended Scan.. (0x08|0x0041) plen 8  #4 [hci0] 10.631326
+        Own address type: Public (0x00)
+        Filter policy: Ignore not in white list (0x01)
+        PHYs: 0x01
+        Entry 0: LE 1M
+          Type: Passive (0x00)
+          Interval: 60.000 msec (0x0060)
+          Window: 60.000 msec (0x0060)
+> HCI Event: Command Complete (0x0e) plen 4                 #5 [hci0] 10.632255
+      LE Set Extended Scan Parameters (0x08|0x0041) ncmd 2
+        Status: Success (0x00)
+< HCI Command: LE Set Extended Scan.. (0x08|0x0042) plen 6  #6 [hci0] 10.632494
+        Extended scan: Enabled (0x01)
+        Filter duplicates: Enabled (0x01)
+        Duration: 0 msec (0x0000)
+        Period: 0.00 sec (0x0000)
+> HCI Event: Command Complete (0x0e) plen 4                 #7 [hci0] 10.649266
+      LE Set Extended Scan Enable (0x08|0x0042) ncmd 2
+        Status: Success (0x00)
+> HCI Event: LE Meta Event (0x3e) plen 35                   #8 [hci0] 10.737230
+      LE Extended Advertising Report (0x0d)
+        Num reports: 1
+        Entry 0
+          Event type: 0x0013
+            Props: 0x0013
+              Connectable
+              Scannable
+              Use legacy advertising PDUs
+            Data status: Complete
+          Legacy PDU Type: ADV_IND (0x0013)
+          Address type: Public (0x00)
+          Address: C4:19:D1:A2:40:45 (Telink Semiconductor (Shanghai) Co., Ltd.)
+          Primary PHY: LE 1M
+          Secondary PHY: No packets
+          SID: no ADI field (0xff)
+          TX power: 127 dBm
+          RSSI: -76 dBm (0xb4)
+          Periodic advertising invteral: 0.00 msec (0x0000)
+          Direct address type: Public (0x00)
+          Direct address: 00:00:00:00:00:00 (OUI 00-00-00)
+          Data length: 0x09
+        02 01 06 05 02 03 bb 03 02                       .........
+< HCI Command: LE Set Extended Scan.. (0x08|0x0042) plen 6  #9 [hci0] 10.737317
+        Extended scan: Disabled (0x00)
+        Filter duplicates: Disabled (0x00)
+        Duration: 0 msec (0x0000)
+        Period: 0.00 sec (0x0000)
+> HCI Event: Command Complete (0x0e) plen 4                #10 [hci0] 10.753261
+      LE Set Extended Scan Enable (0x08|0x0042) ncmd 2
+        Status: Success (0x00)
+< HCI Command: LE Extended Create.. (0x08|0x0043) plen 26  #11 [hci0] 10.753370
+        Filter policy: White list is not used (0x00)
+        Own address type: Public (0x00)
+        Peer address type: Public (0x00)
+        Peer address: C4:19:D1:A2:40:45 (Telink Semiconductor (Shanghai) Co., Ltd.)
+        Initiating PHYs: 0x01
+        Entry 0: LE 1M
+          Scan interval: 60.000 msec (0x0060)
+          Scan window: 60.000 msec (0x0060)
+          Min connection interval: 30.00 msec (0x0018)
+          Max connection interval: 50.00 msec (0x0028)
+          Connection latency: 0 (0x0000)
+          Supervision timeout: 420 msec (0x002a)
+          Min connection length: 0.000 msec (0x0000)
+          Max connection length: 0.000 msec (0x0000)
+> HCI Event: Command Status (0x0f) plen 4                  #12 [hci0] 10.769259
+      LE Extended Create Connection (0x08|0x0043) ncmd 2
+        Status: Success (0x00)
+> HCI Event: LE Meta Event (0x3e) plen 31                  #13 [hci0] 10.817235
+      LE Enhanced Connection Complete (0x0a)
+        Status: Success (0x00)
+        Handle: 16
+        Role: Master (0x00)
+        Peer address type: Public (0x00)
+        Peer address: C4:19:D1:A2:40:45 (Telink Semiconductor (Shanghai) Co., Ltd.)
+        Local resolvable private address: 00:00:00:00:00:00 (Non-Resolvable)
+        Peer resolvable private address: 00:00:00:00:00:00 (Non-Resolvable)
+        Connection interval: 45.00 msec (0x0024)
+        Connection latency: 0 (0x0000)
+        Supervision timeout: 420 msec (0x002a)
+        Master clock accuracy: 0x00
+@ MGMT Event: Device Connected (0x000b) plen 22       {0x0001} [hci0] 10.817290
+        LE Address: C4:19:D1:A2:40:45 (Telink Semiconductor (Shanghai) Co., Ltd.)
+        Flags: 0x00000008
+          Unknown device flag (0x00000008)
+        Data length: 9
+        Flags: 0x06
+          LE General Discoverable Mode
+          BR/EDR Not Supported
+        16-bit Service UUIDs (partial): 2 entries
+          Unknown (0xbb03)
+          Unknown (0x0203)
+< HCI Command: Vendor (0x3f|0x0019) plen 5                 #14 [hci0] 10.817515
+        01 10 00 02 00                                   .....
+> HCI Event: LE Meta Event (0x3e) plen 4                   #15 [hci0] 10.833259
+      LE Channel Selection Algorithm (0x14)
+        Handle: 16
+        Algorithm: #1 (0x00)
+> HCI Event: Command Complete (0x0e) plen 4                #16 [hci0] 10.849258
+      Vendor (0x3f|0x0019) ncmd 2
+        Status: Success (0x00)
+< HCI Command: LE Read Remote Used.. (0x08|0x0016) plen 2  #17 [hci0] 10.849325
+        Handle: 16
+> HCI Event: Command Status (0x0f) plen 4                  #18 [hci0] 10.865262
+      LE Read Remote Used Features (0x08|0x0016) ncmd 2
+        Status: Success (0x00)
+< HCI Command: Vendor (0x3f|0x0019) plen 5                 #19 [hci0] 10.865328
+        01 10 00 12 02                                   .....
+> HCI Event: Command Complete (0x0e) plen 4                #20 [hci0] 10.881249
+      Vendor (0x3f|0x0019) ncmd 2
+        Status: Success (0x00)
+> HCI Event: LE Meta Event (0x3e) plen 11                  #21 [hci0] 10.897247
+      LE Data Length Change (0x07)
+        Handle: 16
+        Max TX octets: 251
+        Max TX time: 2120
+        Max RX octets: 251
+        Max RX time: 2120
+> HCI Event: LE Meta Event (0x3e) plen 12                  #22 [hci0] 10.984239
+      LE Read Remote Used Features (0x04)
+        Status: Success (0x00)
+        Handle: 16
+        Features: 0x3d 0x29 0x00 0x00 0x00 0x00 0x00 0x00
+          LE Encryption
+          Extended Reject Indication
+          Slave-initiated Features Exchange
+          LE Ping
+          LE Data Packet Length Extension
+          LE 2M PHY
+          LE Coded PHY
+          LE Periodic Advertising
+< ACL Data TX: Handle 16 flags 0x00 dlen 7                 #23 [hci0] 10.985018
+      ATT: Exchange MTU Request (0x02) len 2
+        Client RX MTU: 517
+> ACL Data RX: Handle 16 flags 0x02 dlen 7                 #24 [hci0] 11.028853
+      ATT: Exchange MTU Request (0x02) len 2
+        Client RX MTU: 247
+> HCI Event: Number of Completed Packets (0x13) plen 5     #25 [hci0] 11.029252
+        Num handles: 1
+        Handle: 16
+        Count: 1
+< ACL Data TX: Handle 16 flags 0x00 dlen 7                 #26 [hci0] 11.029317
+      ATT: Exchange MTU Response (0x03) len 2
+        Server RX MTU: 517
+> ACL Data RX: Handle 16 flags 0x02 dlen 7                 #27 [hci0] 11.073841
+      ATT: Exchange MTU Response (0x03) len 2
+        Server RX MTU: 247
+< ACL Data TX: Handle 16 flags 0x00 dlen 7                 #28 [hci0] 11.074302
+      ATT: Read Request (0x0a) len 2
+        Handle: 0x0003
+> HCI Event: Number of Completed Packets (0x13) plen 5     #29 [hci0] 11.074250
+        Num handles: 1
+        Handle: 16
+        Count: 1
+> HCI Event: Number of Completed Packets (0x13) plen 5     #30 [hci0] 11.119239
+        Num handles: 1
+        Handle: 16
+        Count: 1
+> ACL Data RX: Handle 16 flags 0x02 dlen 11                #31 [hci0] 11.163519
+      ATT: Read Response (0x0b) len 6
+        Value: 53796e63204f
+< ACL Data TX: Handle 16 flags 0x00 dlen 7                 #32 [hci0] 11.163898
+      ATT: Read Request (0x0a) len 2
+        Handle: 0x0005
+> HCI Event: Number of Completed Packets (0x13) plen 5     #33 [hci0] 11.254241
+        Num handles: 1
+        Handle: 16
+        Count: 1
+> ACL Data RX: Handle 16 flags 0x02 dlen 7                 #34 [hci0] 11.298491
+      ATT: Read Response (0x0b) len 2
+        Value: 0000
+< ACL Data TX: Handle 16 flags 0x00 dlen 11                #35 [hci0] 11.298860
+      ATT: Read By Type Request (0x08) len 6
+        Handle range: 0x0001-0xffff
+        Attribute type: Unknown (0x2b3a)
+> HCI Event: Number of Completed Packets (0x13) plen 5     #36 [hci0] 11.344240
+        Num handles: 1
+        Handle: 16
+        Count: 1
+> ACL Data RX: Handle 16 flags 0x02 dlen 9                 #37 [hci0] 11.388512
+      ATT: Error Response (0x01) len 4
+        Read By Type Request (0x08)
+        Handle: 0x0001
+        Error: Attribute Not Found (0x0a)
+< ACL Data TX: Handle 16 flags 0x00 dlen 11                #38 [hci0] 11.388943
+      ATT: Read By Group Type Request (0x10) len 6
+        Handle range: 0x0001-0xffff
+        Attribute group type: Primary Service (0x2800)
+> HCI Event: Number of Completed Packets (0x13) plen 5     #39 [hci0] 11.434242
+        Num handles: 1
+        Handle: 16
+        Count: 1
+> ACL Data RX: Handle 16 flags 0x02 dlen 18                #40 [hci0] 11.478589
+      ATT: Read By Group Type Response (0x11) len 13
+        Attribute data length: 6
+        Attribute group list: 2 entries
+        Handle range: 0x0001-0x0007
+        UUID: Generic Access Profile (0x1800)
+        Handle range: 0x0008-0x000b
+        UUID: Generic Attribute Profile (0x1801)
+< ACL Data TX: Handle 16 flags 0x00 dlen 11                #41 [hci0] 11.479058
+      ATT: Read By Group Type Request (0x10) len 6
+        Handle range: 0x000c-0xffff
+        Attribute group type: Primary Service (0x2800)
+> HCI Event: Number of Completed Packets (0x13) plen 5     #42 [hci0] 11.524241
+        Num handles: 1
+        Handle: 16
+        Count: 1
+> ACL Data RX: Handle 16 flags 0x02 dlen 46                #43 [hci0] 11.568848
+      ATT: Read By Group Type Response (0x11) len 41
+        Attribute data length: 20
+        Attribute group list: 2 entries
+        Handle range: 0x000c-0x001a
+        UUID: Vendor specific (f000bb03-0451-4000-b000-000000000000)
+        Handle range: 0x001b-0x001f
+        UUID: Vendor specific (00010203-0405-0607-0809-0a0b0c0d1912)
+< ACL Data TX: Handle 16 flags 0x00 dlen 11                #44 [hci0] 11.569297
+      ATT: Read By Group Type Request (0x10) len 6
+        Handle range: 0x0020-0xffff
+        Attribute group type: Primary Service (0x2800)
+> HCI Event: Number of Completed Packets (0x13) plen 5     #45 [hci0] 11.614245
+        Num handles: 1
+        Handle: 16
+        Count: 1
+> ACL Data RX: Handle 16 flags 0x02 dlen 9                 #46 [hci0] 11.658510
+      ATT: Error Response (0x01) len 4
+        Read By Group Type Request (0x10)
+        Handle: 0x0020
+        Error: Attribute Not Found (0x0a)
+< ACL Data TX: Handle 16 flags 0x00 dlen 9                 #47 [hci0] 11.699993
+      ATT: Write Request (0x12) len 4
+        Handle: 0x000b
+          Data: 0200
+> HCI Event: Number of Completed Packets (0x13) plen 5     #48 [hci0] 11.704251
+        Num handles: 1
+        Handle: 16
+        Count: 1
+> ACL Data RX: Handle 16 flags 0x02 dlen 5                 #49 [hci0] 11.748486
+      ATT: Write Response (0x13) len 0
+> ACL Data RX: Handle 16 flags 0x02 dlen 16                #50 [hci0] 11.793577
+      LE L2CAP: Connection Parameter Update Request (0x12) ident 1 len 8
+        Min interval: 24
+        Max interval: 24
+        Slave latency: 99
+        Timeout multiplier: 400
+< ACL Data TX: Handle 16 flags 0x00 dlen 10                #51 [hci0] 11.793638
+      LE L2CAP: Connection Parameter Update Response (0x13) ident 1 len 2
+        Result: Connection Parameters rejected (0x0001)
+> HCI Event: Number of Completed Packets (0x13) plen 5     #52 [hci0] 11.839243
+        Num handles: 1
+        Handle: 16
+        Count: 1
+
+r Developer
 .mr.developer.cfg
 .project
 .pydevproject
