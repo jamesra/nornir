@@ -21,7 +21,7 @@
 	url = ../nornir-imageregistration.git
 [submodule "dm4"]
 	path = dm4
-	url = ../dm4.git
+	url = ./dm4
 [submodule "nornir-pyre"]
 	path = nornir-pyre
 	url = https://github.com/jamesra/nornir-pyre.git
