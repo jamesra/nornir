@@ -1,0 +1,35 @@
+
+{ 
+    "terminal.integrated.env.windows": {
+        "PYTHONPATH": "${workspaceFolder}/nornir-buildmanager;${workspaceFolder}/nornir-imageregistration;${workspaceFolder}/nornir-pools;${workspaceFolder}/nornir-shared;${workspaceFolder}/nornir-pyre;${env:PYTHONPATH}"
+      },
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true,
+    "python.analysis.autoSearchPaths": true,
+    "python.analysis.include": [
+        "{$workspaceRoot}/nornir-*/**",
+        "{$workspaceRoot}/nornir-buildmanager",
+        "{$workspaceRoot}/nornir-imageregistration",
+        "{$workspaceRoot}/nornir-pools",
+        "{$workspaceRoot}/nornir-shared",
+        "{$workspaceRoot}/nornir-*/**"
+    ],
+    "python.analysis.autoFormatStrings": true,
+    "python.analysis.extraPaths": [
+        "{$workspaceRoot}/nornir-*/**",
+        "{$workspaceRoot}/nornir-buildmanager",
+        "{$workspaceRoot}/nornir-imageregistration",
+        "{$workspaceRoot}/nornir-pools",
+        "{$workspaceRoot}/nornir-shared",
+    ],
+    "python.analysis.typeCheckingMode": "basic",
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "${workspaceFolder}/nornir-shared",
+        "-p",
+        "test*.py"
+    ],
+    "python.envFile": "${workspaceFolder}/.env"
+    
+}
