@@ -1,0 +1,5 @@
+---
+alwaysApply: true
+---
+
+The default virtual environment for Nornir is at "D:\src\git\nornir\venv\pyre314"

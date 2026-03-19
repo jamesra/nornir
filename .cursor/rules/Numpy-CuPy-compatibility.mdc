@@ -1,0 +1,5 @@
+---
+alwaysApply: true
+---
+
+**NumPy/CuPy compatibility**: When refactoring code that uses the array module (`xp = get_array_module()` or `cp.get_array_module()`) do not assume CuPy implements every NumPy function.  Any shared helper that accepts arrays must use `xp` (the array module) for operations on those arrays, not hard-coded `np` or `cp`.  In cases where a function is missing, split the control flow only if there is reason to believe it would be faster to use the built-in function.  For example, numpy.delete.
