@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "pyre",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pyre",
+            "python": "${workspaceFolder}/venv/pyre314/Scripts/python.exe",
+            "pythonArgs": ["-Xfrozen_modules=off"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/nornir-pyre;${workspaceFolder}/nornir-imageregistration;${workspaceFolder}/nornir-pools;${workspaceFolder}/nornir-shared;${workspaceFolder}/nornir-buildmanager"
+            }
+        }
+    ]
+}
