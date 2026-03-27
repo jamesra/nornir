@@ -2,4 +2,32 @@
 alwaysApply: true
 ---
 
-**NumPy/CuPy compatibility**: When refactoring code that uses the array module (`xp = get_array_module()` or `cp.get_array_module()`) do not assume CuPy implements every NumPy function.  Any shared helper that accepts arrays must use `xp` (the array module) for operations on those arrays, not hard-coded `np` or `cp`.  In cases where a function is missing, split the control flow only if there is reason to believe it would be faster to use the built-in function.  For example, numpy.delete.
+## NumPy / CuPy in `nornir_imageregistration`
+
+### Picking the array module (`xp`)
+
+- **`xp = nornir_imageregistration.GetComputationModule()`** — Use when there is no input array yet and code should follow the process-wide backend (numpy vs cupy), e.g. allocating scratch buffers for the active lib.
+- **`xp = cp.get_array_module(x)`** — Use when behavior must match a **specific** array `x` (or the first of several related arrays). Prefer this for helpers that transform data: keep outputs on the same kind of array as the inputs (numpy in → numpy out; cupy in → cupy out).
+- **Do not** use `import cupy as xp` or other aliases that steal the name `xp` from this meaning.
+
+### Single code path with `xp`
+
+- For operations on arrays whose backend is chosen above, call **`xp.linalg`**, **`xp.sum`**, **`xp.zeros`**, etc., not hard-coded **`np.*`** or **`cp.*`**, unless you are at an intentional boundary (see below).
+- **CuPy is not a full NumPy clone.** Do not assume every `numpy` API exists on `xp`. If something is missing on CuPy, branch **only** when necessary—e.g. use NumPy for that call after a documented `.get()` / `np.asarray`, or when the NumPy path is clearly required or faster (e.g. `numpy.delete`).
+
+### SciPy vs CuPyX (`cupyx.scipy`)
+
+- When calling SciPy-family routines that have CuPyX equivalents (**ndimage**, **fft**, **spatial.distance**, etc.), resolve the implementation from the array:
+
+  `sp = cupyx.scipy.get_array_module(array)` then e.g. `sp.ndimage.rotate`, `sp.fft.fftshift`.
+
+- Use **CPU SciPy** only when there is **no** suitable CuPyX API or when the algorithm is inherently host-based. At that boundary, pass **NumPy arrays** (e.g. `np.asarray(x.get())` for CuPy `x`). Examples: **Qhull / `scipy.spatial.Delaunay`**, **`scipy.spatial.transform.Rotation`**. Do not pass CuPy arrays into those calls without converting.
+
+### Anti-patterns
+
+- **`cp.asarray(scipy.some_func(...))`** as a default — avoids type errors but forces host work and sync; prefer `cupyx.scipy` when available, or a small dispatcher (e.g. cdist) that chooses GPU vs CPU explicitly.
+- **`UsingCupy()`** or **`GetComputationModule() == np`** to decide output type when the API receives a concrete array — prefer **`cp.get_array_module(input_array)`** so callers on NumPy are not upgraded to CuPy (or vice versa) by global settings alone.
+
+### Thunks
+
+- When CuPy is unavailable, **`nornir_imageregistration.cupy_thunk`** and **`cupyx_thunk`** stand in for `cp` / `cupyx.scipy`; the same `get_array_module` patterns should still read as “numpy path” vs “cupy path” in code reviews.
