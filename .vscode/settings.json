@@ -45,6 +45,8 @@
     ],
     "python.envFile": "${workspaceFolder}/.env",
     "cursorpyright.analysis.autoSearchPaths": true,
+    "cursorpyright.analysis.venvPath": "${workspaceFolder}/venv",
+    "cursorpyright.analysis.venv": "pyre314",
     "cursorpyright.analysis.include": [
         "nornir-buildmanager/nornir_buildmanager",
         "nornir-imageregistration/nornir_imageregistration",
