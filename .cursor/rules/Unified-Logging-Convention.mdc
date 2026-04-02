@@ -1,0 +1,34 @@
+## Unified Nornir Logging Convention
+
+### Purpose
+
+Ensure all Nornir Python projects write persistent logs through one shared convention managed by `nornir-shared`.
+
+### Required behavior
+
+- Initialize persistent logging with `nornir_shared.misc.SetupLogging`.
+- Use environment variable `NORNIR_LOG_ROOT` as the root directory for file logs.
+- Do not hardcode absolute log paths in project modules.
+- Do not create ad hoc debug files (for example `debug-*.log`, repo-root log files, or project-specific log directories).
+- Keep project identity in logger names/record content, not in per-project file names.
+
+### Ownership boundaries
+
+- `nornir_shared.misc` owns file log location and naming conventions.
+- `nornir_shared.prettyoutput` is presentation-layer output and must not own file log sink paths.
+
+### Session layout
+
+When `NORNIR_LOG_ROOT` is defined, log files should follow:
+
+- `<NORNIR_LOG_ROOT>/<YYYY-MM-DD>/nornir-session-<YYYYMMDD-HHMMSS>.log`
+- `<NORNIR_LOG_ROOT>/<YYYY-MM-DD>/nornir-session-<YYYYMMDD-HHMMSS>-errors.log`
+
+Use one parent-created session ID and reuse it across child processes in the same run.
+
+### Multiprocessing requirements
+
+- Use `nornir_shared.misc.StartMultiprocessLoggingListener(...)` in the parent process before creating worker processes.
+- Configure workers with `nornir_shared.misc.ConfigureWorkerQueueLogging(...)` so workers emit through `QueueHandler`.
+- Use `nornir_shared.misc.StopMultiprocessLoggingListener()` on shutdown.
+- Do not attach direct file handlers independently in worker processes.

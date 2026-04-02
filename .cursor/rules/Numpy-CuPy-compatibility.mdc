@@ -6,14 +6,26 @@ alwaysApply: true
 
 ### Picking the array module (`xp`)
 
-- **`xp = nornir_imageregistration.GetComputationModule()`** — Use when there is no input array yet and code should follow the process-wide backend (numpy vs cupy), e.g. allocating scratch buffers for the active lib.
-- **`xp = cp.get_array_module(x)`** — Use when behavior must match a **specific** array `x` (or the first of several related arrays). Prefer this for helpers that transform data: keep outputs on the same kind of array as the inputs (numpy in → numpy out; cupy in → cupy out).
+- **`xp = nornir_imageregistration.GetComputationModule()`** -- Use when there is no input array yet and code should follow the process-wide backend (numpy vs cupy), e.g. allocating scratch buffers for the active lib.
+- **`xp = cp.get_array_module(x)`** -- Use when behavior must match a **specific** array `x` (or the first of several related arrays). Prefer this for helpers that transform data: keep outputs on the same kind of array as the inputs (numpy in -> numpy out; cupy in -> cupy out).
 - **Do not** use `import cupy as xp` or other aliases that steal the name `xp` from this meaning.
+
+### Execution locality and transfer cost
+
+- **Default to the input array's backend** and use the `xp` namespace for operations.
+- **Do not move arrays between CPU and GPU unless there is a clear net benefit.** Host<->device transfers and synchronization are expensive and can dominate runtime.
+- CPU fallback is acceptable when all of the following are true:
+  - input data is small (use a configurable threshold, not a magic number),
+  - there is little or no likely performance gain from running the operation on GPU,
+  - and fallback does not create repeated CPU<->GPU ping-pong in loops or pipelines.
+- A second explicit CPU fallback case is a **CuPy session without needed spatial support** (for example, missing functionality commonly available in Linux CUDA/CuPy environments). In that case, transfer only for unsupported spatial steps, then continue with CuPy for the rest of the pipeline whenever practical.
+- If conversion is required, perform it at a **single explicit boundary**, document why, and keep subsequent work on that side until completion.
 
 ### Single code path with `xp`
 
 - For operations on arrays whose backend is chosen above, call **`xp.linalg`**, **`xp.sum`**, **`xp.zeros`**, etc., not hard-coded **`np.*`** or **`cp.*`**, unless you are at an intentional boundary (see below).
-- **CuPy is not a full NumPy clone.** Do not assume every `numpy` API exists on `xp`. If something is missing on CuPy, branch **only** when necessary—e.g. use NumPy for that call after a documented `.get()` / `np.asarray`, or when the NumPy path is clearly required or faster (e.g. `numpy.delete`).
+- **CuPy is not a full NumPy clone.** Do not assume every `numpy` API exists on `xp`. If something is missing on CuPy, branch **only** when necessary--e.g. use NumPy for that call after a documented `.get()` / `np.asarray`, or when the NumPy path is clearly required or faster (e.g. `numpy.delete`).
+- Prefer **one conversion, many operations** over repeated conversion hops.
 
 ### SciPy vs CuPyX (`cupyx.scipy`)
 
@@ -21,13 +33,14 @@ alwaysApply: true
 
   `sp = cupyx.scipy.get_array_module(array)` then e.g. `sp.ndimage.rotate`, `sp.fft.fftshift`.
 
-- Use **CPU SciPy** only when there is **no** suitable CuPyX API or when the algorithm is inherently host-based. At that boundary, pass **NumPy arrays** (e.g. `np.asarray(x.get())` for CuPy `x`). Examples: **Qhull / `scipy.spatial.Delaunay`**, **`scipy.spatial.transform.Rotation`**. Do not pass CuPy arrays into those calls without converting.
+- Use **CPU SciPy** only when there is **no** suitable CuPyX API, when required spatial support is unavailable in the active CuPy environment, or when the algorithm is inherently host-based. At that boundary, pass **NumPy arrays** (e.g. `np.asarray(x.get())` for CuPy `x`). Examples: **Qhull / `scipy.spatial.Delaunay`**, **`scipy.spatial.transform.Rotation`**. Do not pass CuPy arrays into those calls without converting.
 
 ### Anti-patterns
 
-- **`cp.asarray(scipy.some_func(...))`** as a default — avoids type errors but forces host work and sync; prefer `cupyx.scipy` when available, or a small dispatcher (e.g. cdist) that chooses GPU vs CPU explicitly.
-- **`UsingCupy()`** or **`GetComputationModule() == np`** to decide output type when the API receives a concrete array — prefer **`cp.get_array_module(input_array)`** so callers on NumPy are not upgraded to CuPy (or vice versa) by global settings alone.
+- **`cp.asarray(scipy.some_func(...))`** as a default -- avoids type errors but forces host work and sync; prefer `cupyx.scipy` when available, or a small dispatcher (e.g. cdist) that chooses GPU vs CPU explicitly.
+- Repeated `.get()` / `cp.asarray()` inside iterative code paths (hidden CPU<->GPU ping-pong).
+- **`UsingCupy()`** or **`GetComputationModule() == np`** to decide output type when the API receives a concrete array -- prefer **`cp.get_array_module(input_array)`** so callers on NumPy are not upgraded to CuPy (or vice versa) by global settings alone.
 
 ### Thunks
 
-- When CuPy is unavailable, **`nornir_imageregistration.cupy_thunk`** and **`cupyx_thunk`** stand in for `cp` / `cupyx.scipy`; the same `get_array_module` patterns should still read as “numpy path” vs “cupy path” in code reviews.
+- When CuPy is unavailable, **`nornir_imageregistration.cupy_thunk`** and **`cupyx_thunk`** stand in for `cp` / `cupyx.scipy`; the same `get_array_module` patterns should still read as "numpy path" vs "cupy path" in code reviews.
