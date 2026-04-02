@@ -1,0 +1,25 @@
+From 8689c392d2ca749d6a20e9980fb40ee637ad9e0f Mon Sep 17 00:00:00 2001
+From: Cursor Agent <cursoragent@cursor.com>
+Date: Thu, 2 Apr 2026 20:10:50 +0000
+Subject: [PATCH 3/3] Fix mosaic_tileset import path in test_arrange.py
+
+---
+ test/test_arrange.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/test/test_arrange.py b/test/test_arrange.py
+index 3dfd86d..1c5fbd8 100644
+--- a/test/test_arrange.py
++++ b/test/test_arrange.py
+@@ -10,7 +10,7 @@ import unittest
+ 
+ import matplotlib
+ import matplotlib.pyplot
+-from . import mosaic_tileset
++import nornir_imageregistration.mosaic_tileset as mosaic_tileset
+ import numpy as np
+ 
+ import nornir_imageregistration
+-- 
+2.43.0
+
