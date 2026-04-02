@@ -71,11 +71,36 @@ mkdir -p $TESTOUTPUTPATH
 
 ## Running Tests
 
+Activate the virtual environment and set environment variables before running tests:
+
+```bash
+source /workspace/venv/pyre314/bin/activate
+export TESTINPUTPATH=/workspace/nornir-testdata
+export TESTOUTPUTPATH=/tmp/nornir-test-output
+mkdir -p $TESTOUTPUTPATH
+```
+
+### GUI Tests and Non-Interactive Mode
+
+Several `nornir-imageregistration` tests display matplotlib figures with **Pass/Fail** buttons
+(`ShowWithPassFail`). These tests block until a human clicks Pass or Fail.
+
+For **non-interactive** (automated) runs, set `NORNIR_TEST_AUTOPASS=1`. This patches
+`ShowWithPassFail` to auto-return `True` and switches matplotlib to the `Agg` backend:
+
+```bash
+export NORNIR_TEST_AUTOPASS=1
+```
+
+For **interactive** (GUI) runs, leave the variable unset and ensure `DISPLAY` is set
+(the cloud agent VM uses `DISPLAY=:1` via VNC). The tests will show matplotlib windows
+and wait for you to click Pass or Fail.
+
 ### nornir-shared
 
 ```bash
 cd /workspace/nornir-shared
-python -m unittest discover -s ./test -p 'test_*.py'
+python -m pytest test/ -v --tb=short
 ```
 
 Expected: ~65% pass rate (11/17 tests)
@@ -84,7 +109,7 @@ Expected: ~65% pass rate (11/17 tests)
 
 ```bash
 cd /workspace/nornir-pools
-python -m unittest discover -s ./test -p 'test_*.py'
+python -m pytest test/ -v --tb=short
 ```
 
 Expected: ~78% pass rate (7/9 tests)
@@ -93,19 +118,27 @@ Expected: ~78% pass rate (7/9 tests)
 
 ```bash
 cd /workspace/nornir-imageregistration
-python -m unittest discover -s ./test -p 'test_grid_division*.py'
+PYTHONPATH=test:$PYTHONPATH NORNIR_TEST_AUTOPASS=1 \
+  python -m pytest test/ -v --tb=short \
+    --ignore=test/transforms --ignore=test/__init__.py \
+    --ignore=test/test_SliceToSliceBrute.py --ignore=test/test_assemble.py \
+    -k "not test_volume"
 ```
 
-Note: Some tests require ImageMagick to be installed.
+Expected: ~64% pass rate (97/151 tests in auto-pass mode)
+
+Note: Some tests require ImageMagick (`convert` command).
+`test_SliceToSliceBrute.py` requires Qt. `test_assemble.py` has shared-memory issues
+on some systems. The `transforms` subpackage has import-path issues with pytest.
 
 ### nornir-buildmanager
 
 ```bash
 cd /workspace/nornir-buildmanager
-python -m unittest discover -s ./test -p 'test_pipelinemanager*.py'
+PYTHONPATH=test:$PYTHONPATH python -m pytest test/ -v --tb=short
 ```
 
-Expected: 100% pass rate for pipeline manager tests
+Expected: ~67% pass rate (28/42 tests)
 
 ## GitHub Actions Integration
 
@@ -159,23 +192,32 @@ All packages require Python 3.13+. Use the virtual environment at `/workspace/ve
 
 1. **CI Test Data**: GitHub Actions workflows do NOT download the 24GB test data automatically
    - Use self-hosted runners or create a minimal test dataset for full CI coverage
-2. **GUI Tests**: Console/curses tests fail without a display server
-3. **Memory**: Full imageregistration test suite may cause memory issues
-4. **Path Separators**: Some tests have hardcoded Windows paths that fail on Linux
+2. **GUI Tests (Pass/Fail)**: Several imageregistration tests use `ShowWithPassFail` which
+   blocks until a Pass or Fail button is clicked. Use `NORNIR_TEST_AUTOPASS=1` for CI or
+   provide a display server (VNC) for interactive runs.
+3. **Console Tests**: `nornir-shared` console/curses tests fail without a display server
+4. **Memory / Bus Errors**: `test_assemble.py::test_TransformImage*` can crash with Bus error
+   due to shared memory usage
+5. **Path Separators**: Some tests have hardcoded Windows paths that fail on Linux
+6. **ImageMagick Version**: Tests call `magick` (v7 syntax) but cloud agents have v6 (`convert`)
+7. **Qt Dependency**: `test_SliceToSliceBrute.py` requires PyQt6/PySide6
+8. **Import Paths**: `nornir-buildmanager` and `nornir-imageregistration` tests use bare imports
+   (`import testbase`, `import setup_imagetest`) — add `PYTHONPATH=test:$PYTHONPATH`
 
 ## Test Results Summary
 
-| Package | Total Tests | Pass Rate | Notes |
-|---------|-------------|-----------|-------|
-| nornir-shared | 17 | 64.7% | 4 GUI-related errors |
-| nornir-pools | 9 | 77.8% | 2 skipped tests |
-| nornir-buildmanager | 1+ | 100% | Sample tests |
-| nornir-imageregistration | Many | Varies | Requires ImageMagick |
+| Package | Passed | Failed | Pass Rate | Notes |
+|---------|--------|--------|-----------|-------|
+| nornir-shared | 11 | 6 | 64.7% | 4 console/curses, 2 path issues |
+| nornir-pools | 7 | 0 | 100% | 2 skipped base classes |
+| nornir-buildmanager | 28 | 14 | 66.7% | Missing `ir-refine-grid`, `magick` v7 |
+| nornir-imageregistration | 97 | 54 | 64.2% | Auto-pass mode, excludes transforms/assemble |
 
 ## Future Improvements
 
 1. **Caching**: Implement caching strategy for CI to avoid repeated downloads
 2. **Optimization**: Reduce test data size by removing unused files
-3. **Dependencies**: Add ImageMagick to CI environment
+3. **Dependencies**: Add ImageMagick v7 to CI environment
 4. **Selective Testing**: Run only relevant tests based on changed files
 5. **Test Data Hosting**: Consider faster/more reliable hosting options
+6. **Fix `magick` vs `convert`**: Update tests or install ImageMagick v7
