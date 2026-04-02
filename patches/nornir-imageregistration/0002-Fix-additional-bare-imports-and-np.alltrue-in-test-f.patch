@@ -1,0 +1,90 @@
+From 9a9412d2bf998b11eb26f3c4bae767ba37b41c0d Mon Sep 17 00:00:00 2001
+From: Cursor Agent <cursoragent@cursor.com>
+Date: Thu, 2 Apr 2026 20:09:44 +0000
+Subject: [PATCH 2/3] Fix additional bare imports and np.alltrue in test files
+
+- Fix bare imports: test_arrange, mosaic_tileset, test_TileToTileAlignment
+- Replace np.alltrue with np.all in test_grid_division.py
+- Replace scipy.pi with numpy.pi in test_AlignmentRecord.py
+---
+ test/test_TileToTileAlignment.py        | 2 +-
+ test/test_arrange.py                    | 2 +-
+ test/test_grid_division.py              | 8 ++++----
+ test/transforms/test_AlignmentRecord.py | 2 +-
+ 4 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/test/test_TileToTileAlignment.py b/test/test_TileToTileAlignment.py
+index 625287c..dcdd5fd 100644
+--- a/test/test_TileToTileAlignment.py
++++ b/test/test_TileToTileAlignment.py
+@@ -20,7 +20,7 @@ import nornir_imageregistration.mosaic
+ import nornir_imageregistration.mosaic_tileset
+ import nornir_imageregistration.tile_overlap
+ from . import setup_imagetest
+-import test_arrange
++from . import test_arrange
+ 
+ 
+ class TestMosaicTilesetTileOffsets(setup_imagetest.TransformTestBase):
+diff --git a/test/test_arrange.py b/test/test_arrange.py
+index 342ecc6..3dfd86d 100644
+--- a/test/test_arrange.py
++++ b/test/test_arrange.py
+@@ -10,7 +10,7 @@ import unittest
+ 
+ import matplotlib
+ import matplotlib.pyplot
+-import mosaic_tileset
++from . import mosaic_tileset
+ import numpy as np
+ 
+ import nornir_imageregistration
+diff --git a/test/test_grid_division.py b/test/test_grid_division.py
+index 2b43008..9b6fcc6 100644
+--- a/test/test_grid_division.py
++++ b/test/test_grid_division.py
+@@ -23,7 +23,7 @@ class testITKGridDivision(unittest.TestCase):
+         grid = ITKGridDivision(source_shape=(1000, 1000), cell_size=cell_size,
+                                grid_spacing=grid_spacing, transform=transform)
+ 
+-        self.assertTrue(np.alltrue(grid.grid_spacing <= grid_spacing))
++        self.assertTrue(np.all(grid.grid_spacing <= grid_spacing))
+ 
+         inverted_target_points = transform.InverseTransform(grid.TargetPoints)
+ 
+@@ -39,8 +39,8 @@ class testITKGridDivision(unittest.TestCase):
+         """Ensure the grid_spacing is always equal or less than the passed parameter"""
+         grid = ITKGridDivision(source_shape=source_shape, cell_size=cell_size,
+                                grid_spacing=grid_spacing)
+-        self.assertTrue(np.alltrue(grid.grid_spacing <= grid_spacing))
+-        self.assertTrue(np.alltrue(grid.cell_size == cell_size))
++        self.assertTrue(np.all(grid.grid_spacing <= grid_spacing))
++        self.assertTrue(np.all(grid.cell_size == cell_size))
+ 
+         return grid
+ 
+@@ -48,7 +48,7 @@ class testITKGridDivision(unittest.TestCase):
+         grid_spacing = (100, 66)
+         grid = self.check_grid_spacing(grid_spacing=grid_spacing, cell_size=(100, 66), source_shape=(500, 500))
+ 
+-        self.assertTrue(np.alltrue(grid.grid_spacing[0] == grid_spacing[0]),
++        self.assertTrue(np.all(grid.grid_spacing[0] == grid_spacing[0]),
+                         "Grid spacing should not be changed for a perfect fit")
+ 
+     def test_axis_points(self):
+diff --git a/test/transforms/test_AlignmentRecord.py b/test/transforms/test_AlignmentRecord.py
+index cd97f37..9fd9126 100644
+--- a/test/transforms/test_AlignmentRecord.py
++++ b/test/transforms/test_AlignmentRecord.py
+@@ -28,7 +28,7 @@ import unittest
+ 
+ import numpy as np
+ import test.setup_imagetest
+-from scipy import pi
++from numpy import pi
+ 
+ import nornir_imageregistration
+ from nornir_imageregistration.files.stosfile import StosFile
+-- 
+2.43.0
+

@@ -1,0 +1,26 @@
+From 913e4f18f8bd11ee15d6efedb40fdb78d7b70f56 Mon Sep 17 00:00:00 2001
+From: Cursor Agent <cursoragent@cursor.com>
+Date: Thu, 2 Apr 2026 20:09:24 +0000
+Subject: [PATCH] Relax Python version requirement to >=3.12 for broader
+ compatibility
+
+---
+ pyproject.toml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/pyproject.toml b/pyproject.toml
+index d267041..50a9edb 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -16,7 +16,7 @@ authors = [
+ description = "Shared routines for Nornir python packages and scripts"
+ readme = "README.md"
+ license = { file = "LICENSE" }
+-requires-python = ">=3.13"
++requires-python = ">=3.12"
+ dependencies = [
+     "six >= 1.16",
+     "numpy >= 1.26",
+-- 
+2.43.0
+
