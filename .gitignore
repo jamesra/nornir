@@ -54,3 +54,5 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 
+nornir-testdata/
+nornir-testdata.zip
