@@ -10,10 +10,40 @@
             "pythonArgs": ["-Xfrozen_modules=off"],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
+            "args": ["-stos", "Y:\\Volumes\\RC2\\TEM\\Grid16\\401-402_ctrl-TEM_Leveled_map-TEM_Leveled.stos"],
+            "redirectOutput": true,
             "justMyCode": false,
             "env": {
-                "PYTHONPATH": "${workspaceFolder}/nornir-pyre;${workspaceFolder}/nornir-imageregistration;${workspaceFolder}/nornir-pools;${workspaceFolder}/nornir-shared;${workspaceFolder}/nornir-buildmanager"
-            }
+                "PYTHONPATH": "${workspaceFolder}/nornir-pyre;${workspaceFolder}/nornir-imageregistration;${workspaceFolder}/nornir-pools;${workspaceFolder}/nornir-shared;${workspaceFolder}/nornir-buildmanager",
+                "DEBUG": "1",
+                "PYTHONUNBUFFERED": "1" 
+            },
+        },
+        {
+            "name": "pyre (with stos arg)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pyre",
+            "python": "${workspaceFolder}/venv/pyre314/Scripts/python.exe",
+            "pythonArgs": ["-Xfrozen_modules=off"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "redirectOutput": true,
+            "justMyCode": false,
+            "args": ["-stos", "${input:pyreStosPath}"],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/nornir-pyre;${workspaceFolder}/nornir-imageregistration;${workspaceFolder}/nornir-pools;${workspaceFolder}/nornir-shared;${workspaceFolder}/nornir-buildmanager",
+                "DEBUG": "1",
+                "PYTHONUNBUFFERED": "1" 
+            },
+        }
+    ],
+    "inputs": [
+        {
+            "id": "pyreStosPath",
+            "type": "promptString",
+            "description": "Path to STOS file",
+            "default": "Y:\\Volumes\\RC2\\TEM\\Grid16\\401-402_ctrl-TEM_Leveled_map-TEM_Leveled.stos"
         }
     ]
 }
