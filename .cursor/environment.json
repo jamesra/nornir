@@ -1,0 +1,3 @@
+{
+  "setup": "source /workspace/venv/pyre314/bin/activate && export TESTINPUTPATH=/workspace/nornir-testdata && export TESTOUTPUTPATH=/tmp/nornir-test-output && mkdir -p \"$TESTOUTPUTPATH\""
+}
