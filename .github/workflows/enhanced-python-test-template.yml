@@ -1,0 +1,136 @@
+# Enhanced Python Test Workflow Template
+# This is a standalone template with best practices for nornir packages
+# Copy this to individual package repositories and customize the test-pattern
+
+name: Python Application Tests
+
+on:
+  push:
+    branches: [ "master", "dev", "CuPy" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CURSES: False
+  TERM: xterm
+  ECLIPSE: ECLIPSE
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.13"]
+        # Future: Add more Python versions when testing broader compatibility
+        # python-version: ["3.13", "3.14"]
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+    
+    - name: Display Python version
+      run: python -c "import sys; print(sys.version)"
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip setuptools wheel
+        pip install .
+    
+    # Optional: Install development dependencies
+    # - name: Install dev dependencies
+    #   run: |
+    #     pip install pytest pytest-cov flake8 mypy
+    
+    - name: Create test data directories (Unix)
+      if: runner.os != 'Windows'
+      run: |
+        mkdir -p ${{ github.workspace }}/testdata ${{ github.workspace }}/testdata_output
+        echo "TESTINPUTPATH=${{ github.workspace }}/testdata" >> $GITHUB_ENV
+        echo "TESTOUTPUTPATH=${{ github.workspace }}/testdata_output" >> $GITHUB_ENV
+    
+    - name: Create test data directories (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        mkdir -p ${{ github.workspace }}\testdata 
+        mkdir -p ${{ github.workspace }}\testdata_output
+        echo "TESTINPUTPATH=${{ github.workspace }}\testdata" >> $env:GITHUB_ENV
+        echo "TESTOUTPUTPATH=${{ github.workspace }}\testdata_output" >> $env:GITHUB_ENV
+    
+    - name: Verify test data directories (Unix)
+      if: runner.os != 'Windows'
+      run: |
+        echo "Test input path: $TESTINPUTPATH"
+        echo "Test output path: $TESTOUTPUTPATH"
+    
+    - name: Verify test data directories (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        echo "Test input path: $env:TESTINPUTPATH"
+        echo "Test output path: $env:TESTOUTPUTPATH"
+    
+    # Customize this test pattern for each package:
+    # - nornir-buildmanager: 'test_pipelinemanager*.py'
+    # - nornir-imageregistration: 'test_grid_division*.py'
+    # - nornir-pools: 'test_nornir_pools*.py'
+    # - nornir-shared: 'test_Histogram*.py'
+    - name: Run unit tests
+      run: |
+        python -m unittest discover -s ./test -p 'test_*.py' -v
+    
+    # Optional: Run with pytest for better output
+    # - name: Run tests with pytest
+    #   run: |
+    #     pytest test/ -v --tb=short
+    
+    # Optional: Generate coverage report
+    # - name: Generate coverage report
+    #   run: |
+    #     pytest test/ --cov=. --cov-report=xml --cov-report=html
+    
+    # Optional: Upload coverage to codecov
+    # - name: Upload coverage to Codecov
+    #   uses: codecov/codecov-action@v4
+    #   with:
+    #     file: ./coverage.xml
+    #     flags: unittests
+    #     name: codecov-${{ matrix.os }}-py${{ matrix.python-version }}
+    
+    - name: Upload test artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-artifacts-${{ matrix.os }}-py${{ matrix.python-version }}
+        path: |
+          ${{ github.workspace }}/testdata_output
+        if-no-files-found: ignore
+        retention-days: 7
+
+  # Optional: Linting job
+  # lint:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #   - name: Set up Python
+  #     uses: actions/setup-python@v5
+  #     with:
+  #       python-version: "3.13"
+  #   - name: Install linting tools
+  #     run: |
+  #       pip install flake8 mypy pylint
+  #   - name: Run flake8
+  #     run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+  #   - name: Run mypy
+  #     run: mypy . --ignore-missing-imports || true
