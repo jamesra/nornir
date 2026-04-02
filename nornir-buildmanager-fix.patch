@@ -1,0 +1,51 @@
+From 30ef961b51c923f2eadb17144f674dd21b289931 Mon Sep 17 00:00:00 2001
+From: Cursor Agent <cursoragent@cursor.com>
+Date: Thu, 2 Apr 2026 02:52:46 +0000
+Subject: [PATCH] Update workflow to Python 3.13 and use latest dev
+ dependencies
+
+---
+ .github/workflows/python-app.yml | 8 ++++----
+ pyproject.toml                   | 6 +++---
+ 2 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/.github/workflows/python-app.yml b/.github/workflows/python-app.yml
+index 4503bed..0f573ff 100644
+--- a/.github/workflows/python-app.yml
++++ b/.github/workflows/python-app.yml
+@@ -31,11 +31,11 @@ jobs:
+     runs-on: ${{ matrix.os }}
+ 
+     steps:
+-    - uses: actions/checkout@v3
+-    - name: Set up Python 3.10
+-      uses: actions/setup-python@v3
++    - uses: actions/checkout@v4
++    - name: Set up Python 3.13
++      uses: actions/setup-python@v5
+       with:
+-        python-version: "3.10"
++        python-version: "3.13"
+ 
+     - name: Install dependencies
+       run: |
+diff --git a/pyproject.toml b/pyproject.toml
+index 20f0af6..608c3c4 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -21,9 +21,9 @@ dependencies = [
+     "scipy >= 1.11",
+     "matplotlib >= 3.8",
+     "validators >= 0.23",
+-    "nornir_pools @ git+https://github.com/jamesra/nornir-pools.git@dev-v1.5.2",
+-    "nornir_shared @ git+https://github.com/jamesra/nornir-shared.git@dev-v1.5.2",
+-    "nornir_imageregistration @ git+https://github.com/jamesra/nornir-imageregistration.git@cupy-v1.6.5",
++    "nornir_pools @ git+https://github.com/jamesra/nornir-pools.git@dev",
++    "nornir_shared @ git+https://github.com/jamesra/nornir-shared.git@dev",
++    "nornir_imageregistration @ git+https://github.com/jamesra/nornir-imageregistration.git@CuPy",
+     "python-dotenv >= 1.0.1"
+ ]
+ classifiers = [
+-- 
+2.43.0
+

@@ -1,0 +1,36 @@
+# Example workflow for a nornir package
+# Copy this to individual package repositories and customize as needed
+
+name: Python Package Tests
+
+on:
+  push:
+    branches: [ "master", "dev", "CuPy" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    uses: jamesra/nornir/.github/workflows/reusable-python-test.yml@master
+    with:
+      # Test with Python 3.13 by default, can add more versions
+      python-versions: '["3.13"]'
+      
+      # Customize test pattern for your package
+      test-pattern: 'test_*.py'
+      
+      # Customize test directory
+      test-directory: './test'
+      
+      # Set to true if your tests need testdata directories
+      needs-test-data-dirs: false
+      
+      # Add optional dependencies if needed (e.g., '[gpu]' or '[test]')
+      install-extras: ''
+
+# Alternative: For packages that need custom test setup, use the reusable workflow
+# as a template and customize directly in the package repository
