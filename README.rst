@@ -1,9 +1,11 @@
 Nornir
 ======
 
-Umbrella project for all nornir packages
+Umbrella project for all nornir packages.
 
-For developer information, see the `Developer Notes`_.
+**Full documentation and API reference:** https://nornir.github.io/
+
+**Developer overview:** `docs/developer_notes.rst`_ (also published under *Developer notes* on the doc site).
 
 
-.. _Developer Notes: developer_notes.rst
+.. _docs/developer_notes.rst: docs/developer_notes.rst

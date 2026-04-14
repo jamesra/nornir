@@ -1,0 +1,24 @@
+---
+description: Umbrella monodoc (docs/), RST vs Markdown, package README vs Sphinx
+globs: docs/**,**/README.md,nornir-pyre/README.rst
+alwaysApply: false
+---
+
+## Monodoc layout
+
+- Narrative and API documentation for the whole Nornir umbrella live under **`docs/`** with a single root **`index.rst`** and one coherent toctree.
+- **Do not** edit the built HTML in the separate **`nornir.github.io`** repository by hand; that repo receives **deploy output** from CI (see **`docs/development/publishing_documentation.rst`**).
+
+## reStructuredText vs Markdown
+
+- Prefer **`.rst`** for new manual pages (directives, toctrees, cross-references).
+- Use **`.md`** when content is short or already in Markdown; enable via **`myst_parser`** (see **`docs/conf.py`**). Example: **`docs/development/markdown_in_sphinx.md`**.
+
+## Package `README.md` (or `README.rst`)
+
+- Each **`nornir-*`** package keeps a **short** landing file: what the package does, links to **https://nornir.github.io/**, links to that package’s section and **API** pages.
+- **Do not** duplicate long guides or hand-maintained API listings in READMEs; link to Sphinx autodoc instead.
+
+## Publishing
+
+- Cross-repo deploy uses **`NORNIR_GITHUB_IO_DEPLOY_TOKEN`** (see publishing doc). Never commit tokens.
