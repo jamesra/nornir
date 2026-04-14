@@ -1,0 +1,11 @@
+{
+  "name": "Nornir dev",
+  "build": {
+    "context": ".",
+    "dockerfile": "nornir-docker/dev/Dockerfile"
+  },
+  "env": {
+    "TESTINPUTPATH": "/nornir-testdata",
+    "TESTOUTPUTPATH": "/tmp/nornir-test-output"
+  }
+}
