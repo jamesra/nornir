@@ -4,7 +4,7 @@ This layout keeps **secrets and env** under a fixed Windows path while the **rep
 
 ## Symlinks are not automatic
 
-**Git clone and Docker do not create these links.** Run `Initialize-NornirCursorWorkerLayout.ps1` once (from the repo), or follow the snippet under [Thin launcher](#thin-launcher-symlink) below. Creating symlinks usually requires **Windows Developer Mode** or an **elevated** PowerShell/cmd.
+**Git clone and Docker do not create these links.** Run `Initialize-NornirCursorWorkerLayout.ps1` once (from the repo), or follow the snippet under [Thin launcher](thin-launcher-symlink) below. Creating symlinks usually requires **Windows Developer Mode** or an **elevated** PowerShell/cmd.
 
 ```powershell
 & 'D:\src\git\nornir\nornir-docker\windows-docker-layout\Initialize-NornirCursorWorkerLayout.ps1' -MonorepoRoot 'D:\src\git\nornir'
@@ -25,7 +25,8 @@ Use `-LayoutRoot 'D:\your\path'` if your layout root differs from the default.
 
 Per-run folders under `D:\Docker\mounted-configs\nornir-cursor-worker\` and isolated clones under `D:\agents\` can accumulate. Run `nornir-docker/Cleanup-CursorWorkerClones.ps1` to remove disposable directories only when no Docker container bind-mounts that path and the git working tree is clean. Use `-WhatIf` first. See {doc}`cursor_worker` for behavior and parameters.
 
-## Thin launcher (symlink) {#thin-launcher-symlink}
+(thin-launcher-symlink)=
+## Thin launcher (symlink)
 
 From an elevated PowerShell (or with Developer Mode enabled):
 
