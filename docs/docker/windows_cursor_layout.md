@@ -21,6 +21,10 @@ Use `-LayoutRoot 'D:\your\path'` if your layout root differs from the default.
 | `D:\Docker\Builds\nornir-cursor-worker\` | **Layout root**: `.env.cursor-worker`, optional symlink to the thin launcher. |
 | `D:\Docker\mounted-configs\nornir-cursor-worker\` | **Default parent** for per-run unique workspace folders (`nornir-cursor-worker-<timestamp>-<guid>`). |
 
+## Disk cleanup
+
+Per-run folders under `D:\Docker\mounted-configs\nornir-cursor-worker\` and isolated clones under `D:\agents\` can accumulate. Run `nornir-docker/Cleanup-CursorWorkerClones.ps1` to remove disposable directories only when no Docker container bind-mounts that path and the git working tree is clean. Use `-WhatIf` first. See {doc}`cursor_worker` for behavior and parameters.
+
 ## Thin launcher (symlink) {#thin-launcher-symlink}
 
 From an elevated PowerShell (or with Developer Mode enabled):

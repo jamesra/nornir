@@ -49,8 +49,20 @@ PowerShell launcher ``start-cursor-worker.ps1``
 - ``-LiveMount``: bind-mount ``WorkspaceMountPath`` or ``RepoRoot`` at ``/workspace``, ``mounted`` strategy.
 - ``-LiveMount -UseUniqueWorkspaceFolder``: empty unique folder per run under ``WorkspaceRunParent`` (default ``D:\Docker\mounted-configs\nornir-cursor-worker``), mount at ``/workspace``, ``clone`` strategy.
 - ``-UseNamedDockerVolume``: named Docker volume at ``/workspace``, ``clone`` strategy.
-- ``-RemoveCloneAfter``: delete isolated host clone or per-run folder after exit.
+- ``-RemoveCloneAfter``: delete isolated host clone or per-run folder after exit (skipped if ``git status --porcelain`` is non-empty; see ``CursorWorkerWorkspaceGit.ps1``).
 - ``-Rebuild``: builds ``nornir:dev-cursor-base`` then ``nornir:cursor-worker``.
 - ``-Gpu``, ``-SmokeTest``, ``-CloneUrl``, ``-CloneBranch``.
 
 For the **standard Windows ``D:\`` layout**, see :doc:`windows_cursor_layout`.
+
+Cleanup script ``Cleanup-CursorWorkerClones.ps1``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Use ``nornir-docker/Cleanup-CursorWorkerClones.ps1`` on the **host** to remove leftover disposable workspace folders when:
+
+- **Docker:** ``docker`` must be on ``PATH``. The script scans **all** containers (running and stopped), collects each bind mount ``Source``, and **never** deletes a directory whose normalized path is still a bind source.
+- **Git:** Same rules as ``-RemoveCloneAfter``, implemented in ``CursorWorkerWorkspaceGit.ps1`` (``Get-CursorWorkerRemoveCloneAfterDisposition``): delete if there is no ``.git``, or if ``git status --porcelain`` is empty; otherwise skip.
+
+**Scope (name patterns):** under ``WorkspaceRunParent`` (default ``D:\Docker\mounted-configs\nornir-cursor-worker``), only directories named ``nornir-cursor-worker-*``; under ``AgentCloneParent`` (default ``D:\agents``), only ``nornir-agent-*``. Override parents with ``-WorkspaceRunParent`` and ``-AgentCloneParent``.
+
+**Safety:** Use ``-WhatIf`` to list removals without deleting. Confirmation uses ``ShouldProcess`` (``-Confirm:$false`` to skip prompts).
