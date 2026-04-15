@@ -35,7 +35,16 @@ Example: run a function on a thread pool::
    result = task.wait_return()
    print(result)
 
-Cluster pool usage follows the same pattern with ``GetGlobalClusterPool()``.
+Cluster pool usage follows the same pattern with ``GetGlobalClusterPool()``::
+
+   def add(x, y):
+       return x + y
+
+   import nornir_pools as pools
+   cluster_pool = pools.GetGlobalClusterPool()
+   task = cluster_pool.add_task("Add 3 + 5", add, 3, y=5)
+   result = task.wait_return()
+   print(result)
 
 **API reference**
 

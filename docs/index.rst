@@ -10,6 +10,7 @@ Nornir takes large sets of overlapping images in 2D and produces registered (ali
 
    overview
    packages/index
+   docker/index
    development/index
    developer_notes
    api/index

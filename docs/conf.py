@@ -15,6 +15,8 @@ for _pkg in (
     _ROOT / "nornir-pools",
     _ROOT / "nornir-imageregistration",
     _ROOT / "nornir-buildmanager",
+    _ROOT / "nornir-volumecontroller",
+    _ROOT / "nornir-volumemodel",
 ):
     p = str(_pkg.resolve())
     if p not in sys.path:
@@ -63,6 +65,7 @@ autodoc_mock_imports = [
     "cupy",
     "cupyx",
     "cupyx.scipy",
+    "scipy.misc",          # removed from modern SciPy; used by nornir_volumecontroller
 ]
 
 autodoc_default_options = {

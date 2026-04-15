@@ -10,4 +10,7 @@ Nornir is split into several installable packages. Each has a short ``README.md`
    nornir_pools
    nornir_imageregistration
    nornir_buildmanager
+   nornir_volumecontroller
+   nornir_volumemodel
+   nornir_web
    other_packages
