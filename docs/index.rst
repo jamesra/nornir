@@ -9,6 +9,7 @@ Nornir takes large sets of overlapping images in 2D and produces registered (ali
    :maxdepth: 2
 
    overview
+   overview_alignment_theory
    packages/index
    docker/index
    development/index
