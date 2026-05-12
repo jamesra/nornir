@@ -338,3 +338,6 @@ r Developer
 # Sphinx documentation
 docs/_build/
 
+# docker-build.ps1 CWD overrides when invoked from monorepo root
+/build.env
+/.build.*.env

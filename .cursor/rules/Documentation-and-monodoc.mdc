@@ -12,7 +12,7 @@ alwaysApply: false
 ## reStructuredText vs Markdown
 
 - Prefer **`.rst`** for new manual pages (directives, toctrees, cross-references).
-- Use **`.md`** when content is short or already in Markdown; enable via **`myst_parser`** (see **`docs/conf.py`**). Example: **`docs/development/markdown_in_sphinx.md`**.
+- Use **`.md`** when content is short or requires no special formatting; enable via **`myst_parser`** (see **`docs/conf.py`**). Example: **`docs/development/markdown_in_sphinx.md`**.
 
 ## Package `README.md` (or `README.rst`)
 

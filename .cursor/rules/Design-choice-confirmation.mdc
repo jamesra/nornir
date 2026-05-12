@@ -1,0 +1,26 @@
+---
+description: Pause and confirm before implementing unusual or weak design choices; respect non-negotiable project rules unless the user explicitly overrides in writing.
+alwaysApply: true
+---
+
+## Design-choice confirmation
+
+### When to speak up
+
+Before implementing—or when a plan embeds it—flag **material** concerns if the approach involves: security or data-safety risk; APIs or structure that are hard to revert; **violation of established rules** in `.cursor/rules/`; obvious maintenance traps; or “clever” shortcuts that trade clarity for brevity.
+
+### What to do
+
+Briefly name the concern, state the **main tradeoff**, and offer **one or two** reasonable alternatives when practical.
+
+### Confirmation
+
+**Do not** implement the questionable path until the user **explicitly confirms** they want it (for example: “yes, proceed with X despite Y”). If they already clearly chose that path **after** the warning, you may proceed.
+
+### Non-negotiable project rules
+
+Requirements in other `.cursor/rules/` files (for example **must not** or **do not**) are **default non-negotiable**. Do not treat “confirm override” as permission to skip them **unless** the user **explicitly states in writing** that they accept overriding that rule for this change. Illegal or clearly unsafe requests remain out of scope for silent compliance—warn and refuse if appropriate.
+
+### What not to do
+
+Do not nitpick minor style preferences. Reserve this for **material** design impact.

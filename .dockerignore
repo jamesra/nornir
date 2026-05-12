@@ -1,0 +1,9 @@
+# Used when building with context = monorepo root (nornir-docker Dockerfiles).
+.git
+**/.venv
+**/venv
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.mypy_cache
+nornir-pyre
