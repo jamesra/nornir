@@ -1,5 +1,4 @@
 {
-    "python.defaultInterpreterPath": "${workspaceFolder}/venv/pyre314/Scripts/python.exe",
     "python.terminal.activateEnvironment": true,
     "terminal.integrated.profiles.windows": {
         "Pyre314 PowerShell": {
@@ -13,10 +12,20 @@
     },
     "terminal.integrated.defaultProfile.windows": "Pyre314 PowerShell",
     "terminal.integrated.env.windows": {
-        "PYTHONPATH": "${workspaceFolder}/nornir-buildmanager;${workspaceFolder}/nornir-imageregistration;${workspaceFolder}/nornir-pools;${workspaceFolder}/nornir-shared;${workspaceFolder}/nornir-pyre;${env:PYTHONPATH}"
+        "PYTHONPATH": "${workspaceFolder}/nornir-buildmanager;${workspaceFolder}/nornir-imageregistration;${workspaceFolder}/nornir-pools;${workspaceFolder}/nornir-shared;${workspaceFolder}/nornir-pyre;${env:PYTHONPATH}",
+        "TESTINPUTPATH": "D:\\nornir-testdata",
+        "TESTOUTPUTPATH": "C:\\Temp\\nornir"
+    },
+    "terminal.integrated.env.linux": {
+        "TESTINPUTPATH": "/nornir-testdata",
+        "TESTOUTPUTPATH": "/tmp/nornir-test-output"
     },
     "python.testing.pytestEnabled": true,
     "python.testing.cwd": "${workspaceFolder}",
+    // Do not override import mode: root pytest.ini uses --import-mode=importlib for monorepo collection; prepend breaks Test Explorer discovery.
+    "python.testing.pytestArgs": [
+        "-s", "-vv"
+    ],
     "python.testing.unittestEnabled": false,
     "python.analysis.autoSearchPaths": true,
     "python.analysis.include": [

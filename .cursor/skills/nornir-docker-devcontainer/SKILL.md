@@ -2,7 +2,8 @@
 name: nornir-docker-devcontainer
 description: >-
   Sets up the Nornir Docker-based dev container for Cursor and PyCharm: CuPy on a
-  CUDA-capable GPU stack, WSL2-mounted test input as TESTINPUTPATH, tmp test output,
+  CUDA-capable GPU stack, WSL2-mounted test input as TESTINPUTPATH, optional repro
+  corpus at /data as INPUT_NORNIR_DATA, tmp test output,
   bind-mounted monorepo at /workspace by default (optional named-volume clone mode),
   pytest-ready venv, and editable installs. Use when opening Dev Containers,
   configuring nornir-docker/.env from dev/example.cursor-dev.run.env for cursor-dev,
@@ -28,7 +29,7 @@ For **build vs run scripts**, `docker-build.ps1` CWD-only build-arg files (`buil
 
 ## What this is
 
-The repo ships a **cursor-dev** Compose stack (services **cursor-dev** and **cursor-dev-clone**) and image `nornir:dev-cursor-base` that match `.cursor/environment.json`: monorepo at `/workspace`, read-only fixtures at `/nornir-testdata`, and standard test env vars. Same layout works for **Cursor Dev Containers** and **PyCharm** (Docker Compose or remote interpreter against the same container).
+The repo ships a **cursor-dev** Compose stack (services **cursor-dev** and **cursor-dev-clone**) and image `nornir:dev-cursor-base` that match `.cursor/environment.json`: monorepo at `/workspace`, read-only fixtures at `/nornir-testdata`, optional repro corpus at `/data` with `INPUT_NORNIR_DATA=/data`, and standard test env vars. Same layout works for **Cursor Dev Containers** and **PyCharm** (Docker Compose or remote interpreter against the same container).
 
 **CuPy and CUDA:** the dev image **includes CuPy** (see `CUPY_PACKAGE` in `nornir-docker/dev/Dockerfile`, e.g. `cupy-cuda13x`). Treat the stack as **building on a working CUDA environment**: the **host** must run a compatible NVIDIA driver, Docker must expose GPUs to the container (`--gpus all` or equivalent), and the NVIDIA Container Toolkit (or Docker Desktop GPU support) must be correctly installed so device nodes and libraries are available at runtime. Without GPU passthrough, the container still runs, but CuPy GPU paths are not usable.
 
@@ -54,6 +55,7 @@ Authoritative files:
 |----------|-----------------|------|
 | `TESTINPUTPATH` | `/nornir-testdata` | Read-only mount; must match `.cursor/environment.json` and test expectations |
 | `TESTOUTPUTPATH` | `/tmp/nornir-test-output` | Writable scratch for artifacts, Hypothesis DB, plot outputs, etc. |
+| `INPUT_NORNIR_DATA` | `/data` (cursor-dev compose) | Root of the optional large repro corpus; set to `D:\Data` (or your path) when running pytest on Windows without Docker |
 | `NORNIR_HEADLESS` | `1` (set in image) | Headless matplotlib / CI-style tests |
 | `NORNIR_CLONE_URL` | `https://github.com/jamesra/nornir.git` | Clone source when `/workspace` is empty or for **cursor-dev-clone** refresh |
 | `NORNIR_CLONE_BRANCH` | `dev` | Branch for clone / optional sync (case-sensitive git branch name) |
@@ -67,9 +69,10 @@ Compose sets `TESTINPUTPATH` / `TESTOUTPUTPATH` on **cursor-dev**; keep PyCharm 
 
 1. Copy `nornir-docker/dev/example.cursor-dev.run.env` to `nornir-docker/.env` (or place the same variables under `$NORNIR_DOCKER_USER_ROOT/dev/cursor-dev.run.env`—see docker-build-run-phases; Compose still expects `nornir-docker/.env` for variable substitution unless you use another mechanism).
 2. Set `NORNIR_TESTDATA_HOST` to the **Linux path** where `nornir-testdata` lives (e.g. from WSL: `echo $HOME` and append `/nornir-testdata`).
-3. Ensure Docker can bind-mount that path (Docker Desktop file sharing prompts if needed).
+3. Optionally set `NORNIR_REPRO_DATA_HOST` to the **Linux path** of the large repro dataset (mirror of Windows `D:\Data`); it is mounted at `/data` and compose sets `INPUT_NORNIR_DATA=/data`.
+4. Ensure Docker can bind-mount that path (Docker Desktop file sharing prompts if needed).
 
-Compose binds `${NORNIR_TESTDATA_HOST}` → `/nornir-testdata`; the container exposes that path as the value of `TESTINPUTPATH`.
+Compose binds `${NORNIR_TESTDATA_HOST}` → `/nornir-testdata`; the container exposes that path as the value of `TESTINPUTPATH`. When set, `${NORNIR_REPRO_DATA_HOST}` → `/data` (read-only).
 
 ## Build and run
 
@@ -139,8 +142,9 @@ Set `user.name` / `user.email` in the container (or via repo-local git config) b
 ## Quick verification checklist
 
 - [ ] `nornir-docker/.env` exists with `NORNIR_TESTDATA_HOST` pointing at WSL-side test data
+- [ ] Optional: `NORNIR_REPRO_DATA_HOST` set for a real `/data` repro mount (otherwise placeholder empty `/data`)
 - [ ] `docker compose ... run` includes **`--gpus all`** (or compose-level GPU) when GPU access is required
-- [ ] In container: `echo $TESTINPUTPATH` → `/nornir-testdata`, `echo $TESTOUTPUTPATH` → under `/tmp`
+- [ ] In container: `echo $TESTINPUTPATH` → `/nornir-testdata`, `echo $TESTOUTPUTPATH` → under `/tmp`, `echo $INPUT_NORNIR_DATA` → `/data`
 - [ ] `/workspace` contains the monorepo; `pip list` shows editable installs for Nornir packages
 - [ ] `git status` works; remote push tested with your chosen auth method
 - [ ] `pytest` runs from `/workspace` for the packages you care about

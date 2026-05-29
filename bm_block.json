@@ -1,0 +1,2286 @@
+﻿{
+    "version": "1.1.408",
+    "time": "1773377413881",
+    "generalDiagnostics": [
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"int | None\" cannot be assigned to parameter \"control\" of type \"int\" in function \"RemoveMapping\"\n┬á┬áType \"int | None\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"None\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 252,
+                    "character": 34
+                },
+                "end": {
+                    "line": 252,
+                    "character": 49
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 304,
+                    "character": 27
+                },
+                "end": {
+                    "line": 304,
+                    "character": 84
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 305,
+                    "character": 46
+                },
+                "end": {
+                    "line": 305,
+                    "character": 116
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"frozenset[int]\" cannot be assigned to parameter \"sectionNumbers\" of type \"Sequence[int]\" in function \"NearestSection\"\n┬á┬á\"frozenset[int]\" is not assignable to \"Sequence[int]\"",
+            "range": {
+                "start": {
+                    "line": 321,
+                    "character": 66
+                },
+                "end": {
+                    "line": 321,
+                    "character": 91
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"int | None\" cannot be assigned to parameter \"reqnumber\" of type \"int\" in function \"NearestSection\"\n┬á┬áType \"int | None\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"None\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 321,
+                    "character": 93
+                },
+                "end": {
+                    "line": 321,
+                    "character": 115
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | Unknown | str | int | None\" cannot be assigned to parameter \"center\" of type \"int | None\" in function \"AddNonControlSections\"\n┬á┬áType \"Any | Unknown | str | int | None\" is not assignable to type \"int | None\"\n┬á┬á┬á┬áType \"str\" is not assignable to type \"int | None\"\n┬á┬á┬á┬á┬á┬á\"str\" is not assignable to \"int\"\n┬á┬á┬á┬á┬á┬á\"str\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 347,
+                    "character": 77
+                },
+                "end": {
+                    "line": 347,
+                    "character": 100
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 355,
+                    "character": 7
+                },
+                "end": {
+                    "line": 355,
+                    "character": 77
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"XElementWrapper\" cannot be assigned to parameter \"StosMap\" of type \"StosMapNode\" in function \"UpdateStosMapWithRegistrationTree\"\n┬á┬á\"XElementWrapper\" is not assignable to \"StosMapNode\"",
+            "range": {
+                "start": {
+                    "line": 358,
+                    "character": 41
+                },
+                "end": {
+                    "line": 358,
+                    "character": 58
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Operator \"/\" not supported for types \"ScaleAxis\" and \"ScaleAxis\"",
+            "range": {
+                "start": {
+                    "line": 510,
+                    "character": 14
+                },
+                "end": {
+                    "line": 510,
+                    "character": 44
+                }
+            },
+            "rule": "reportOperatorIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Operator \"/\" not supported for types \"ScaleAxis\" and \"ScaleAxis\"",
+            "range": {
+                "start": {
+                    "line": 511,
+                    "character": 14
+                },
+                "end": {
+                    "line": 511,
+                    "character": 44
+                }
+            },
+            "rule": "reportOperatorIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Expression of type \"None\" cannot be assigned to parameter of type \"AngleSearchRange\"\n┬á┬á\"None\" is not assignable to \"AngleSearchRange\"",
+            "range": {
+                "start": {
+                    "line": 522,
+                    "character": 75
+                },
+                "end": {
+                    "line": 522,
+                    "character": 79
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"str | None\" cannot be assigned to parameter \"path\" of type \"str\" in function \"LoadChecksum\"\n┬á┬áType \"str | None\" is not assignable to type \"str\"\n┬á┬á┬á┬á\"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 546,
+                    "character": 75
+                },
+                "end": {
+                    "line": 546,
+                    "character": 97
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"str | None\" cannot be assigned to parameter \"path\" of type \"str\" in function \"LoadChecksum\"\n┬á┬áType \"str | None\" is not assignable to type \"str\"\n┬á┬á┬á┬á\"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 549,
+                    "character": 75
+                },
+                "end": {
+                    "line": 549,
+                    "character": 97
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"float\" cannot be assigned to parameter \"Downsample\" of type \"int\" in function \"SetStosFileMasks\"\n┬á┬á\"float\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 603,
+                    "character": 90
+                },
+                "end": {
+                    "line": 603,
+                    "character": 111
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"float\" cannot be assigned to parameter \"Downsample\" of type \"int\" in function \"__CallNornirStosBrute\"\n┬á┬á\"float\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 619,
+                    "character": 48
+                },
+                "end": {
+                    "line": 619,
+                    "character": 69
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"FullPath\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 620,
+                    "character": 55
+                },
+                "end": {
+                    "line": 620,
+                    "character": 63
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"FullPath\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 620,
+                    "character": 81
+                },
+                "end": {
+                    "line": 620,
+                    "character": 89
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"AngleSearchRange\" cannot be assigned to parameter \"AngleSearchRange\" of type \"list[float] | None\" in function \"__CallNornirStosBrute\"\n┬á┬áType \"AngleSearchRange\" is not assignable to type \"list[float] | None\"\n┬á┬á┬á┬á\"AngleSearchRange\" is not assignable to \"list[float]\"\n┬á┬á┬á┬á\"AngleSearchRange\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 622,
+                    "character": 55
+                },
+                "end": {
+                    "line": 622,
+                    "character": 73
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"float\" cannot be assigned to parameter \"Downsample\" of type \"int\" in function \"__CallNornirStosBrute\"\n┬á┬á\"float\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 625,
+                    "character": 48
+                },
+                "end": {
+                    "line": 625,
+                    "character": 69
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"FullPath\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 626,
+                    "character": 55
+                },
+                "end": {
+                    "line": 626,
+                    "character": 63
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"FullPath\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 626,
+                    "character": 81
+                },
+                "end": {
+                    "line": 626,
+                    "character": 89
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"AngleSearchRange\" cannot be assigned to parameter \"AngleSearchRange\" of type \"list[float] | None\" in function \"__CallNornirStosBrute\"\n┬á┬áType \"AngleSearchRange\" is not assignable to type \"list[float] | None\"\n┬á┬á┬á┬á\"AngleSearchRange\" is not assignable to \"list[float]\"\n┬á┬á┬á┬á\"AngleSearchRange\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 627,
+                    "character": 55
+                },
+                "end": {
+                    "line": 627,
+                    "character": 73
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"int | None\" cannot be assigned to parameter \"Number\" of type \"int\" in function \"GetSection\"\n┬á┬áType \"int | None\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"None\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 677,
+                    "character": 47
+                },
+                "end": {
+                    "line": 677,
+                    "character": 60
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"ChannelNode\" cannot be assigned to parameter \"ControlFilter\" of type \"FilterNode\" in function \"GenerateStosFilename\"\n┬á┬á\"ChannelNode\" is not assignable to \"FilterNode\"",
+            "range": {
+                "start": {
+                    "line": 712,
+                    "character": 20
+                },
+                "end": {
+                    "line": 712,
+                    "character": 33
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"ChannelNode\" cannot be assigned to parameter \"MappedFilter\" of type \"FilterNode\" in function \"GenerateStosFilename\"\n┬á┬á\"ChannelNode\" is not assignable to \"FilterNode\"",
+            "range": {
+                "start": {
+                    "line": 712,
+                    "character": 35
+                },
+                "end": {
+                    "line": 712,
+                    "character": 47
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"ChannelNode\" cannot be assigned to parameter \"control_filter\" of type \"FilterNode\" in function \"FilterToFilterBruteRegistration\"\n┬á┬á\"ChannelNode\" is not assignable to \"FilterNode\"",
+            "range": {
+                "start": {
+                    "line": 719,
+                    "character": 74
+                },
+                "end": {
+                    "line": 719,
+                    "character": 87
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"ChannelNode\" cannot be assigned to parameter \"mapped_filter\" of type \"FilterNode\" in function \"FilterToFilterBruteRegistration\"\n┬á┬á\"ChannelNode\" is not assignable to \"FilterNode\"",
+            "range": {
+                "start": {
+                    "line": 720,
+                    "character": 73
+                },
+                "end": {
+                    "line": 720,
+                    "character": 85
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"Unknown | None\" cannot be assigned to parameter \"angle_search_range\" of type \"AngleSearchRange\" in function \"FilterToFilterBruteRegistration\"\n┬á┬áType \"Unknown | None\" is not assignable to type \"AngleSearchRange\"\n┬á┬á┬á┬á\"None\" is not assignable to \"AngleSearchRange\"",
+            "range": {
+                "start": {
+                    "line": 724,
+                    "character": 78
+                },
+                "end": {
+                    "line": 724,
+                    "character": 94
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Type \"XElementWrapper | None\" is not assignable to declared type \"BlockNode | None\"\n┬á┬áType \"XElementWrapper | None\" is not assignable to type \"BlockNode | None\"\n┬á┬á┬á┬áType \"XElementWrapper\" is not assignable to type \"BlockNode | None\"\n┬á┬á┬á┬á┬á┬á\"XElementWrapper\" is not assignable to \"BlockNode\"\n┬á┬á┬á┬á┬á┬á\"XElementWrapper\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 762,
+                    "character": 17
+                },
+                "end": {
+                    "line": 762,
+                    "character": 54
+                }
+            },
+            "rule": "reportAssignmentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"BlockNode | None\" cannot be assigned to parameter \"block_node\" of type \"BlockNode\" in function \"GetImage\"\n┬á┬áType \"BlockNode | None\" is not assignable to type \"BlockNode\"\n┬á┬á┬á┬á\"None\" is not assignable to \"BlockNode\"",
+            "range": {
+                "start": {
+                    "line": 764,
+                    "character": 56
+                },
+                "end": {
+                    "line": 764,
+                    "character": 66
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"int | None\" cannot be assigned to parameter \"SectionNumber\" of type \"int\" in function \"GetImage\"\n┬á┬áType \"int | None\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"None\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 765,
+                    "character": 70
+                },
+                "end": {
+                    "line": 765,
+                    "character": 108
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"BlockNode | None\" cannot be assigned to parameter \"block_node\" of type \"BlockNode\" in function \"GetImage\"\n┬á┬áType \"BlockNode | None\" is not assignable to type \"BlockNode\"\n┬á┬á┬á┬á\"None\" is not assignable to \"BlockNode\"",
+            "range": {
+                "start": {
+                    "line": 770,
+                    "character": 54
+                },
+                "end": {
+                    "line": 770,
+                    "character": 64
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"int | None\" cannot be assigned to parameter \"SectionNumber\" of type \"int\" in function \"GetImage\"\n┬á┬áType \"int | None\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"None\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 771,
+                    "character": 68
+                },
+                "end": {
+                    "line": 771,
+                    "character": 105
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"ImageNode | None\" cannot be assigned to parameter \"ControlImageNode\" of type \"ImageNode\" in function \"__new__\"\n┬á┬áType \"ImageNode | None\" is not assignable to type \"ImageNode\"\n┬á┬á┬á┬á\"None\" is not assignable to \"ImageNode\"",
+            "range": {
+                "start": {
+                    "line": 776,
+                    "character": 49
+                },
+                "end": {
+                    "line": 776,
+                    "character": 65
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"ImageNode | None\" cannot be assigned to parameter \"MappedImageNode\" of type \"ImageNode\" in function \"__new__\"\n┬á┬áType \"ImageNode | None\" is not assignable to type \"ImageNode\"\n┬á┬á┬á┬á\"None\" is not assignable to \"ImageNode\"",
+            "range": {
+                "start": {
+                    "line": 777,
+                    "character": 48
+                },
+                "end": {
+                    "line": 777,
+                    "character": 63
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"Downsample\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 810,
+                    "character": 32
+                },
+                "end": {
+                    "line": 810,
+                    "character": 42
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"None\" is not iterable\n┬á┬á\"__iter__\" method not defined",
+            "range": {
+                "start": {
+                    "line": 811,
+                    "character": 42
+                },
+                "end": {
+                    "line": 811,
+                    "character": 89
+                }
+            },
+            "rule": "reportGeneralTypeIssues"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"None\" is not iterable\n┬á┬á\"__iter__\" method not defined",
+            "range": {
+                "start": {
+                    "line": 812,
+                    "character": 44
+                },
+                "end": {
+                    "line": 812,
+                    "character": 92
+                }
+            },
+            "rule": "reportGeneralTypeIssues"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"FullPath\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 872,
+                    "character": 71
+                },
+                "end": {
+                    "line": 872,
+                    "character": 79
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"FullPath\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 873,
+                    "character": 70
+                },
+                "end": {
+                    "line": 873,
+                    "character": 78
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"FullPath\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 876,
+                    "character": 71
+                },
+                "end": {
+                    "line": 876,
+                    "character": 79
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"FullPath\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 877,
+                    "character": 70
+                },
+                "end": {
+                    "line": 877,
+                    "character": 78
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"FullPath\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 878,
+                    "character": 75
+                },
+                "end": {
+                    "line": 878,
+                    "character": 83
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"FullPath\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 879,
+                    "character": 74
+                },
+                "end": {
+                    "line": 879,
+                    "character": 82
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"MappedSectionNumber\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 891,
+                    "character": 40
+                },
+                "end": {
+                    "line": 891,
+                    "character": 59
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"Name\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 892,
+                    "character": 62
+                },
+                "end": {
+                    "line": 892,
+                    "character": 66
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"FullPath\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 893,
+                    "character": 54
+                },
+                "end": {
+                    "line": 893,
+                    "character": 62
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | Unknown | str\" cannot be assigned to parameter \"Downsample\" of type \"int\" in function \"StosImageNodes\"\n┬á┬áType \"Any | Unknown | str\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"str\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 900,
+                    "character": 48
+                },
+                "end": {
+                    "line": 900,
+                    "character": 68
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"Downsample\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 900,
+                    "character": 58
+                },
+                "end": {
+                    "line": 900,
+                    "character": 68
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"int | None\" cannot be assigned to parameter \"ControlSectionNumber\" of type \"int\" in function \"TransformsForMapping\"\n┬á┬áType \"int | None\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"None\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 950,
+                    "character": 84
+                },
+                "end": {
+                    "line": 950,
+                    "character": 104
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"float\" cannot be assigned to parameter \"Downsample\" of type \"int\" in function \"StosImageNodes\"\n┬á┬á\"float\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 984,
+                    "character": 67
+                },
+                "end": {
+                    "line": 984,
+                    "character": 88
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 990,
+                    "character": 24
+                },
+                "end": {
+                    "line": 990,
+                    "character": 72
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 992,
+                    "character": 31
+                },
+                "end": {
+                    "line": 992,
+                    "character": 98
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 998,
+                    "character": 24
+                },
+                "end": {
+                    "line": 998,
+                    "character": 69
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 1000,
+                    "character": 24
+                },
+                "end": {
+                    "line": 1000,
+                    "character": 88
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 1003,
+                    "character": 24
+                },
+                "end": {
+                    "line": 1003,
+                    "character": 71
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 1005,
+                    "character": 24
+                },
+                "end": {
+                    "line": 1005,
+                    "character": 90
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 1044,
+                    "character": 24
+                },
+                "end": {
+                    "line": 1044,
+                    "character": 72
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 1045,
+                    "character": 24
+                },
+                "end": {
+                    "line": 1045,
+                    "character": 69
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 1046,
+                    "character": 24
+                },
+                "end": {
+                    "line": 1046,
+                    "character": 71
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | Unknown | str\" cannot be assigned to parameter \"MappedSectionNumber\" of type \"int\" in function \"TransformsForMapping\"\n┬á┬áType \"Any | Unknown | str\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"str\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 1091,
+                    "character": 65
+                },
+                "end": {
+                    "line": 1091,
+                    "character": 78
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | Unknown | str\" cannot be assigned to parameter \"ControlSectionNumber\" of type \"int\" in function \"TransformsForMapping\"\n┬á┬áType \"Any | Unknown | str\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"str\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 1091,
+                    "character": 80
+                },
+                "end": {
+                    "line": 1091,
+                    "character": 100
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 1124,
+                    "character": 20
+                },
+                "end": {
+                    "line": 1124,
+                    "character": 65
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 1126,
+                    "character": 23
+                },
+                "end": {
+                    "line": 1126,
+                    "character": 87
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 1154,
+                    "character": 20
+                },
+                "end": {
+                    "line": 1154,
+                    "character": 65
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Type \"XElementWrapper | None\" is not assignable to return type \"XElementWrapper\"\n┬á┬áType \"XElementWrapper | None\" is not assignable to type \"XElementWrapper\"\n┬á┬á┬á┬á\"None\" is not assignable to \"XElementWrapper\"",
+            "range": {
+                "start": {
+                    "line": 1181,
+                    "character": 15
+                },
+                "end": {
+                    "line": 1181,
+                    "character": 25
+                }
+            },
+            "rule": "reportReturnType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"UpdateOrAddChildByAttrib\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 1205,
+                    "character": 49
+                },
+                "end": {
+                    "line": 1205,
+                    "character": 73
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"NonStosSectionNumbers\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 1213,
+                    "character": 46
+                },
+                "end": {
+                    "line": 1213,
+                    "character": 67
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 1214,
+                    "character": 26
+                },
+                "end": {
+                    "line": 1214,
+                    "character": 96
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"UpdateOrAddChildByAttrib\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 1220,
+                    "character": 46
+                },
+                "end": {
+                    "line": 1220,
+                    "character": 70
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 1247,
+                    "character": 35
+                },
+                "end": {
+                    "line": 1247,
+                    "character": 92
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 1254,
+                    "character": 16
+                },
+                "end": {
+                    "line": 1254,
+                    "character": 86
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | Unknown | str\" cannot be assigned to parameter \"func\" of type \"(...) -> Any\" in function \"add_process\"\n┬á┬áType \"Any | Unknown | str\" is not assignable to type \"(...) -> Any\"\n┬á┬á┬á┬áType \"str\" is not assignable to type \"(...) -> Any\"",
+            "range": {
+                "start": {
+                    "line": 1295,
+                    "character": 75
+                },
+                "end": {
+                    "line": 1295,
+                    "character": 99
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Cannot assign to attribute \"transform_node\" for class \"TaskWithEvent\"\n┬á┬áAttribute \"transform_node\" is unknown",
+            "range": {
+                "start": {
+                    "line": 1296,
+                    "character": 29
+                },
+                "end": {
+                    "line": 1296,
+                    "character": 43
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 1323,
+                    "character": 8
+                },
+                "end": {
+                    "line": 1323,
+                    "character": 90
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"str | None\" cannot be assigned to parameter \"ManualInputStosFullPath\" of type \"str\" in function \"__SelectAutomaticOrManualStosFilePath\"\n┬á┬áType \"str | None\" is not assignable to type \"str\"\n┬á┬á┬á┬á\"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 1359,
+                    "character": 86
+                },
+                "end": {
+                    "line": 1359,
+                    "character": 109
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"GetOrPredictImageFullPath\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 1388,
+                    "character": 66
+                },
+                "end": {
+                    "line": 1388,
+                    "character": 91
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"GetOrPredictImageFullPath\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 1389,
+                    "character": 64
+                },
+                "end": {
+                    "line": 1389,
+                    "character": 89
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 1416,
+                    "character": 22
+                },
+                "end": {
+                    "line": 1416,
+                    "character": 64
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"GetOrPredictImageFullPath\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 1444,
+                    "character": 62
+                },
+                "end": {
+                    "line": 1444,
+                    "character": 87
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"GetOrPredictImageFullPath\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 1445,
+                    "character": 60
+                },
+                "end": {
+                    "line": 1445,
+                    "character": 85
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"GetOrPredictImageFullPath\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 1491,
+                    "character": 62
+                },
+                "end": {
+                    "line": 1491,
+                    "character": 87
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"GetOrPredictImageFullPath\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 1492,
+                    "character": 60
+                },
+                "end": {
+                    "line": 1492,
+                    "character": 85
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"Save\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 1521,
+                    "character": 15
+                },
+                "end": {
+                    "line": 1521,
+                    "character": 19
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 1533,
+                    "character": 20
+                },
+                "end": {
+                    "line": 1533,
+                    "character": 64
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 1534,
+                    "character": 19
+                },
+                "end": {
+                    "line": 1534,
+                    "character": 62
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"Downsample\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 1549,
+                    "character": 38
+                },
+                "end": {
+                    "line": 1549,
+                    "character": 48
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"GetOrPredictImageFullPath\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 1561,
+                    "character": 62
+                },
+                "end": {
+                    "line": 1561,
+                    "character": 87
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"GetOrPredictImageFullPath\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 1562,
+                    "character": 60
+                },
+                "end": {
+                    "line": 1562,
+                    "character": 85
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | Unknown | str\" cannot be assigned to parameter \"oldspacing\" of type \"int\" in function \"ChangeTransformPixelSpacing\"\n┬á┬áType \"Any | Unknown | str\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"str\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 1572,
+                    "character": 77
+                },
+                "end": {
+                    "line": 1572,
+                    "character": 92
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Type \"frozenset[int]\" is not assignable to declared type \"list[int] | None\"\n┬á┬áType \"frozenset[int]\" is not assignable to type \"list[int] | None\"\n┬á┬á┬á┬á\"frozenset[int]\" is not assignable to \"None\"\n┬á┬á┬á┬á\"frozenset[int]\" is not assignable to \"list[int]\"",
+            "range": {
+                "start": {
+                    "line": 1696,
+                    "character": 25
+                },
+                "end": {
+                    "line": 1696,
+                    "character": 50
+                }
+            },
+            "rule": "reportAssignmentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"list[int] | None\" cannot be assigned to parameter \"MappedSections\" of type \"frozenset[int] | None\" in function \"RefineInvoker\"\n┬á┬áType \"list[int] | None\" is not assignable to type \"frozenset[int] | None\"\n┬á┬á┬á┬áType \"list[int]\" is not assignable to type \"frozenset[int] | None\"\n┬á┬á┬á┬á┬á┬á\"list[int]\" is not assignable to \"None\"\n┬á┬á┬á┬á┬á┬á\"list[int]\" is not assignable to \"frozenset[int]\"",
+            "range": {
+                "start": {
+                    "line": 1706,
+                    "character": 51
+                },
+                "end": {
+                    "line": 1706,
+                    "character": 65
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 1739,
+                    "character": 35
+                },
+                "end": {
+                    "line": 1739,
+                    "character": 99
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"GetOrCreateStosGroup\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 1739,
+                    "character": 46
+                },
+                "end": {
+                    "line": 1739,
+                    "character": 66
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Return type of generator function must be compatible with \"Generator[XElementWrapper | None, Any, Any]\"\n┬á┬á\"Generator[XElementWrapper | None, Unknown, Unknown]\" is not assignable to \"Generator[XElementWrapper, None, None]\"\n┬á┬á┬á┬áType parameter \"_YieldT_co@Generator\" is covariant, but \"XElementWrapper | None\" is not a subtype of \"XElementWrapper\"\n┬á┬á┬á┬á┬á┬áType \"XElementWrapper | None\" is not assignable to type \"XElementWrapper\"\n┬á┬á┬á┬á┬á┬á┬á┬á\"None\" is not assignable to \"XElementWrapper\"",
+            "range": {
+                "start": {
+                    "line": 1743,
+                    "character": 14
+                },
+                "end": {
+                    "line": 1743,
+                    "character": 24
+                }
+            },
+            "rule": "reportReturnType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"int | None\" cannot be assigned to parameter \"ControlSectionNumber\" of type \"int\" in function \"TransformsForMapping\"\n┬á┬áType \"int | None\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"None\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 1751,
+                    "character": 86
+                },
+                "end": {
+                    "line": 1751,
+                    "character": 106
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"attrib\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 1761,
+                    "character": 42
+                },
+                "end": {
+                    "line": 1761,
+                    "character": 48
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"int | None\" cannot be assigned to parameter \"ControlSection\" of type \"int\" in function \"AddPair\"\n┬á┬áType \"int | None\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"None\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 1925,
+                    "character": 23
+                },
+                "end": {
+                    "line": 1925,
+                    "character": 42
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"RootNode\" for class \"RegistrationTreeNode\"\n┬á┬áAttribute \"RootNode\" is unknown",
+            "range": {
+                "start": {
+                    "line": 1936,
+                    "character": 24
+                },
+                "end": {
+                    "line": 1936,
+                    "character": 32
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"MappedNode\" for class \"RegistrationTreeNode\"\n┬á┬áAttribute \"MappedNode\" is unknown",
+            "range": {
+                "start": {
+                    "line": 1937,
+                    "character": 26
+                },
+                "end": {
+                    "line": 1937,
+                    "character": 36
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Operator \"/=\" not supported for types \"float | None\" and \"float\"\n┬á┬áOperator \"/\" not supported for types \"None\" and \"float\"",
+            "range": {
+                "start": {
+                    "line": 2057,
+                    "character": 8
+                },
+                "end": {
+                    "line": 2057,
+                    "character": 38
+                }
+            },
+            "rule": "reportOperatorIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 2064,
+                    "character": 40
+                },
+                "end": {
+                    "line": 2065,
+                    "character": 102
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 2070,
+                    "character": 4
+                },
+                "end": {
+                    "line": 2070,
+                    "character": 48
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"float | Unknown | None\" cannot be assigned to parameter \"EnrichTolerance\" of type \"UnionType\" in function \"SliceToVolumeFromRegistrationTreeNode\"\n┬á┬áType \"float | Unknown | None\" is not assignable to type \"UnionType\"\n┬á┬á┬á┬á\"float\" is not assignable to \"UnionType\"",
+            "range": {
+                "start": {
+                    "line": 2082,
+                    "character": 106
+                },
+                "end": {
+                    "line": 2082,
+                    "character": 115
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"MappedNode\" for class \"RegistrationTreeNode\"\n┬á┬áAttribute \"MappedNode\" is unknown",
+            "range": {
+                "start": {
+                    "line": 2107,
+                    "character": 33
+                },
+                "end": {
+                    "line": 2107,
+                    "character": 43
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"ParentNode\" for class \"RegistrationTreeNode\"\n┬á┬áAttribute \"ParentNode\" is unknown",
+            "range": {
+                "start": {
+                    "line": 2108,
+                    "character": 42
+                },
+                "end": {
+                    "line": 2108,
+                    "character": 52
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"int | Unknown | None\" cannot be assigned to parameter \"ControlSectionNumber\" of type \"int\" in function \"FindStosTransform\"\n┬á┬áType \"int | Unknown | None\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"None\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 2156,
+                    "character": 95
+                },
+                "end": {
+                    "line": 2156,
+                    "character": 115
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"int | None\" cannot be assigned to parameter \"MappedSectionNumber\" of type \"int\" in function \"FindStosTransform\"\n┬á┬áType \"int | None\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"None\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 2159,
+                    "character": 94
+                },
+                "end": {
+                    "line": 2159,
+                    "character": 138
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"UnionType\" cannot be assigned to parameter \"EnrichTolerance\" of type \"float | None\" in function \"AddStosTransforms\"\n┬á┬áType \"UnionType\" is not assignable to type \"float | None\"\n┬á┬á┬á┬á\"UnionType\" is not assignable to \"float\"\n┬á┬á┬á┬á\"UnionType\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 2244,
+                    "character": 78
+                },
+                "end": {
+                    "line": 2244,
+                    "character": 93
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Call expression not allowed in type expression",
+            "range": {
+                "start": {
+                    "line": 2412,
+                    "character": 54
+                },
+                "end": {
+                    "line": 2412,
+                    "character": 89
+                }
+            },
+            "rule": "reportInvalidTypeForm"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Type \"Generator[XElementWrapper, None, None]\" is not assignable to declared type \"Generator[FilterNode, None, None]\"\n┬á┬á\"Generator[XElementWrapper, None, None]\" is not assignable to \"Generator[FilterNode, None, None]\"\n┬á┬á┬á┬áType parameter \"_YieldT_co@Generator\" is covariant, but \"XElementWrapper\" is not a subtype of \"FilterNode\"\n┬á┬á┬á┬á┬á┬á\"XElementWrapper\" is not assignable to \"FilterNode\"",
+            "range": {
+                "start": {
+                    "line": 2490,
+                    "character": 21
+                },
+                "end": {
+                    "line": 2492,
+                    "character": 91
+                }
+            },
+            "rule": "reportAssignmentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 2551,
+                    "character": 58
+                },
+                "end": {
+                    "line": 2552,
+                    "character": 52
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"None\" is not iterable\n┬á┬á\"__iter__\" method not defined",
+            "range": {
+                "start": {
+                    "line": 2566,
+                    "character": 53
+                },
+                "end": {
+                    "line": 2566,
+                    "character": 100
+                }
+            },
+            "rule": "reportGeneralTypeIssues"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"None\" is not iterable\n┬á┬á\"__iter__\" method not defined",
+            "range": {
+                "start": {
+                    "line": 2567,
+                    "character": 51
+                },
+                "end": {
+                    "line": 2567,
+                    "character": 97
+                }
+            },
+            "rule": "reportGeneralTypeIssues"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 2579,
+                    "character": 49
+                },
+                "end": {
+                    "line": 2584,
+                    "character": 112
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"XElementWrapper\" cannot be assigned to parameter \"InputTransformNode\" of type \"TransformNode\" in function \"__GenerateStosFile\"\n┬á┬á\"XElementWrapper\" is not assignable to \"TransformNode\"",
+            "range": {
+                "start": {
+                    "line": 2601,
+                    "character": 55
+                },
+                "end": {
+                    "line": 2601,
+                    "character": 73
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"float\" cannot be assigned to parameter \"Downsample\" of type \"int\" in function \"Create\"\n┬á┬á\"float\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 2632,
+                    "character": 91
+                },
+                "end": {
+                    "line": 2632,
+                    "character": 107
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 2642,
+                    "character": 58
+                },
+                "end": {
+                    "line": 2643,
+                    "character": 52
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"None\" is not iterable\n┬á┬á\"__iter__\" method not defined",
+            "range": {
+                "start": {
+                    "line": 2656,
+                    "character": 53
+                },
+                "end": {
+                    "line": 2656,
+                    "character": 100
+                }
+            },
+            "rule": "reportGeneralTypeIssues"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"None\" is not iterable\n┬á┬á\"__iter__\" method not defined",
+            "range": {
+                "start": {
+                    "line": 2657,
+                    "character": 51
+                },
+                "end": {
+                    "line": 2657,
+                    "character": 97
+                }
+            },
+            "rule": "reportGeneralTypeIssues"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 2669,
+                    "character": 49
+                },
+                "end": {
+                    "line": 2674,
+                    "character": 112
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 2734,
+                    "character": 26
+                },
+                "end": {
+                    "line": 2734,
+                    "character": 81
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | Unknown | str\" cannot be assigned to parameter \"oldspacing\" of type \"int\" in function \"ChangeTransformPixelSpacing\"\n┬á┬áType \"Any | Unknown | str\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"str\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 2797,
+                    "character": 48
+                },
+                "end": {
+                    "line": 2797,
+                    "character": 74
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"Downsample\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 2797,
+                    "character": 64
+                },
+                "end": {
+                    "line": 2797,
+                    "character": 74
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"float\" cannot be assigned to parameter \"newspacing\" of type \"int\" in function \"ChangeTransformPixelSpacing\"\n┬á┬á\"float\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 2797,
+                    "character": 76
+                },
+                "end": {
+                    "line": 2797,
+                    "character": 79
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"str | None\" cannot be assigned to parameter \"Transform\" of type \"str\" in function \"LoadTransform\"\n┬á┬áType \"str | None\" is not assignable to type \"str\"\n┬á┬á┬á┬á\"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 2803,
+                    "character": 46
+                },
+                "end": {
+                    "line": 2803,
+                    "character": 60
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Cannot assign to attribute \"imagename\" for class \"Task\"\n┬á┬áAttribute \"imagename\" is unknown",
+            "range": {
+                "start": {
+                    "line": 2819,
+                    "character": 21
+                },
+                "end": {
+                    "line": 2819,
+                    "character": 30
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Cannot assign to attribute \"dimX\" for class \"Task\"\n┬á┬áAttribute \"dimX\" is unknown",
+            "range": {
+                "start": {
+                    "line": 2821,
+                    "character": 25
+                },
+                "end": {
+                    "line": 2821,
+                    "character": 29
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Cannot assign to attribute \"dimY\" for class \"Task\"\n┬á┬áAttribute \"dimY\" is unknown",
+            "range": {
+                "start": {
+                    "line": 2823,
+                    "character": 25
+                },
+                "end": {
+                    "line": 2823,
+                    "character": 29
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"AddTransform\" for class \"ITransform\"\n┬á┬áAttribute \"AddTransform\" is unknown",
+            "range": {
+                "start": {
+                    "line": 2836,
+                    "character": 47
+                },
+                "end": {
+                    "line": 2836,
+                    "character": 59
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Type \"Generator[XElementWrapper, None, None]\" is not assignable to declared type \"Generator[ChannelNode, None, None]\"\n┬á┬á\"Generator[XElementWrapper, None, None]\" is not assignable to \"Generator[ChannelNode, None, None]\"\n┬á┬á┬á┬áType parameter \"_YieldT_co@Generator\" is covariant, but \"XElementWrapper\" is not a subtype of \"ChannelNode\"\n┬á┬á┬á┬á┬á┬á\"XElementWrapper\" is not assignable to \"ChannelNode\"",
+            "range": {
+                "start": {
+                    "line": 2858,
+                    "character": 27
+                },
+                "end": {
+                    "line": 2859,
+                    "character": 92
+                }
+            },
+            "rule": "reportAssignmentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"XElementWrapper\" cannot be assigned to parameter \"object\" of type \"TransformNode\" in function \"append\"\n┬á┬á\"XElementWrapper\" is not assignable to \"TransformNode\"",
+            "range": {
+                "start": {
+                    "line": 2878,
+                    "character": 40
+                },
+                "end": {
+                    "line": 2878,
+                    "character": 61
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 2898,
+                    "character": 32
+                },
+                "end": {
+                    "line": 2898,
+                    "character": 88
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"None\" is not subscriptable",
+            "range": {
+                "start": {
+                    "line": 2923,
+                    "character": 7
+                },
+                "end": {
+                    "line": 2923,
+                    "character": 26
+                }
+            },
+            "rule": "reportOptionalSubscript"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"None\" is not subscriptable",
+            "range": {
+                "start": {
+                    "line": 2923,
+                    "character": 39
+                },
+                "end": {
+                    "line": 2923,
+                    "character": 58
+                }
+            },
+            "rule": "reportOptionalSubscript"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"findall\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 2949,
+                    "character": 26
+                },
+                "end": {
+                    "line": 2949,
+                    "character": 33
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Object of type \"str\" is not callable\n┬á┬áAttribute \"__call__\" is unknown",
+            "range": {
+                "start": {
+                    "line": 2961,
+                    "character": 15
+                },
+                "end": {
+                    "line": 2961,
+                    "character": 61
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | Unknown | str\" cannot be assigned to parameter \"MappedSection\" of type \"int\" in function \"FindAllControlsForMapped\"\n┬á┬áType \"Any | Unknown | str\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"str\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 2999,
+                    "character": 72
+                },
+                "end": {
+                    "line": 2999,
+                    "character": 91
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | Unknown | str\" cannot be assigned to parameter \"MappedSectionNumber\" of type \"int\" in function \"GetSectionMapping\"\n┬á┬áType \"Any | Unknown | str\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"str\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 3006,
+                    "character": 59
+                },
+                "end": {
+                    "line": 3006,
+                    "character": 78
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "\"Name\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 3014,
+                    "character": 72
+                },
+                "end": {
+                    "line": 3014,
+                    "character": 76
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"int | None\" cannot be assigned to parameter \"x\" of type \"ConvertibleToInt\" in function \"__new__\"\n┬á┬áType \"int | None\" is not assignable to type \"ConvertibleToInt\"\n┬á┬á┬á┬áType \"None\" is not assignable to type \"ConvertibleToInt\"\n┬á┬á┬á┬á┬á┬á\"None\" is not assignable to \"str\"\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"Buffer\"\n┬á┬á┬á┬á┬á┬á┬á┬á\"__buffer__\" is not present\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"SupportsInt\"\n┬á┬á┬á┬á┬á┬á┬á┬á\"__int__\" is not present\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"SupportsIndex\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 3017,
+                    "character": 23
+                },
+                "end": {
+                    "line": 3017,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-buildmanager\\nornir_buildmanager\\operations\\block.py",
+            "severity": "error",
+            "message": "Argument of type \"int | None\" cannot be assigned to parameter \"x\" of type \"ConvertibleToInt\" in function \"__new__\"\n┬á┬áType \"int | None\" is not assignable to type \"ConvertibleToInt\"\n┬á┬á┬á┬áType \"None\" is not assignable to type \"ConvertibleToInt\"\n┬á┬á┬á┬á┬á┬á\"None\" is not assignable to \"str\"\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"Buffer\"\n┬á┬á┬á┬á┬á┬á┬á┬á\"__buffer__\" is not present\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"SupportsInt\"\n┬á┬á┬á┬á┬á┬á┬á┬á\"__int__\" is not present\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"SupportsIndex\"",
+            "range": {
+                "start": {
+                    "line": 3017,
+                    "character": 23
+                },
+                "end": {
+                    "line": 3017,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        }
+    ],
+    "summary": {
+        "filesAnalyzed": 1,
+        "errorCount": 142,
+        "warningCount": 0,
+        "informationCount": 0,
+        "timeInSec": 2.881
+    }
+}
+

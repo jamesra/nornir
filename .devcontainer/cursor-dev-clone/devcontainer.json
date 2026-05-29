@@ -1,0 +1,22 @@
+{
+  "name": "Nornir (cursor-dev clone)",
+  "dockerComposeFile": "../../nornir-docker/compose.cursor-dev.yaml",
+  "service": "cursor-dev-clone",
+  "workspaceFolder": "/workspace",
+  "overrideCommand": false,
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.debugpy",
+        "ms-python.vscode-pylance",
+        "lextudio.restructuredtext"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/opt/venv/bin/python",
+        "python.testing.pytestEnabled": true,
+        "python.testing.unittestEnabled": false
+      }
+    }
+  }
+}

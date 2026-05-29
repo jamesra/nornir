@@ -21,7 +21,7 @@ Workspace strategies (``NORNIR_WORKSPACE_STRATEGY``)
 Secrets
 -------
 
-Copy ``.env.cursor-worker.example`` to ``nornir-docker/.env.cursor-worker`` (gitignored). Set at minimum:
+Copy ``nornir-docker/example.nornir-cursor-worker.run.env`` to ``nornir-docker/.env.cursor-worker`` (gitignored). The flat ``nornir-docker/.env.cursor-worker.example`` file points at the same template. Set at minimum:
 
 - ``CURSOR_API_KEY``
 - ``GITHUB_TOKEN`` (optional; for private submodules or rate limits)

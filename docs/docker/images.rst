@@ -28,7 +28,7 @@ All images are built from the monorepo root (context ``.``).
 
 Packages baked into ``nornir:dev``, ``nornir:prod``, and ``nornir:cupy`` (from the monorepo at build time):
 ``nornir_shared``, ``nornir_pools``, ``nornir_imageregistration``, ``dm4``, ``nornir_buildmanager``.
-``nornir:cursor-worker`` does **not** bake those; it installs editables from ``/workspace`` at container start.
+``nornir:cursor-worker`` and ``nornir:dev-cursor-base`` do **not** bake those; they install editables from ``/workspace`` at container start.
 
 Monorepo version and package map
 ---------------------------------
@@ -40,10 +40,16 @@ Monorepo version and package map
 Build commands
 --------------
 
-Recommended (OCI labels + BOM JSON) — run from ``nornir-docker/``::
+Recommended (OCI labels + BOM JSON) — run from ``nornir-docker/`` (or any directory; the script captures the current directory before changing to the monorepo root)::
 
     .\docker-build.ps1     # PowerShell
     build.cmd              # cmd
+
+Optional build-arg overrides: place ``build.env`` (shared) and ``.build.<id>.env`` per image (``<id>`` is the tag with ``:`` replaced by ``-``, e.g. ``.build.nornir-dev.env``) in that **invocation** directory. The script does not read committed ``example.*.build.env`` files; use those files in the repo only as templates.
+
+Minimal samples (Compose / same builds from repo root)::
+
+    .\nornir-docker\start-sample.ps1 -Sample List
 
 This reads ``VERSION``, git SHA, build time, and embeds a base64-encoded JSON bill of materials.
 
@@ -74,6 +80,46 @@ Decode the BOM::
 
     $b64 = (docker image inspect nornir:dev --format '{{index .Config.Labels "org.nornir.package_versions.json.base64"}}')
     [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($b64))
+
+Running ``nornir:dev`` interactively (bind mounts)
+--------------------------------------------------
+
+The ``nornir:dev`` image **bakes** the monorepo packages under ``/opt/nornir`` at **build** time.
+It does **not** clone sources into ``/workspace`` on start: the default command is ``bash`` only,
+so ``WORKDIR /workspace`` is usually an **empty** directory unless you mount something there.
+
+- **Empty ``/workspace``** — If you bind-mount an empty host folder at ``/workspace``, the
+  container shell will show an empty tree. Mount your **actual monorepo checkout** instead
+  (same layout as the build context), e.g. ``-v D:\src\git\nornir:/workspace``, then work or
+  re-run ``pip install -e`` on packages from ``/workspace`` if you need editables against the
+  mount.
+
+- **Clone into an empty mount** — The image ships ``/usr/local/bin/cursor-dev-entry.sh`` (same
+  script used by the Cursor dev compose flow). It is **not** the default ``CMD``; run it
+  explicitly so an empty ``/workspace`` is populated by ``git clone`` (requires network and
+  ``NORNIR_CLONE_URL`` / ``NORNIR_CLONE_BRANCH`` if you override defaults), then drops into
+  your shell, for example (one line, or use ``^`` continuation in ``cmd`` / backtick in PowerShell)::
+
+    docker run --rm -it --env-file secrets.env --env-file .env.run.nornir-dev -v "D:\Docker\mounted-configs\nornir-dev:/workspace" -w /workspace nornir:dev /usr/local/bin/cursor-dev-entry.sh bash
+
+  If the mount is **non-empty** and not a git repo, the script refuses to clone (see script
+  error text); use an empty directory or a real checkout.
+
+- **``/nornir-testdata``** — Nothing in ``nornir:dev`` creates this path. For tests that need
+  ``TESTINPUTPATH`` (often ``/nornir-testdata``), add a **second** read-only bind mount from
+  the host (WSL Linux paths are recommended on Docker Desktop) and set the env vars, e.g. in
+  your env file::
+
+    TESTINPUTPATH=/nornir-testdata
+    TESTOUTPUTPATH=/tmp/nornir-test-output
+
+  and::
+
+    -v "//wsl$/Ubuntu/home/you/nornir-testdata:/nornir-testdata:ro"
+
+  Or use ``docker compose -f nornir-docker/compose.cursor-dev.yaml run --rm cursor-dev``, which
+  wires ``NORNIR_TESTDATA_HOST``, ``TESTINPUTPATH``, and ``cursor-dev-entry.sh`` for bind-mounted sources (service **cursor-dev**), or use ``cursor-dev-clone`` for a named-volume clone (see
+  :doc:`cursor_dev`).
 
 GPU runtime
 -----------

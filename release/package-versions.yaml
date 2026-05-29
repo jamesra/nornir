@@ -1,0 +1,31 @@
+# Bill of materials for the Nornir monorepo.
+# The active monorepo release id is the single line in the repository root VERSION file.
+# When you cut a release: bump ../VERSION, update versions below if any package changed, run:
+#   python release/verify_package_versions.py
+# Then tag: git tag v$(cat VERSION)  (e.g. v1.7.0)
+
+packages:
+  nornir_shared:
+    path: nornir-shared
+    version: "1.5.3"
+    docker: true
+  nornir_pools:
+    path: nornir-pools
+    version: "1.5.3"
+    docker: true
+  nornir_imageregistration:
+    path: nornir-imageregistration
+    version: "1.6.5"
+    docker: true
+  nornir_buildmanager:
+    path: nornir-buildmanager
+    version: "1.6.6"
+    docker: true
+  dm4:
+    path: dm4
+    version: "1.0.3.post1"
+    docker: true
+  pyre:
+    path: nornir-pyre
+    version: "1.5.2"
+    docker: false

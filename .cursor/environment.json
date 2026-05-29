@@ -6,6 +6,7 @@
   },
   "env": {
     "TESTINPUTPATH": "/nornir-testdata",
-    "TESTOUTPUTPATH": "/tmp/nornir-test-output"
+    "TESTOUTPUTPATH": "/tmp/nornir-test-output",
+    "INPUT_NORNIR_DATA": "/data"
   }
 }

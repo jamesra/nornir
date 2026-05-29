@@ -15,7 +15,7 @@ description: >-
 ## Set `NORNIR_HEADLESS=1` for unit test runs
 
 - `nornir_imageregistration` selects the matplotlib backend at **import time** (`Agg` when headless, `qtAgg` otherwise). Running tests without headless can open GUI windows, break in CI, or desynchronize behavior from CI and Docker (where `NORNIR_HEADLESS=1` is already set).
-- For **`nornir-imageregistration` pytest**, `nornir-imageregistration/conftest.py` (at the package root, not under `test/`) calls `os.environ.setdefault("NORNIR_HEADLESS", "1")` so the default is headless **when that conftest loads**. Still **set `NORNIR_HEADLESS=1` explicitly** when:
+- For **`nornir-imageregistration` pytest**, `nornir-imageregistration/conftest.py` (at the package root, not under `tests/`) calls `os.environ.setdefault("NORNIR_HEADLESS", "1")` so the default is headless **when that conftest loads**. Still **set `NORNIR_HEADLESS=1` explicitly** when:
   - Running tests from another working directory or without collecting `conftest.py` as expected,
   - Spawning subprocesses or tools that import `nornir_imageregistration` before pytest sets the env,
   - Documenting or scripting test commands so behavior does not depend on import order.
@@ -24,7 +24,7 @@ description: >-
 
 ## Where PNGs are written
 
-- **`save_figure_to_png_artifact`** / **`artifact_png_path`** (see `nornir_imageregistration/headless.py`) write under **`<test_output_root>/_plot_artifacts`**, where **`test_output_root`** is **`TEST_OUTPUT_DIR`** if set, otherwise **`TESTOUTPUTPATH`** (the env used by `nornir-imageregistration/test/setup_imagetest.py` and CI). If neither is set, the directory is the **system temp** folder.
+- **`save_figure_to_png_artifact`** / **`artifact_png_path`** (see `nornir_imageregistration/headless.py`) write under **`<test_output_root>/_plot_artifacts`**, where **`test_output_root`** is **`TEST_OUTPUT_DIR`** if set, otherwise **`TESTOUTPUTPATH`** (the env used by `nornir-imageregistration/tests/setup_imagetest.py` and CI). If neither is set, the directory is the **system temp** folder.
 - Tests often save figures explicitly under **`TestOutputPath`** (`TESTOUTPUTPATH` plus class/method segments); those paths are independent of `_plot_artifacts`. The same **review and triage** workflow applies wherever the test or helper wrote the image.
 
 Implementation reference: `nornir_imageregistration/headless.py` (`is_headless`, `artifact_png_path`, `save_figure_to_png_artifact`, `inspect_png_output`).
@@ -62,7 +62,7 @@ Correlate filenames with code paths using the `tag=` argument to `save_figure_to
 ## How to judge intent: test source + figure title
 
 - Read the **unit test** (body, **comments**, and setup) to learn what behavior is being exercised, then open the **saved PNG** and compare.
-- Use **informational text in the plot title** (`Axes.set_title`, `pyplot.title`, `Figure.suptitle`, etc.) as **on-canvas documentation**: it should **align** with what you see and with the test’s purpose. Example: descriptive `set_title` strings in `nornir-imageregistration/test/transforms/test_metrics.py`.
+- Use **informational text in the plot title** (`Axes.set_title`, `pyplot.title`, `Figure.suptitle`, etc.) as **on-canvas documentation**: it should **align** with what you see and with the test’s purpose. Example: descriptive `set_title` strings in `nornir-imageregistration/tests/transforms/test_metrics.py`.
 - **`inspect_png_output`** checks structural validity (file exists, readable PNG, dimensions); **semantic/visual** correctness still requires comparing the image to intent and title.
 
 ## Pass/fail is not only “pytest exited 0”

@@ -1,4 +1,5 @@
 ---
+description: 
 alwaysApply: true
 ---
 
@@ -8,6 +9,8 @@ alwaysApply: true
 
 - **`xp = nornir_imageregistration.GetComputationModule()`** -- Use when there is no input array yet and code should follow the process-wide backend (numpy vs cupy), e.g. allocating scratch buffers for the active lib.
 - **`xp = cp.get_array_module(x)`** -- Use when behavior must match a **specific** array `x` (or the first of several related arrays). Prefer this for helpers that transform data: keep outputs on the same kind of array as the inputs (numpy in -> numpy out; cupy in -> cupy out).
+
+Transitioning from system memory (numpy) and gpu memory (cupy) is very expensive.  Transitions should be kept to the minimum number possible. 
 - **Do not** use `import cupy as xp` or other aliases that steal the name `xp` from this meaning.
 
 ### Execution locality and transfer cost

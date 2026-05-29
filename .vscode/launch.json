@@ -2,11 +2,29 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "pyre",
+            "name": "Python: Debug Tests",
             "type": "debugpy",
             "request": "launch",
+            "purpose": ["debug-test"],
+            "console": "internalConsole",
+            "justMyCode": false,
+            "subProcess": false,
+            "redirectOutput": true,
+            "python": "${command:python.interpreterPath}",
+            "pythonArgs": ["-Xfrozen_modules=off"],
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/nornir-buildmanager;${workspaceFolder}/nornir-imageregistration;${workspaceFolder}/nornir-pools;${workspaceFolder}/nornir-shared;${workspaceFolder}/nornir-pyre;${env:PYTHONPATH}",
+                "PYTHONUNBUFFERED": "1"
+            }
+        },
+        {
+            "name": "pyre",
+            "type": "debugpy",
+            "subProcess": true,
+            "request": "launch",
             "module": "pyre",
-            "python": "${workspaceFolder}/venv/pyre314/Scripts/python.exe",
+            "python": "${command:python.interpreterPath}",
             "pythonArgs": ["-Xfrozen_modules=off"],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
@@ -16,17 +34,16 @@
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/nornir-pyre;${workspaceFolder}/nornir-imageregistration;${workspaceFolder}/nornir-pools;${workspaceFolder}/nornir-shared;${workspaceFolder}/nornir-buildmanager",
                 "DEBUG": "1",
-                "PYTHONUNBUFFERED": "1",
-                "TESTINPUTPATH": "D:\\nornir-testdata",
-                "TESTOUTPUTPATH": "C:\\Temp\\nornir"
+                "PYTHONUNBUFFERED": "1"
             }
         },
         {
             "name": "pyre (with stos arg)",
             "type": "debugpy",
+            "subProcess": true,
             "request": "launch",
             "module": "pyre",
-            "python": "${workspaceFolder}/venv/pyre314/Scripts/python.exe",
+            "python": "${command:python.interpreterPath}",
             "pythonArgs": ["-Xfrozen_modules=off"],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
@@ -36,98 +53,104 @@
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/nornir-pyre;${workspaceFolder}/nornir-imageregistration;${workspaceFolder}/nornir-pools;${workspaceFolder}/nornir-shared;${workspaceFolder}/nornir-buildmanager",
                 "DEBUG": "1",
-                "PYTHONUNBUFFERED": "1",
-                "TESTINPUTPATH": "D:\\nornir-testdata",
-                "TESTOUTPUTPATH": "C:\\Temp\\nornir"
+                "PYTHONUNBUFFERED": "1"
             }
         },
         {
             "name": "Tests: nornir-imageregistration",
             "type": "debugpy",
+            "subProcess": true,
             "request": "launch",
             "module": "pytest",
-            "python": "${workspaceFolder}/venv/pyre314/Scripts/python.exe",
+            "python": "${command:python.interpreterPath}",
             "pythonArgs": ["-Xfrozen_modules=off"],
             "cwd": "${workspaceFolder}/nornir-imageregistration",
-            "console": "integratedTerminal",
+            "console": "internalConsole",
+            "redirectOutput": true,
             "justMyCode": false,
-            "args": ["test", "-v"],
+            "args": ["tests", "-v"],
             "env": {
-                "PYTHONPATH": "${workspaceFolder}/nornir-imageregistration/test;${workspaceFolder}/nornir-imageregistration;${workspaceFolder}/nornir-pools;${workspaceFolder}/nornir-shared;${workspaceFolder}/nornir-buildmanager;${workspaceFolder}/nornir-pyre",
+                "PYTHONPATH": "${workspaceFolder}/nornir-imageregistration/tests;${workspaceFolder}/nornir-imageregistration;${workspaceFolder}/nornir-pools;${workspaceFolder}/nornir-shared;${workspaceFolder}/nornir-buildmanager;${workspaceFolder}/nornir-pyre",
                 "NORNIR_HEADLESS": "1",
-                "TESTINPUTPATH": "D:\\nornir-testdata",
-                "TESTOUTPUTPATH": "C:\\Temp\\nornir",
                 "PYTHONUNBUFFERED": "1"
             }
         },
         {
             "name": "Tests: nornir-buildmanager",
             "type": "debugpy",
+            "subProcess": true,
             "request": "launch",
             "module": "pytest",
-            "python": "${workspaceFolder}/venv/pyre314/Scripts/python.exe",
+            "python": "${command:python.interpreterPath}",
             "pythonArgs": ["-Xfrozen_modules=off"],
             "cwd": "${workspaceFolder}/nornir-buildmanager",
-            "console": "integratedTerminal",
+            "console": "internalConsole",
+            "redirectOutput": true,
             "justMyCode": false,
             "args": ["tests", "-v"],
             "env": {
-                "PYTHONPATH": "${workspaceFolder}/nornir-buildmanager/tests;${workspaceFolder}/nornir-buildmanager;${workspaceFolder}/nornir-imageregistration;${workspaceFolder}/nornir-pools;${workspaceFolder}/nornir-shared;${workspaceFolder}/nornir-pyre",
+                "PYTHONPATH": "${workspaceFolder}/nornir-buildmanager/tests;${workspaceFolder}/nornir-buildmanager;${workspaceFolder}/nornir-imageregistration/tests;${workspaceFolder}/nornir-imageregistration;${workspaceFolder}/nornir-pools;${workspaceFolder}/nornir-shared;${workspaceFolder}/nornir-pyre",
                 "NORNIR_HEADLESS": "1",
-                "TESTINPUTPATH": "D:\\nornir-testdata",
-                "TESTOUTPUTPATH": "C:\\Temp\\nornir",
                 "PYTHONUNBUFFERED": "1"
             }
         },
         {
             "name": "Tests: nornir-shared",
             "type": "debugpy",
+            "subProcess": true,
             "request": "launch",
             "module": "pytest",
-            "python": "${workspaceFolder}/venv/pyre314/Scripts/python.exe",
+            "python": "${command:python.interpreterPath}",
             "pythonArgs": ["-Xfrozen_modules=off"],
             "cwd": "${workspaceFolder}/nornir-shared",
-            "console": "integratedTerminal",
+            "console": "internalConsole",
+            "redirectOutput": true,
             "justMyCode": false,
-            "args": ["test", "-v"],
+            "args": ["tests", "-v"],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/nornir-shared",
-                "TESTINPUTPATH": "D:\\nornir-testdata",
-                "TESTOUTPUTPATH": "C:\\Temp\\nornir",
                 "PYTHONUNBUFFERED": "1"
             }
         },
         {
-            "name": "Tests: nornir-pools",
+            "name": "Debug tests: nornir-pools only",
             "type": "debugpy",
+            "subProcess": true,
             "request": "launch",
             "module": "pytest",
-            "python": "${workspaceFolder}/venv/pyre314/Scripts/python.exe",
+            "python": "${command:python.interpreterPath}",
             "pythonArgs": ["-Xfrozen_modules=off"],
             "cwd": "${workspaceFolder}/nornir-pools",
-            "console": "integratedTerminal",
+            "console": "internalConsole",
+            "redirectOutput": true,
             "justMyCode": false,
-            "args": ["test", "-v"],
+            "args": [
+                "tests",
+                "-v",
+                "--import-mode=prepend",
+                "--rootdir",
+                "${workspaceFolder}/nornir-pools"
+            ],
             "env": {
-                "PYTHONPATH": "${workspaceFolder}/nornir-pools",
-                "TESTOUTPUTPATH": "C:\\Temp\\nornir",
+                "PYTHONPATH": "${workspaceFolder}/nornir-pools:${workspaceFolder}/nornir-shared:${env:PYTHONPATH}",
                 "PYTHONUNBUFFERED": "1"
             }
         },
         {
             "name": "Tests: dm4",
             "type": "debugpy",
+            "subProcess": true,
             "request": "launch",
             "module": "pytest",
-            "python": "${workspaceFolder}/venv/pyre314/Scripts/python.exe",
+            "python": "${command:python.interpreterPath}",
             "pythonArgs": ["-Xfrozen_modules=off"],
             "cwd": "${workspaceFolder}/dm4",
-            "console": "integratedTerminal",
+            "console": "internalConsole",
+            "redirectOutput": true,
             "justMyCode": false,
-            "args": ["test", "-v"],
+            "args": ["tests", "-v"],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/dm4",
-                "TESTINPUTPATH": "D:\\nornir-testdata",
                 "PYTHONUNBUFFERED": "1"
             }
         }
