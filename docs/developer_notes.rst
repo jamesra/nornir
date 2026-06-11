@@ -7,3 +7,8 @@ This repository is an **umbrella** checkout that contains multiple ``nornir-*`` 
 * **Publishing:** :doc:`development/publishing_documentation` describes how HTML is built and deployed to the ``nornir.github.io`` site.
 
 When adding features, prefer updating the **monodoc** (reStructuredText under ``docs/``) and keep package ``README.md`` files short—overview plus links to this site.
+
+Grid refine parity (C++ ``ir-refine-grid`` vs Python ``RefineGridMosaic``):
+
+* ``docs/refine-grid-cpp-parity-checklist.md`` — C++ audit mapping
+* ``docs/refine-grid690-python-parity-changelog.md`` — implementation change log
