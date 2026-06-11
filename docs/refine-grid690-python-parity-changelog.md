@@ -62,10 +62,15 @@ or `nornir-volumemodel`. Submodule working trees may show line-ending noise unre
 
 **Excluded:** `dm4` (per request).
 
+## Follow-up fixes
+
+- **Prewarp interpolation (Bugbot):** `_prewarp_tile_for_grid_refine` now passes `interpolation_order=0` to
+  `_TransformImageUsingCoords`, matching C++ `warp<>` (`itk::NearestNeighborInterpolateImageFunction`).
+
 ## Known follow-ups (Bugbot / review)
 
 | Severity | Location | Finding |
 |----------|----------|---------|
-| High | `assemble.py` prewarp interpolation | `_TransformImageUsingCoords` uses cubic (`order=3`) sampling; legacy prewarp may expect nearest-neighbor — review for full FFT-cell parity |
+| ~~High~~ | ~~`assemble.py` prewarp interpolation~~ | Fixed: grid-refine prewarp uses nearest-neighbor (`order=0`) |
 | Medium | `tests/grid_seam_metrics.py` | Chained single-iteration passes reset `last_average` each call; cross-pass “no improvement” stop only applies inside one `RefineGridMosaic` invocation |
 | High | `assemble.py` `TransformStos` | Image warp call commented out — verify STOS path if touched in same branch |
