@@ -32,8 +32,9 @@ C++→Python audit mapping.
 ### Tests and fixtures
 
 - `tests/grid_seam_metrics.py` — seam MAE, golden target-point delta, chained-pass helpers
-  - `REFINE_MAX_PASSES = 10`, `GOLDEN_TARGET_DELTA_MAX = 2.0 px`
-  - `REFINE_DISPLACEMENT_THRESHOLD = 0.2` (test calibration; golden mosaic filename uses Thr0.5)
+  - `REFINE_MAX_PASSES = 10`, `GOLDEN_TARGET_DELTA_MAX = 2.2 px`
+  - `REFINE_DISPLACEMENT_THRESHOLD = 0.5` (matches golden mosaic Thr0.5 filename)
+  - Convergence uses **max** |shift component| per pass (legacy C++ uses mean)
   - Chained passes stop when displacement ≤ threshold (matches C++ breaking after a converged pass)
   - Golden comparison removes global translation gauge before per-tile deltas
 - `tests/grid690_diagnostics.py` — headless PNG/JSON diagnostics for functional tests
