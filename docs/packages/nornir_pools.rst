@@ -89,3 +89,41 @@ Cluster pool usage follows the same pattern with ``GetGlobalClusterPool()``::
 **API reference**
 
 * :doc:`../api/nornir_pools`
+
+Pool lifecycle and stage boundaries
+-----------------------------------
+
+Pipelines enqueue work on global thread- and process-backed pools across many stages.
+**Waiting** for tasks and **closing** pools are separate:
+
+* **Wait** — block until queued tasks finish; pools stay registered.
+* **Close** — shut down workers and unregister the pool.
+
+Thread-kind pools (``GetGlobalThreadPool``, subprocess ``GetGlobalProcessPool``,
+``GetGlobalSerialPool``) run inside the parent process.  Process-kind pools
+(``GetGlobalMultithreadingPool`` / ``GetLocalMachinePool``,
+``GetGlobalClusterPool``) keep OS worker processes alive.  Spawning workers is
+expensive, so production code keeps process pools warm between stages and recycles
+thread pools at stage boundaries.
+
+Recommended pattern at the end of each pipeline stage::
+
+   import nornir_pools
+
+   nornir_pools.ReleaseStagePools()
+
+``ReleaseStagePools``:
+
+1. Waits for **all** pool tasks (thread and process) so stage outputs are safe.
+2. Shuts down **thread-kind** pools only.
+3. Leaves **process-kind** pools registered for the next stage.
+
+Use ``WaitOnAllPools()`` when you only need synchronization and will enqueue more
+work immediately.  Use ``ClosePools()`` once at process exit or test teardown for
+full shutdown.  Finer-grained helpers (``WaitOnThreadPools``,
+``WaitOnProcessPools``, ``CloseThreadPools``, ``CloseProcessPools``) exist for
+custom orchestration; see the API reference.
+
+Set ``NORNIR_POOL_DIAG=1`` to log pool names, kinds, and active task counts on each
+lifecycle call.  ``NORNIR_KEEP_PROCESS_POOLS=1`` skips process-pool shutdown in
+``CloseProcessPools`` (normally unnecessary when using ``ReleaseStagePools``).
