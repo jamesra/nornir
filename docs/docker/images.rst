@@ -113,6 +113,8 @@ so ``WORKDIR /workspace`` is usually an **empty** directory unless you mount som
     TESTINPUTPATH=/nornir-testdata
     TESTOUTPUTPATH=/tmp/nornir-test-output
 
+  ``compose.cursor-dev.yaml`` bind-mounts ``NORNIR_TESTOUTPUT_HOST`` (default ``D:/nornir-test-output``) to that path.
+
   and::
 
     -v "//wsl$/Ubuntu/home/you/nornir-testdata:/nornir-testdata:ro"

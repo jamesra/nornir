@@ -36,7 +36,8 @@ The repo ships a **cursor-dev** Compose stack (services **cursor-dev** and **cur
 Authoritative files:
 
 - `nornir-docker/compose.cursor-dev.yaml` — **cursor-dev** (bind-mounted repo root) and **cursor-dev-clone** (named volume + clone)
-- `nornir-docker/cursor-dev-entry.sh` — workspace prep (`mounted` vs `clone`) + `pip install -e` order
+- `nornir-docker/cursor-dev-entry.sh` — workspace prep (`mounted` vs `clone`) + `install-monorepo-editables.sh` (`pip install -e --no-deps` for all headless packages)
+- `nornir-docker/install-monorepo-editables.sh` — shared editable install helper (also used by `dev/Dockerfile` and `prod/Dockerfile`)
 - `nornir-docker/dev/Dockerfile` — image: Python 3.14, git, ImageMagick, CuPy, pytest, venv
 - `.devcontainer/devcontainer.json` — default: compose **cursor-dev** + `workspaceFolder` `/workspace`
 - `.devcontainer/cursor-dev-clone/devcontainer.json` — optional: compose **cursor-dev-clone** (fresh clone in volume)
@@ -54,7 +55,7 @@ Authoritative files:
 | Variable | Typical value | Role |
 |----------|-----------------|------|
 | `TESTINPUTPATH` | `/nornir-testdata` | Read-only mount; must match `.cursor/environment.json` and test expectations |
-| `TESTOUTPUTPATH` | `/tmp/nornir-test-output` | Writable scratch for artifacts, Hypothesis DB, plot outputs, etc. |
+| `TESTOUTPUTPATH` | `/tmp/nornir-test-output` | Writable scratch for artifacts, Hypothesis DB, plot outputs, etc. Bind-mounted from host `${NORNIR_TESTOUTPUT_HOST:-D:/nornir-test-output}` (use `/mnt/d/nornir-test-output` when Compose runs from WSL). |
 | `INPUT_NORNIR_DATA` | `/data` (cursor-dev compose) | Root of the optional large repro corpus; set to `D:\Data` (or your path) when running pytest on Windows without Docker |
 | `NORNIR_HEADLESS` | `1` (set in image) | Headless matplotlib / CI-style tests |
 | `NORNIR_CLONE_URL` | `https://github.com/jamesra/nornir.git` | Clone source when `/workspace` is empty or for **cursor-dev-clone** refresh |
@@ -72,7 +73,7 @@ Compose sets `TESTINPUTPATH` / `TESTOUTPUTPATH` on **cursor-dev**; keep PyCharm 
 3. Optionally set `NORNIR_REPRO_DATA_HOST` to the **Linux path** of the large repro dataset (mirror of Windows `D:\Data`); it is mounted at `/data` and compose sets `INPUT_NORNIR_DATA=/data`.
 4. Ensure Docker can bind-mount that path (Docker Desktop file sharing prompts if needed).
 
-Compose binds `${NORNIR_TESTDATA_HOST}` → `/nornir-testdata`; the container exposes that path as the value of `TESTINPUTPATH`. When set, `${NORNIR_REPRO_DATA_HOST}` → `/data` (read-only).
+Compose binds `${NORNIR_TESTDATA_HOST}` → `/nornir-testdata`; the container exposes that path as the value of `TESTINPUTPATH`. When set, `${NORNIR_REPRO_DATA_HOST}` → `/data` (read-only). `${NORNIR_TESTOUTPUT_HOST:-D:/nornir-test-output}` → `/tmp/nornir-test-output` (writable test output).
 
 ## Build and run
 
@@ -100,7 +101,9 @@ On container start, **`cursor-dev-entry.sh`** runs before your shell:
 1. If `/workspace` is empty: shallow `git clone` from `NORNIR_CLONE_URL` / `NORNIR_CLONE_BRANCH` (first-time empty bind only).
 2. If `/workspace` is already a git repo: `git fetch`; **only** if `NORNIR_SYNC_REMOTE=1`: checkout clone branch and `git pull --ff-only`.
 3. Best-effort `git submodule update --init --recursive`.
-4. **`pip install --no-cache-dir -e`** for `nornir-shared`, `nornir-pools`, `nornir-imageregistration`, `dm4`, `nornir-buildmanager` in that order (same as `dev/Dockerfile`).
+4. **`install-monorepo-editables.sh`**: `pip install -e --no-deps` for `nornir-shared`, `nornir-pools`, `nornir-imageregistration`, `dm4`, `nornir-buildmanager` (``--no-deps`` avoids git sibling deps overwriting local editables).
+
+**Dev Containers:** `.devcontainer/*/devcontainer.json` sets `postAttachCommand` to rerun the same editable install when the editor attaches (covers persistent containers that skip container entry).
 
 **Service `cursor-dev-clone` (`NORNIR_WORKSPACE_STRATEGY=clone`):** clone when empty; when `.git` exists, fetch/checkout/pull to `NORNIR_CLONE_BRANCH`. Optional `NORNIR_CLONE_REFRESH=1` wipes `/workspace` before clone (parity with cursor worker). Then submodules (best effort) and the same editable installs.
 

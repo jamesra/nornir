@@ -4,6 +4,7 @@
   "service": "cursor-dev",
   "workspaceFolder": "/workspace",
   "overrideCommand": false,
+  "postAttachCommand": "NORNIR_CURSOR_DEV_SETUP_ONLY=1 /usr/local/bin/cursor-dev-entry.sh",
   "customizations": {
     "vscode": {
       "extensions": [

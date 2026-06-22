@@ -34,7 +34,7 @@ Copy ``nornir-docker/dev/example.cursor-dev.run.env`` to ``nornir-docker/.env`` 
 
 **Reproduction corpus (optional):** set ``NORNIR_REPRO_DATA_HOST`` in the same ``.env`` to a **WSL/Linux** path whose contents mirror the Windows corpus (for example what you keep under ``D:\\Data``). Compose mounts it read-only at ``/data`` and sets ``INPUT_NORNIR_DATA=/data`` so tests and scripts can build paths without hard-coding a drive letter. If ``NORNIR_REPRO_DATA_HOST`` is unset, compose uses a tiny placeholder directory so the stack still starts; ``/data`` is then empty until you set a real host path. For pytest on Windows **outside** Docker, set ``INPUT_NORNIR_DATA`` yourself (for example ``D:\\Data``).
 
-On start, ``cursor-dev-entry.sh`` installs the monorepo packages from ``/workspace`` in editable mode in the same order as ``dev/Dockerfile``.
+On start, ``cursor-dev-entry.sh`` runs ``install-monorepo-editables.sh``, which ``pip install -e --no-deps`` each monorepo package from ``/workspace`` (``nornir-shared``, ``nornir-pools``, ``nornir-imageregistration``, ``dm4``, ``nornir-buildmanager``). ``--no-deps`` is required because ``pyproject.toml`` files reference sibling packages via git URLs; without it, a later editable install can replace earlier ones with non-editable git checkouts. Dev Containers also run the same install on attach via ``postAttachCommand`` in ``.devcontainer/devcontainer.json``.
 
 Build (from monorepo root)::
 
@@ -63,6 +63,8 @@ Test data
 ---------
 
 ``NORNIR_TESTDATA_HOST`` must be set (via ``nornir-docker/.env``—see ``nornir-docker/dev/example.cursor-dev.run.env``). Use a path on the **WSL2** filesystem when developing under WSL; ensure Docker Desktop **file sharing** allows that path if prompted.
+
+**Test output:** compose bind-mounts ``${NORNIR_TESTOUTPUT_HOST:-D:/nornir-test-output}`` to ``/tmp/nornir-test-output`` (``TESTOUTPUTPATH``). Create the host directory if needed. When you run ``docker compose`` from WSL, set ``NORNIR_TESTOUTPUT_HOST=/mnt/d/nornir-test-output`` (or another Linux path) in ``nornir-docker/.env`` instead of the Windows ``D:/`` form.
 
 ``INPUT_NORNIR_DATA`` is the root path for the **optional** large reproduction dataset used by some tests (for example arrange tests that fall back from ``TESTINPUTPATH``). In cursor-dev, compose sets ``INPUT_NORNIR_DATA=/data``. On Windows hosts running pytest without Docker, set ``INPUT_NORNIR_DATA`` to your corpus root (commonly ``D:\Data``). ``NORNIR_REPRO_DATA_HOST`` in ``.env`` is only the **host** bind source for ``/data``; it does not replace setting ``INPUT_NORNIR_DATA`` when you run tests on the host outside Compose.
 
