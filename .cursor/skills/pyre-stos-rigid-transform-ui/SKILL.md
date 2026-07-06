@@ -138,7 +138,7 @@ Composite fixed display rotation uses **−rangle** in `record_fixed_display_rot
 1. **Composite rotate** (rigid) — purple pivots on cursor; green unchanged during gesture.
 2. **Warped panel** (rigid) — Ctrl+scroll does **not** rotate; translate still works.
 3. **Composite translate** — purple moves; green still.
-4. **Warped translate** — green moves; composite updates after release.
+4. **Warped translate** — green moves in Warped; composite alignment updates live (purple baseline refreshed each step).
 5. **Cross-view** — composite and warped translate stay aligned; composite rotation updates all views after each notch.
 6. **Reset Transform** — all three views return to identity alignment.
 7. **Zoom** — cursor-centered in each panel.
