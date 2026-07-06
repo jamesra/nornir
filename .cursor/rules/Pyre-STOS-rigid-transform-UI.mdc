@@ -1,10 +1,11 @@
 ---
 description: >-
-  Pyre STOS rigid transform UI — registration vs display overlays, per-view
+  Pyre STOS rigid transform UI — registration vs display strategy, per-view
   draw rules, and cross-view sync invariants. Read the paired skill before
   editing translate/rotate/zoom or composite/warped mismatch bugs.
 globs: >
   nornir-pyre/**/transformcontroller.py,
+  nornir-pyre/**/transform_display.py,
   nornir-pyre/**/imagetransformview.py,
   nornir-pyre/**/compositetransformview.py,
   nornir-pyre/**/texture_shader.py,
@@ -12,6 +13,7 @@ globs: >
   nornir-pyre/**/translaterigidcommand.py,
   nornir-pyre/**/transform_edit_policy.py,
   nornir-pyre/**/stoswindow.py,
+  nornir-pyre/docs/adding_transform_display_strategy.md,
   .cursor/skills/pyre-stos-rigid-transform-ui/**
 alwaysApply: false
 ---
@@ -25,12 +27,10 @@ That skill is the authoritative description of:
 
 - Expected behavior per view (fixed / warped / composite)
 - **Rigid rotation is Composite-only** (`rigid_rotation_locked`)
-- Registration model vs GPU display overlays (`rigid_*_display_*`)
-- Interactive-edit freeze rules
-- Cross-view sync invariants and known gaps
+- **Model-authoritative display** via `RigidDisplayStrategy.resolve_draw_state`
+- Interactive-edit layer freeze (gesture snapshot, not overlay matrices)
+- Cross-view sync invariants
 
-**Do not** patch one panel in isolation without checking rebasing for the other two views.
+**Do not** patch one panel in isolation without checking the display strategy rules for all three views.
 
-When you change display-state lifecycle (new matrices, new `end_interactive_edit` hooks, or
-shader uniforms), update the skill’s **Key files** and **Known implementation gaps** sections
-in the same change set.
+When you change display-state lifecycle (new gestures, strategy hooks, or shader uniforms), update the skill and `nornir-pyre/docs/adding_transform_display_strategy.md` in the same change set.

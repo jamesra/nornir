@@ -3,18 +3,18 @@ name: pyre-stos-rigid-transform-ui
 description: >-
   Documents Pyre STOS rigid-transform UI semantics across Source (fixed/purple),
   Target (warped/green), and Composite views: command space, registration vs
-  display overlays, interactive-edit freeze rules, cross-view rebasing, and
-  repaint. Use when editing rigid translate/rotate/zoom in nornir-pyre,
-  debugging view mismatch, or before changing transformcontroller,
+  display strategy, interactive-edit freeze rules, cross-view sync, and repaint.
+  Use when editing rigid translate/rotate/zoom in nornir-pyre, debugging view
+  mismatch, or before changing transformcontroller, transform_display,
   imagetransformview, texture_shader, or navigation commands.
 ---
 
 # Pyre STOS rigid transform UI
 
 One **shared** `TransformController` / `IRigidTransform` model drives all STOS
-windows. UI code splits **registration** (persisted transform) from **display
-overlays** (per-panel GPU matrices and shifts). Cross-view bugs usually mean
-those layers diverged or a view did not repaint.
+windows. Display is resolved by **`RigidDisplayStrategy`** (`pyre/controllers/transform_display.py`):
+**model-authoritative** matrices from `forward_matrix`, with gesture snapshots only
+to **freeze the non-editing layer** during a drag or wheel notch.
 
 ## Vocabulary
 
@@ -26,7 +26,7 @@ those layers diverged or a view did not repaint.
 | **ViewType.Target** | Standalone warped panel (`Space.Target` commands) |
 | **ViewType.Composite** | Overlay of both layers (`Space.Source` commands; draws in target space) |
 | **Registration** | `TransformModel` fields: `angle`, `target_offset`, `source_space_center_of_rotation`, `forward_matrix` |
-| **Display overlay** | Controller-owned GPU state that may differ from `forward_matrix` during/after edits |
+| **Display strategy** | `TransformDisplayStrategy.resolve_draw_state()` — GPU uniforms per panel pass |
 
 Color convention in composite overlay shader: **purple = fixed**, **green = warped**.
 
@@ -40,15 +40,15 @@ Rigid model API (imageregistration):
 ## Expected user-visible behavior (product invariants)
 
 1. **Single transform** — Translate/rotate in any view updates the same registration; **all** views show the same alignment after the edit ends.
-2. **Composite is the alignment truth check** — Purple (fixed transformed into target space) and green (warped native) should match standalone panels.
+2. **Composite is the alignment truth check** — Purple and green should match standalone panels.
 3. **Which layer moves** (rigid):
    - **Composite + translate/rotate** → user edits the **fixed (purple)** layer; green stays still during the gesture.
    - **Warped panel + translate** → user edits the **warped (green)** layer (translation only).
    - **Rigid rotation** → **Composite window only** (`rigid_rotation_locked` blocks Ctrl+scroll on Fixed and Warped standalone).
    - **Fixed standalone (rigid/grid)** → whole-layer translate/rotate is **blocked** (`fixed_image_manipulation_locked`).
-4. **Rotation pivot** (rigid, composite only) — Ctrl+scroll rotates purple about the **cursor** (target-space world position under the mouse).
+4. **Rotation pivot** (rigid, composite only) — Ctrl+scroll rotates purple about the **cursor** via `RotateFixed` each wheel notch (**no** display-matrix overlay).
 5. **Zoom** — Mouse wheel without Ctrl zooms about cursor (`navigationcommandbase` lookat delta in active command space).
-6. **Reset Transform** (STOS menu) — Rigid: zero offset, zero angle, clear display overlays (`reset_rigid_transform`).
+6. **Reset Transform** (STOS menu) — Rigid: zero offset, zero angle (`reset_rigid_transform`).
 
 ## Command routing
 
@@ -56,90 +56,45 @@ Rigid model API (imageregistration):
 |--------|-------------|-----------------|----------------|---------------|
 | Fixed | Source | Source | **Blocked** | `TranslateFixed` (blocked) |
 | Warped | Target | Target | **Blocked** | `TranslateWarped` |
-| Composite | Composite | **Source** | `RotateFixed` + fixed display | `TranslateFixed` |
+| Composite | Composite | **Source** | `RotateFixed` | `TranslateFixed` |
 
-Non-rigid transforms (mesh, grid, etc.) are not gated by `rigid_rotation_locked`; mesh may still rotate on the warped panel.
+Non-rigid transforms (mesh, grid, RBF) use **`MeshLikeDisplayStrategy`** (Delaunay tile path).
 
 Composite `ImageTransformViewPanel` uses `CompositeTransformView` with
 `display_space=Space.Target`. Both sub-FBOs render with `tween=1` (target space).
 
 ## Rendering architecture (rigid)
 
+### Display strategy (`RigidDisplayStrategy`)
+
+| Gesture | Set by | Editing layer | Non-editing layer during gesture |
+|---------|--------|---------------|--------------------------------|
+| `COMPOSITE_TRANSLATE` | translate drag, Source space | Live `forward_matrix` (purple) | Warped native frozen at gesture snapshot |
+| `WARPED_TRANSLATE` | translate drag, Target space | Live `forward_matrix` (green) | Fixed standalone frozen at snapshot |
+| `COMPOSITE_ROTATE` | Ctrl+scroll on Composite | Live `forward_matrix` after each `RotateFixed` | Warped native frozen at snapshot |
+| `Idle` | — | Live model | Live model |
+
+Lifecycle:
+
+- `TransformController.begin_interactive_edit(..., gesture=...)` → `begin_gesture` + matrix snapshot
+- `TransformController.end_interactive_edit()` → `end_gesture` + coalesced `FireOnChangeEvent`
+- `Translate()` during rigid drag → `on_translate_step()` + `notify_interactive_rigid_repaint()` + peer repaint for Target-space edits
+
+### Draw path (`imagetransformview.py`)
+
+Each pass calls `controller.resolve_draw_state(image_space, view_type, composite_fixed_align, tween)` and passes the result to `TextureShader.draw`. No ad hoc controller matrix branches in the view.
+
 ### Shader (`texture_shader.py`)
 
-Tile corners are **native** (source tiles on fixed path, target tiles on warped path).
-
-For rigid path:
-
-1. Source-native corners → `rigid_source_to_target` → warped slot position.
-2. Composite source FBO: `rigid_fixed_warped_into_target` copies warped slot to fixed slot (purple at transformed position).
-3. **Warped layer** (standalone **or** composite target FBO): `rigid_interactive_native_shift` then `rigid_warped_display_matrix` on green native corners.
-4. **Composite source FBO**: `rigid_fixed_display_matrix` on purple after forward transform.
-
-### Display state (`TransformController`)
-
-| State | Purpose |
-|-------|---------|
-| `rigid_warped_display_baseline` | `target_offset` snapshot when display overlays were reset |
-| `rigid_warped_display_matrix` | Cumulative warped-panel rotation (mesh / non-rigid; unused for rigid warped-panel rotation) |
-| `rigid_fixed_display_baseline_matrix` | Frozen `forward_matrix` for composite purple |
-| `rigid_fixed_display_matrix` | Incremental composite purple rotation; committed into baseline on `end_interactive_edit` |
-| `rigid_matrix_at_edit_start` | Snapshot for **freezing** the non-edited layer during interactive edit |
-
-### Rebase / sync at `end_interactive_edit`
-
-After each interactive edit (wheel notch, translate release):
-
-1. `_commit_rigid_fixed_display_matrix()` — fold pending composite-purple rotation into `rigid_fixed_display_baseline_matrix`.
-2. **Target-space edit** (warped panel): `_refresh_rigid_fixed_display_baseline_from_model()` so composite purple catches registration changes from warped edits.
-3. **Source-space edit without fixed display rotation** (e.g. composite translate): same refresh from live `forward_matrix`.
-4. **Source-space rotate on composite**: commit only (baseline already includes rotation); do not overwrite from model in the same tick.
-5. `FireOnChangeEvent()` — coalesced listener notification; all STOS `ImageTransformViewPanel` instances repaint their GL canvas.
-
-Full reset: `_sync_rigid_warped_display_baseline()` on transform load/replace and `reset_rigid_transform`.
-
-### Per-view draw selection (`imagetransformview.py`)
-
-| Draw context | `rigid_forward` | Extra uniforms |
-|--------------|---------------|----------------|
-| Fixed standalone | Live `forward_matrix` | — |
-| Warped standalone | Live (frozen during Target interactive edit; unused on native corners) | `shift = target_offset − baseline`, `rigid_warped_display_matrix` |
-| Composite source FBO | **`rigid_fixed_display_baseline_matrix`** | `rigid_fixed_display_matrix` |
-| Composite target FBO | Live / frozen per interactive rules | Same warped `shift` + `rigid_warped_display_matrix` as standalone |
-
-### Interactive-edit freeze
-
-While `interactive_edit_in_progress`:
-
-- **Editing layer** uses live registration updates + that layer's display overlay.
-- **Other layer** in composite uses `rigid_matrix_at_edit_start` when sub-view `image_space != interactive_edit_space`, except composite source FBO always uses the fixed display baseline path (purple stays on stale baseline until edit ends — intentional).
-
-`begin_interactive_edit` / `end_interactive_edit` wrap each wheel tick and drag segment.
-
-### Cross-view repaint
-
-`ImageTransformViewPanel` subscribes to `TransformController.AddOnChangeEventListener` and calls `glcanvas.update()` so edits in one window refresh the others without requiring focus on that window.
-
-## Coordinate helpers
-
-`NavigationCommandBase.get_world_positions(e)`:
-
-- `Space.Source` panel: `source = camera position`, `target = Transform(source)`
-- `Space.Target` panel: `target = camera position`, `source = InverseTransform(target)`
-
-Rotation pivot passed to display recorders (composite / rigid fixed path only):
-
-- `center = point_pair.source` (camera world = target-space vertex coords under cursor on composite)
-
-Composite fixed display rotation uses **−rangle** in `record_fixed_display_rotation` to match `RotateFixed` angle sign.
+Rigid path maps native tile corners through `rigid_source_to_target`. Overlay uniforms (`rigid_*_display_matrix`, `rigid_interactive_native_shift`) remain in the shader but are **identity/zero** for rigid STOS (model-authoritative).
 
 ## Cross-view sync checklist (before merging UI changes)
 
-1. **Composite rotate** (rigid) — purple pivots on cursor; green unchanged during gesture.
+1. **Composite rotate** (rigid) — purple pivots on cursor; green unchanged during gesture; no teleport on release.
 2. **Warped panel** (rigid) — Ctrl+scroll does **not** rotate; translate still works.
-3. **Composite translate** — purple moves; green still.
-4. **Warped translate** — green moves in Warped; composite alignment updates live (purple baseline refreshed each step).
-5. **Cross-view** — composite and warped translate stay aligned; composite rotation updates all views after each notch.
+3. **Composite translate** — purple moves; green still; no jump on mouse release.
+4. **Warped translate** — green moves; composite updates live (`repaint_peer_stos_gl_panels`).
+5. **Cross-view** — all panels aligned after each gesture ends.
 6. **Reset Transform** — all three views return to identity alignment.
 7. **Zoom** — cursor-centered in each panel.
 
@@ -149,26 +104,26 @@ Composite fixed display rotation uses **−rangle** in `record_fixed_display_rot
 |----------|-----------|
 | `fixed_image_manipulation_locked` | Standalone Fixed panel: no layer translate/rotate (rigid/grid) |
 | `rigid_rotation_locked` | Not Composite + rigid: no Ctrl+scroll rotation |
+| `wheel_rotate_locked` | Combines fixed-panel lock + rigid composite-only rotation |
 
 ## Key files
 
 | File | Role |
 |------|------|
-| `pyre/controllers/transformcontroller.py` | Registration calls, display matrices, interactive edit, rebase |
-| `pyre/views/imagetransformview.py` | Per-panel matrix/uniform selection |
+| `pyre/controllers/transform_display.py` | `TransformDisplayStrategy`, `RigidDisplayStrategy`, registry |
+| `pyre/controllers/transformcontroller.py` | Registration calls, strategy delegation, interactive edit |
+| `pyre/views/imagetransformview.py` | Calls `resolve_draw_state` |
 | `pyre/views/compositetransformview.py` | Dual FBO composite draw |
 | `pyre/gl_engine/shaders/texture_shader.py` | Vertex transforms |
-| `pyre/commands/navigationcommandbase.py` | Wheel zoom/rotate, `get_world_positions` |
+| `pyre/commands/navigationcommandbase.py` | Wheel zoom/rotate |
 | `pyre/commands/stos/translaterigidcommand.py` | Drag translate |
-| `pyre/ui/widgets/imagetransformviewpanel.py` | Cross-view repaint on `FireOnChangeEvent` |
-| `pyre/transform_edit_policy.py` | Fixed standalone lock; **rigid rotation composite-only** |
-| `pyre/ui/windows/stoswindow.py` | Per-window `space`, menus |
-| `nornir_imageregistration/transforms/rigid.py` | Registration math |
+| `pyre/transform_edit_policy.py` | Gesture policy matrix |
+| `nornir-pyre/docs/adding_transform_display_strategy.md` | How to plug in new transform types |
 
 ## Agent workflow
 
 1. Read this skill before editing files above.
 2. State which **invariant** your change affects.
-3. Any new display state needs a **rebase hook** in `end_interactive_edit` or `_sync_rigid_warped_display_baseline` and must trigger `FireOnChangeEvent`.
-4. Do not fix one panel by skipping display overlays on another.
+3. Put display logic in **`TransformDisplayStrategy`**, not new booleans in `imagetransformview`.
+4. Any new gesture needs `begin_gesture` / `end_gesture` wiring and checklist verification.
 5. After behavior changes, run the cross-view checklist and update this skill if lifecycle rules change.
