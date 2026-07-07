@@ -32,7 +32,7 @@ Color convention in composite overlay shader: **purple = fixed**, **green = warp
 
 Rigid model API (imageregistration):
 
-- **Runtime model (Pyre STOS):** `CenteredSimilarity2DTransform` — uniform `scalar` between source and target; supports `ScaleWarped` / `ScaleFixed` (Shift+scroll on `ITransformRelativeScaling`, without Ctrl).
+- **Runtime model (Pyre STOS):** `CenteredSimilarity2DTransform` — uniform `scalar` between source and target; supports `ScaleWarpedAboutSourcePoint` / `ScaleFixed` (Shift+scroll on `ITransformRelativeScaling`, without Ctrl).
 - **Load (Pyre only):** legacy `Rigid2DTransform` strings deserialize to `Rigid` / `RigidTranslation`; `StosWindow.loadStos` upgrades them to `CenteredSimilarity2DTransform` for editing. Global `LoadTransform` elsewhere keeps minimal types.
 - **Save:** `CenteredSimilarity2DTransform.ToITKString()` writes `Rigid2DTransform_double_2_2` when `scalar ≈ 1`; writes full `CenteredSimilarity2DTransform_double_2_2` when scaled.
 - `TranslateFixed(offset)` — move fixed in target space (+offset on `target_offset`)
@@ -50,7 +50,7 @@ Rigid model API (imageregistration):
    - **Rigid rotation** → **Composite window only** (`rigid_rotation_locked` blocks Ctrl+scroll on Fixed and Warped standalone).
    - **Fixed standalone (rigid/grid)** → whole-layer translate/rotate is **blocked** (`fixed_image_manipulation_locked`).
 4. **Rotation pivot** (rigid, composite only) — Ctrl+scroll rotates purple about the **cursor** via `RotateFixedAboutSourcePoint` (source pivot from `InverseTransform` of draw-world cursor).
-5. **Relative scale** (rigid) — Shift+scroll (no Ctrl) on composite/target when model is `CenteredSimilarity2DTransform` calls `ScaleWarped`. Do not use Alt+scroll on Windows (Qt delivers zero wheel delta while Alt is on the event).
+5. **Relative scale** (rigid) — Shift+scroll (no Ctrl) on composite/target when model is `CenteredSimilarity2DTransform` calls `ScaleWarpedAboutSourcePoint` with the same composite pivot as Ctrl+scroll rotate. Do not use Alt+scroll on Windows (Qt delivers zero wheel delta while Alt is on the event).
 6. **Zoom** — Mouse wheel without Ctrl zooms about cursor (`navigationcommandbase` lookat delta in active command space).
 7. **Reset Transform** (STOS menu) — Rigid: zero offset, zero angle (`reset_rigid_transform`).
 
