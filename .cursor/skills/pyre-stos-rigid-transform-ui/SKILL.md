@@ -32,10 +32,13 @@ Color convention in composite overlay shader: **purple = fixed**, **green = warp
 
 Rigid model API (imageregistration):
 
+- **Runtime model (Pyre STOS):** `CenteredSimilarity2DTransform` — uniform `scalar` between source and target; supports `ScaleWarped` / `ScaleFixed` (Shift+scroll on `ITransformRelativeScaling`, without Ctrl).
+- **Load (Pyre only):** legacy `Rigid2DTransform` strings deserialize to `Rigid` / `RigidTranslation`; `StosWindow.loadStos` upgrades them to `CenteredSimilarity2DTransform` for editing. Global `LoadTransform` elsewhere keeps minimal types.
+- **Save:** `CenteredSimilarity2DTransform.ToITKString()` writes `Rigid2DTransform_double_2_2` when `scalar ≈ 1`; writes full `CenteredSimilarity2DTransform_double_2_2` when scaled.
 - `TranslateFixed(offset)` — move fixed in target space (+offset on `target_offset`)
 - `TranslateWarped(offset)` — move warped in target space (−offset on `target_offset`)
-- `RotateFixed(rangle, center_tgt)` — decrease `angle`; rotate `target_offset` about **target-space** pivot
-- `RotateSourcePoints(rangle, center_src)` — increase `angle`; set `source_space_center` to **source-space** pivot
+- `RotateFixedAboutSourcePoint(rangle, source_pivot)` — composite rotation; pins `Transform(source_pivot)` via offset compensation
+- `RotateSourcePoints(rangle, center_src)` — increase `angle`; set source rotation center
 
 ## Expected user-visible behavior (product invariants)
 
@@ -46,9 +49,10 @@ Rigid model API (imageregistration):
    - **Warped panel + translate** → user edits the **warped (green)** layer (translation only).
    - **Rigid rotation** → **Composite window only** (`rigid_rotation_locked` blocks Ctrl+scroll on Fixed and Warped standalone).
    - **Fixed standalone (rigid/grid)** → whole-layer translate/rotate is **blocked** (`fixed_image_manipulation_locked`).
-4. **Rotation pivot** (rigid, composite only) — Ctrl+scroll rotates purple about the **cursor** via `RotateFixed` each wheel notch (**no** display-matrix overlay).
-5. **Zoom** — Mouse wheel without Ctrl zooms about cursor (`navigationcommandbase` lookat delta in active command space).
-6. **Reset Transform** (STOS menu) — Rigid: zero offset, zero angle (`reset_rigid_transform`).
+4. **Rotation pivot** (rigid, composite only) — Ctrl+scroll rotates purple about the **cursor** via `RotateFixedAboutSourcePoint` (source pivot from `InverseTransform` of draw-world cursor).
+5. **Relative scale** (rigid) — Shift+scroll (no Ctrl) on composite/target when model is `CenteredSimilarity2DTransform` calls `ScaleWarped`. Do not use Alt+scroll on Windows (Qt delivers zero wheel delta while Alt is on the event).
+6. **Zoom** — Mouse wheel without Ctrl zooms about cursor (`navigationcommandbase` lookat delta in active command space).
+7. **Reset Transform** (STOS menu) — Rigid: zero offset, zero angle (`reset_rigid_transform`).
 
 ## Command routing
 
@@ -56,7 +60,7 @@ Rigid model API (imageregistration):
 |--------|-------------|-----------------|----------------|---------------|
 | Fixed | Source | Source | **Blocked** | `TranslateFixed` (blocked) |
 | Warped | Target | Target | **Blocked** | `TranslateWarped` |
-| Composite | Composite | **Source** | `RotateFixed` | `TranslateFixed` |
+| Composite | Composite | **Source** | `RotateFixedAboutSourcePoint` | `TranslateFixed` |
 
 Non-rigid transforms (mesh, grid, RBF) use **`MeshLikeDisplayStrategy`** (Delaunay tile path).
 
@@ -71,7 +75,7 @@ Composite `ImageTransformViewPanel` uses `CompositeTransformView` with
 |---------|--------|---------------|--------------------------------|
 | `COMPOSITE_TRANSLATE` | translate drag, Source space | Live `forward_matrix` (purple) | Warped native frozen at gesture snapshot |
 | `WARPED_TRANSLATE` | translate drag, Target space | Live `forward_matrix` (green) | Fixed standalone frozen at snapshot |
-| `COMPOSITE_ROTATE` | Ctrl+scroll on Composite | Live `forward_matrix` after each `RotateFixed` | Warped native frozen at snapshot |
+| `COMPOSITE_ROTATE` | Ctrl+scroll on Composite | Live `forward_matrix` after each `RotateFixedAboutSourcePoint` | Warped native frozen at snapshot |
 | `Idle` | — | Live model | Live model |
 
 Lifecycle:
