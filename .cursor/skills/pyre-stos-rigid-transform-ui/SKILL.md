@@ -33,7 +33,7 @@ Color convention in composite overlay shader: **purple = fixed**, **green = warp
 Rigid model API (imageregistration):
 
 - **Runtime model (Pyre STOS):** `CenteredSimilarity2DTransform` — uniform `scalar` between source and target; supports `ScaleWarpedAboutSourcePoint` / `ScaleFixed` (Shift+scroll on `ITransformRelativeScaling`, without Ctrl).
-- **Load (Pyre only):** legacy `Rigid2DTransform` strings deserialize to `Rigid` / `RigidTranslation`; `StosWindow.loadStos` upgrades them to `CenteredSimilarity2DTransform` for editing. Global `LoadTransform` elsewhere keeps minimal types.
+- **Load / estimate (Pyre only):** legacy `Rigid2DTransform` strings deserialize to `Rigid` / `RigidTranslation`; `TransformController.TransformModel` upgrades them to `CenteredSimilarity2DTransform` for editing (including **Rotate translate estimate**). Global `LoadTransform` elsewhere keeps minimal types.
 - **Save:** `CenteredSimilarity2DTransform.ToITKString()` writes `Rigid2DTransform_double_2_2` when `scalar ≈ 1`; writes full `CenteredSimilarity2DTransform_double_2_2` when scaled.
 - `TranslateFixed(offset)` — move fixed in target space (+offset on `target_offset`)
 - `TranslateWarped(offset)` — move warped in target space (−offset on `target_offset`)
@@ -53,6 +53,7 @@ Rigid model API (imageregistration):
 5. **Relative scale** (rigid) — Shift+scroll (no Ctrl) on composite/target when model is `CenteredSimilarity2DTransform` calls `ScaleWarpedAboutSourcePoint` with the same composite pivot as Ctrl+scroll rotate. Do not use Alt+scroll on Windows (Qt delivers zero wheel delta while Alt is on the event).
 6. **Zoom** — Mouse wheel without Ctrl zooms about cursor (`navigationcommandbase` lookat delta in active command space).
 7. **Reset Transform** (STOS menu) — Rigid: zero offset, zero angle (`reset_rigid_transform`).
+8. **Rotate translate estimate** (Operations submenu) — **Log Polar (Fast)** (`SliceToSliceMethod.LogPolar`) or **Brute Force (Slow)** (`SliceToSliceMethod.BruteForce`); both return `CenteredSimilarity2DTransform` for Shift+wheel scale.
 
 ## Command routing
 
