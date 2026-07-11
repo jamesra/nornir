@@ -1,0 +1,44 @@
+---
+description: Guardrails for Nornir Docker images, Compose, env templates, and entry scripts under nornir-docker/
+globs: nornir-docker/**/*,docs/docker/**/*,.devcontainer/**/*,**/Dockerfile*,**/compose*.yaml,**/compose*.yml
+alwaysApply: false
+---
+
+## Nornir Docker conventions
+
+### Where Docker assets live
+
+- Dockerfiles, Compose files, entry scripts, and **committed** `example.*.build.env` / `example.*.run.env` templates belong under **`nornir-docker/`** (a git submodule in the monorepo).
+- Do **not** add parallel monorepo-root `docker/` trees or duplicate image definitions without an explicit design decision.
+
+### Secrets and local env
+
+- **Do not** commit real `.env`, tokens, PATs, or machine-specific host paths.
+- Use committed **`example.*`** templates; operators copy to gitignored names (`nornir-docker/.env`, `.env.cursor-worker`, `build.env`, `.build.<id>.env`) or under **`$NORNIR_DOCKER_USER_ROOT`** (see **docker-build-run-phases** and **docker-machine-layout** skills).
+- **`docker-build.ps1`** merges build-args only from the **invocation directory** (`build.env`, `.build.<id>.env`); it does not read committed `example.*.build.env` files automatically.
+
+### Submodule workflow
+
+- When `nornir-docker` is a submodule: commit Docker changes **inside the submodule**, then bump the parent monorepo submodule pointer. Do not assume parent-repo commits include submodule file changes unless the pointer was updated.
+
+### CuPy, CUDA, and GPU
+
+- Dev and CuPy prod images ship a **`CUPY_PACKAGE`** wheel (default `cupy-cuda13x`); the **host** still needs a compatible NVIDIA driver and GPU passthrough (`--gpus all` or compose reservations) for device use at **run** time.
+- Do not imply GPU works in docs or scripts without stating the run-time GPU requirement.
+
+### Compose and `/workspace`
+
+- Avoid **double-mounting** `/workspace` (Compose bind/volume **and** devcontainer `workspaceMount` on the same target).
+- **`cursor-dev`** (default): bind-mounted monorepo root; entry script uses **`NORNIR_WORKSPACE_STRATEGY=mounted`** — no forced branch checkout unless **`NORNIR_SYNC_REMOTE=1`**.
+- **`cursor-dev-clone`**: named volume + clone strategy; use the separate devcontainer config when a fresh in-container tree is intended.
+
+### Logging
+
+- Do **not** add ad hoc debug log files in entry scripts or Docker-run paths (repo-root `debug-*.log`, per-project log dirs). Persistent logging follows the unified Nornir convention (`nornir_shared.misc.SetupLogging`, `NORNIR_LOG_ROOT`) in application code, not in shell entrypoints.
+
+### Related skills
+
+- **docker-build-run-phases** — build vs run scripts and env layering
+- **nornir-docker-devcontainer** — cursor-dev / Dev Containers / test data mounts
+- **nornir-docker-images-ci** — image matrix, OCI labels, maintenance checklist
+- **docker-machine-layout** — `D:\Docker\Builds` / `Run` / `mounted-configs` layout

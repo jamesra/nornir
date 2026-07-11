@@ -1,0 +1,56 @@
+---
+description: Bounded-memory producer→consumer pipelines for data and I/O-heavy Python
+globs: "{nornir-buildmanager,nornir-imageregistration,nornir-pools,nornir-shared}/**/*.py"
+alwaysApply: false
+---
+
+## Streaming and memory-bounded processing
+
+### Core principle
+
+**Bound peak memory by design.** Treat full-dataset loads as the exception. Prefer pipelines where a producer emits work units (paths, tiles, slabs, records) and consumers process them with bounded in-flight buffers.
+
+### Required behavior
+
+- **Stream work, don't hoard it.** Use generators/iterators (`yield`, `yield from`, `Iterator`) to enumerate files, tiles, sections, or records. Buildmanager stages return generators saved incrementally by `PipelineManager._SaveNodes`. Prefer per-item processing over `list(...)` / list comprehensions over large inputs unless size is provably small.
+- **Chunk large arrays and images.** Process in tiles or slabs (`ImageToTilesGenerator`, tile loops in `TransformImage`, chunked transforms). Expose chunk/tile size as a parameter or derive from available memory (`EstimateMaxTempImageArea`).
+- **Spill to disk when outputs are large.** Use `np.memmap`, temp files, or `memmap_metadata` for buffers that would exceed RAM. Pass **paths or metadata** across process boundaries; avoid pickling large arrays (`npArrayToSharedArray` falls back to file-backed memmap when shared memory is too small).
+- **Parallelize I/O with bounded concurrency.** Use `nornir_pools` thread pools for I/O-bound work; process pools for CPU-bound stages. Apply **backpressure** when queueing—do not enqueue unbounded tasks (gate on queue depth or wait per row/column). Call `ReleaseStagePools()` at stage boundaries.
+- **Overlap I/O and compute.** Prefetch or copy inputs locally for network paths before many small reads. Queue the next read/transform while the current unit is processed.
+
+### When full in-memory load is acceptable
+
+Document the reason:
+
+- Input is **provably small** (metadata, config, single tile)—use a configurable threshold, not a magic number.
+- Algorithm requires a global pass with no practical streaming alternative (rare; call out in review).
+- Prototype/debug code (must not ship to production pipelines without revisiting).
+
+### Anti-patterns
+
+- `read()` or `np.array(...)` of an entire volume, mosaic, or file list when sequential access suffices.
+- Accumulating all results in a list/dict before writing any output.
+- Unbounded `pool.add_task` loops without queue-depth or row/column gates.
+- Repeated `.get()` / host copies inside loops (see NumPy/CuPy rule).
+- Loading remote datasets entirely into RAM to avoid temp/cache dirs when level-based temp dirs are the established pattern.
+
+### Cross-rule references
+
+- **NumPy/CuPy:** keep array work on the input backend; minimize host↔device transfers in chunked pipelines.
+- **Unified logging:** no ad hoc debug dumps of full datasets to repo-local files.
+- **Design-choice confirmation:** loading an entire dataset into memory for a production pipeline stage is a **material** design choice requiring explicit user confirmation.
+
+### Examples
+
+```python
+# Good — generator pipeline stage
+def ExportTiles(...):
+    for tile_path in iter_tile_paths(source_dir):
+        write_tile(tile_path)
+        yield volume_node
+
+# Bad — load everything first
+all_tiles = [load_tile(p) for p in glob.glob(f"{dir}/*.png")]
+for tile in all_tiles:
+    process(tile)
+```

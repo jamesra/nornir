@@ -21,14 +21,26 @@ Workspace strategies (``NORNIR_WORKSPACE_STRATEGY``)
 Secrets
 -------
 
-Copy ``nornir-docker/example.nornir-cursor-worker.run.env`` to ``nornir-docker/.env.cursor-worker`` (gitignored). The flat ``nornir-docker/.env.cursor-worker.example`` file points at the same template. Set at minimum:
+Copy ``nornir-docker/example.nornir-cursor-worker.run.env`` to **``D:\Docker\Run\nornir-cursor-worker\nornir-cursor-worker.run.env``** (recommended) or ``nornir-docker/.env.cursor-worker`` (dev/compose fallback). Set at minimum:
 
 - ``CURSOR_API_KEY``
 - ``GITHUB_TOKEN`` (optional; for private submodules or rate limits)
 
+On Windows, run ``Initialize-NornirCursorWorkerLayout.ps1`` once to create the ``D:\Docker`` tree from examples. See :doc:`windows_cursor_layout`.
+
 .. warning::
 
    Never commit real tokens. The ``GITHUB_TOKEN`` / ``GH_TOKEN`` variables are passed into the container only via ``--env-file``; they are never loaded onto the host process by the launcher scripts.
+
+Dev-container mount parity (opt-in)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+By default the worker only bind-mounts ``/workspace``. To mirror **cursor-dev** data paths (``/volumes``, ``/nornir-testdata``, ``/data``, test output, optional in-container NAS mounts), configure ``D:\Docker\Run\nornir-dev\`` first (see ``nornir-docker/windows-docker-layout/NORNIR_DEV_VOLUMES.md``), then either:
+
+- Set ``NORNIR_WORKER_DEV_PARITY_MOUNTS=1`` in the worker run env, or
+- Pass ``-DevParityMounts`` to ``start-cursor-worker.ps1``.
+
+Host paths are read from ``Run/nornir-dev/.run.nornir-dev.env`` and ``nornir-docker/.env``; do not duplicate ``NORNIR_VOLUMES_HOST`` in the worker run file.
 
 Build::
 
@@ -50,8 +62,9 @@ PowerShell launcher ``start-cursor-worker.ps1``
 - ``-LiveMount -UseUniqueWorkspaceFolder``: empty unique folder per run under ``WorkspaceRunParent`` (default ``D:\Docker\mounted-configs\nornir-cursor-worker``), mount at ``/workspace``, ``clone`` strategy.
 - ``-UseNamedDockerVolume``: named Docker volume at ``/workspace``, ``clone`` strategy.
 - ``-RemoveCloneAfter``: delete isolated host clone or per-run folder after exit (skipped if ``git status --porcelain`` is non-empty; see ``CursorWorkerWorkspaceGit.ps1``).
-- ``-Rebuild``: builds ``nornir:dev-cursor-base`` then ``nornir:cursor-worker``.
+- ``-Rebuild``: builds ``nornir:dev-cursor-base`` then ``nornir:cursor-worker`` (or ``cd D:\Docker\Builds\nornir`` and ``.\build-nornir-images.ps1``).
 - ``-Gpu``, ``-SmokeTest``, ``-CloneUrl``, ``-CloneBranch``.
+- ``-DevParityMounts`` or ``NORNIR_WORKER_DEV_PARITY_MOUNTS=1``: same NAS/testdata mounts as cursor-dev (see above).
 
 For the **standard Windows ``D:\`` layout**, see :doc:`windows_cursor_layout`.
 

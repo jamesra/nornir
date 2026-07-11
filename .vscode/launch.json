@@ -19,6 +19,25 @@
             }
         },
         {
+            "name": "pyre (without stos arg)",
+            "type": "debugpy",
+            "subProcess": true,
+            "request": "launch",
+            "module": "pyre",
+            "python": "${command:python.interpreterPath}",
+            "pythonArgs": ["-Xfrozen_modules=off"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "args": [],
+            "redirectOutput": true,
+            "justMyCode": false,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/nornir-pyre;${workspaceFolder}/nornir-imageregistration;${workspaceFolder}/nornir-pools;${workspaceFolder}/nornir-shared;${workspaceFolder}/nornir-buildmanager",
+                "DEBUG": "1",
+                "PYTHONUNBUFFERED": "1"
+            }
+        },
+        {
             "name": "pyre",
             "type": "debugpy",
             "subProcess": true,
@@ -318,7 +337,7 @@
             "justMyCode": false,
             "subProcess": false,
             "redirectOutput": true,
-            "args": [
+            "args": [ 
                 "-debug", "-computational_library", "cupy",
                 "/volumes/${input:nornirVolumeName}",
                 "AlignSections", "-NumAdjacentSections", "1", "-Filters", "Blob", "-UseMasks", "-Downsample", "64", "-Channels", "TEM"

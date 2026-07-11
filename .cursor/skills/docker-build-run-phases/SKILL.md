@@ -91,4 +91,8 @@ After loading, if **required** variables for that phase are still unset or empty
 
 ## Relationship to other project skills
 
-**nornir-docker-devcontainer** covers **cursor-dev** specifics: GPU, WSL test data, Compose paths, Dev Container, PyCharm. This skill covers **phased scripts and env layering** only.
+- **nornir-docker-devcontainer** — cursor-dev / Dev Containers / test data mounts
+- **nornir-docker-images-ci** — image matrix, `docker-build.ps1` order, OCI/BOM, Dockerfile review checklist
+- **docker-machine-layout** — `D:\Docker\Builds` / `Run` / `mounted-configs` on Windows
+
+This skill covers **phased scripts and env layering** only.

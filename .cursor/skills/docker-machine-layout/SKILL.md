@@ -40,3 +40,9 @@ For each project, enforce:
 - [ ] Repo contains only templates and examples
 - [ ] Use a project-appropriate layout initializer when needed (do not require `Initialize-NornirCursorWorkerLayout.ps1`)
 - [ ] Any override uses an explicit layout-root override mechanism (for example `-LayoutRoot`) and keeps the same directory model
+
+## Related skills
+
+- **docker-build-run-phases** — build vs run env files and `docker-build.ps1` invocation directory
+- **nornir-docker-images-ci** — image tags, `docker-build.ps1` order, OCI/BOM labels
+- **nornir-docker-devcontainer** — cursor-dev Compose and Dev Containers

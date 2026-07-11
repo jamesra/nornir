@@ -1,53 +1,53 @@
 # Standard `D:\` layout for nornir-cursor-worker
 
-This layout keeps **secrets and env** under a fixed Windows path while the **repo launcher** stays a single file in git (no duplicate copies of `start-cursor-worker.ps1`).
+This layout keeps **secrets and env** under `D:\Docker` while launchers stay in the repo (symlinked once).
 
-## Symlinks are not automatic
+## One-time initializer
 
-**Git clone and Docker do not create these links.** Run `Initialize-NornirCursorWorkerLayout.ps1` once (from the repo), or follow the snippet under [Thin launcher](thin-launcher-symlink) below. Creating symlinks usually requires **Windows Developer Mode** or an **elevated** PowerShell/cmd.
+**Git clone and Docker do not create these paths.** Run `Initialize-NornirCursorWorkerLayout.ps1` once (Developer Mode or elevated shell for symlinks):
 
 ```powershell
-& 'D:\src\git\nornir\nornir-docker\windows-docker-layout\Initialize-NornirCursorWorkerLayout.ps1' -MonorepoRoot 'D:\src\git\nornir'
+& 'D:\src\git\nornir\nornir-docker\windows-docker-layout\Initialize-NornirCursorWorkerLayout.ps1' `
+  -ScriptsRepoRoot 'D:\src\git\nornir' `
+  -DockerUserRoot 'D:\Docker'
 ```
 
-Use `-LayoutRoot 'D:\your\path'` if your layout root differs from the default.
-
-**Folder name:** the documented layout root is `D:\Docker\Builds\nornir-cursor-worker` (`Builds`, plural). `D:\Docker\Build\...` (singular `Build`) is a different path; use `Builds` or pass `-LayoutRoot` to the initializer.
-
-## Recommended directories
+## Directory layout
 
 | Path | Purpose |
 |------|---------|
-| `D:\Docker\Builds\nornir-cursor-worker\` | **Layout root**: `.env.cursor-worker`, optional symlink to the thin launcher. |
-| `D:\Docker\mounted-configs\nornir-cursor-worker\` | **Default parent** for per-run unique workspace folders (`nornir-cursor-worker-<timestamp>-<guid>`). |
+| `D:\Docker\Builds\nornir\` | Build env + `build-nornir-images.ps1` symlink |
+| `D:\Docker\Builds\nornir-cursor-worker\` | Thin launcher symlink |
+| `D:\Docker\Run\nornir-cursor-worker\` | Run secrets (`nornir-cursor-worker.run.env`) |
+| `D:\Docker\mounted-configs\nornir-cursor-worker\` | Per-run agent clone folders at `/workspace` |
+
+Set `NORNIR_DOCKER_USER_ROOT=D:\Docker` and `NORNIR_MONOREPO_ROOT` to your clone (host scripts only).
 
 ## Disk cleanup
 
-Per-run folders under `D:\Docker\mounted-configs\nornir-cursor-worker\` and isolated clones under `D:\agents\` can accumulate. Run `nornir-docker/Cleanup-CursorWorkerClones.ps1` to remove disposable directories only when no Docker container bind-mounts that path and the git working tree is clean. Use `-WhatIf` first. See {doc}`cursor_worker` for behavior and parameters.
+Per-run folders under `D:\Docker\mounted-configs\nornir-cursor-worker\` can accumulate. Run `nornir-docker/Cleanup-CursorWorkerClones.ps1` with `-WhatIf` first. See {doc}`cursor_worker`.
 
-(thin-launcher-symlink)=
-## Thin launcher (symlink)
-
-From an elevated PowerShell (or with Developer Mode enabled):
+## Build and run
 
 ```powershell
-$Target = 'D:\src\git\nornir\nornir-docker\windows-docker-layout\start-nornir-cursor-worker.ps1'
-$Link   = 'D:\Docker\Builds\nornir-cursor-worker\start-nornir-cursor-worker.ps1'
-New-Item -ItemType Directory -Force -Path (Split-Path $Link) | Out-Null
-if (Test-Path $Link) { Remove-Item $Link -Force }
-New-Item -ItemType SymbolicLink -Path $Link -Target $Target
+cd D:\Docker\Builds\nornir
+.\build-nornir-images.ps1
+
+# Edit CURSOR_API_KEY in:
+#   D:\Docker\Run\nornir-cursor-worker\nornir-cursor-worker.run.env
+
+& D:\Docker\Builds\nornir-cursor-worker\start-nornir-cursor-worker.ps1
 ```
 
-Place `D:\Docker\Builds\nornir-cursor-worker\.env.cursor-worker` next to the symlink. Set `NORNIR_MONOREPO_ROOT` (User or Machine env) to your clone root, e.g. `D:\src\git\nornir`, or pass `-RepoRoot` each time.
+## Dev mount parity (opt-in)
 
-## What the thin launcher does
+After configuring `D:\Docker\Run\nornir-dev\` per the dev volumes doc, set `NORNIR_WORKER_DEV_PARITY_MOUNTS=1` in the worker run env or pass `-DevParityMounts` to the launcher.
 
-- Calls `start-cursor-worker.ps1` with `-LiveMount -UseUniqueWorkspaceFolder` and `-WorkspaceRunParent D:\Docker\mounted-configs\nornir-cursor-worker`.
-- Each run creates a unique folder (`nornir-cursor-worker-<stamp>-<guid>`), bind-mounts it at `/workspace`, and the entrypoint **clones** into it.
-
-## Compose (point at a specific env file)
+## Compose
 
 ```powershell
-$env:NORNIR_CURSOR_WORKER_ENV_FILE = 'D:\Docker\Builds\nornir-cursor-worker\.env.cursor-worker'
+$env:NORNIR_CURSOR_WORKER_ENV_FILE = 'D:\Docker\Run\nornir-cursor-worker\nornir-cursor-worker.run.env'
 docker compose -f nornir-docker/compose.cursor-worker.yaml run --rm nornir-cursor-worker
 ```
+
+See also `nornir-docker/windows-docker-layout/CONFIG_LAYOUT.md` in the repo.

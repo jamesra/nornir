@@ -30,6 +30,19 @@ to **freeze the non-editing layer** during a drag or wheel notch.
 
 Color convention in composite overlay shader: **purple = fixed**, **green = warped**.
 
+### Control point space (mesh / grid / RBF)
+
+Pyre **`Space`** (panels, commands) does **not** match registration column names on `IControlPoints`:
+
+| Pyre `Space` | Panel | Registration columns edited |
+|--------------|-------|----------------------------|
+| `Space.Source` | Fixed, Composite | `TargetPoints` (fixed / purple) |
+| `Space.Target` | Warped | `SourcePoints` (warped / green) |
+
+`MovePoint`, `GetPoints`, `SetPoint`, `ControlPointMap`, and control-point glyph tween all use **Pyre** semantics. Same mapping as `NearestPoint`, `TryDrag`, and `Translate` (`TranslateFixed` / `TranslateWarped`).
+
+Control-point shader: `tween=1` draws `TargetPoints`; `tween=0` draws `SourcePoints`. Fixed/Composite panels pass `tween=1.0`; warped panel passes `tween=0.0`.
+
 Rigid model API (imageregistration):
 
 - **Runtime model (Pyre STOS):** `CenteredSimilarity2DTransform` — uniform `scalar` between source and target; supports `ScaleWarpedAboutSourcePoint` / `ScaleFixed` (Shift+scroll on `ITransformRelativeScaling`, without Ctrl).
