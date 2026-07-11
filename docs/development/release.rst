@@ -103,3 +103,14 @@ published documentation banner automatically reflects the new version.
 
    :doc:`publishing_documentation` — how the docs CI workflow builds and deploys to ``nornir.github.io``.
    :doc:`../docker/images` — Docker image catalogue and build options.
+   :doc:`pyre_development` — Pyre Windows installer build (PyInstaller + Inno Setup); CI workflow ``pyre-windows-release.yml`` runs on ``v*`` tags.
+
+Pyre Windows installer
+----------------------
+
+Pyre ships a native Windows installer (``Pyre-<version>-Setup.exe``), not a Docker image.
+On ``v*`` tags, ``.github/workflows/pyre-windows-release.yml`` builds the frozen bundle and
+attaches the installer to the GitHub Release.
+
+Maintainers: see the **Windows packaging and release** section in :doc:`pyre_development`.
+End users: :doc:`../packages/pyre_install`.

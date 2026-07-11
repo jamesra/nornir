@@ -13,6 +13,14 @@
 4. Run **`python release/verify_package_versions.py`** from the repo root (requires **PyYAML**: `pip install pyyaml`).
 5. Commit; tag **`v$(cat VERSION)`**.
 6. Build Docker images using **[nornir-docker/docker-build.ps1](../nornir-docker/docker-build.ps1)** or pass the same `--build-arg` values documented in [nornir-docker/README.md](../nornir-docker/README.md).
+7. **Pyre (Windows):** pushing a `v*` tag runs `.github/workflows/pyre-windows-release.yml`; verify `Pyre-<version>-Setup.exe` on the GitHub Release.
+
+## Pyre Windows installer
+
+- **End-user docs:** `docs/packages/pyre_install.rst`
+- **Developer / packaging:** `docs/development/pyre_development.rst`
+- **Generate local constraints:** `python release/generate_pyre_windows_constraints.py` → `release/pyre-windows-constraints.txt` (machine-local paths; do not commit)
+- **Build locally:** `nornir-pyre/packaging/windows/build-freeze.ps1`
 
 ## Docker OCI labels
 

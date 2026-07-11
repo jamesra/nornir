@@ -1,0 +1,99 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "pyre: freeze bundle",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/nornir-pyre/packaging/windows/build-freeze.ps1",
+                "-Python",
+                "${workspaceFolder}/venv/pyre314/Scripts/python.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "focus": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "pyre: validate frozen bundle",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/nornir-pyre/packaging/windows/validate-frozen.ps1"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/nornir-pyre/packaging/windows"
+            },
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "pyre: build installer",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/nornir-pyre/packaging/windows/build-installer.ps1"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/nornir-pyre/packaging/windows"
+            },
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "focus": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "pyre: build Windows installer (full)",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "pyre: freeze bundle",
+                "pyre: validate frozen bundle",
+                "pyre: build installer"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "pyre: run frozen bundle (GUI)",
+            "type": "process",
+            "command": "${workspaceFolder}/nornir-pyre/packaging/windows/dist/pyre/pyre.exe",
+            "options": {
+                "cwd": "${workspaceFolder}/nornir-pyre/packaging/windows/dist/pyre"
+            },
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        }
+    ]
+}

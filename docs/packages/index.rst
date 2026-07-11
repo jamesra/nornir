@@ -13,4 +13,5 @@ Nornir is split into several installable packages. Each has a short ``README.md`
    nornir_volumecontroller
    nornir_volumemodel
    nornir_web
+   pyre_install
    other_packages

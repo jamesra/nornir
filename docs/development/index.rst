@@ -8,4 +8,5 @@ Development
    github_pages
    logging
    release
+   pyre_development
    markdown_in_sphinx
