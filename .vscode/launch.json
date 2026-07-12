@@ -397,7 +397,7 @@
             "args": [
                 "-debug", "-computational_library", "cupy",
                 "/volumes/${input:nornirVolumeName}",
-                "RefineSectionAlignment", "-InputGroup", "StosBrute", "-InputDownsample", "64", "-OutputGroup", "Grid", "-OutputDownsample", "32", "-Filter", "Leveled", "-UseMasks"
+                "RefineSectionAlignment", "-InputGroup", "StosBrute", "-InputDownsample", "64", "-OutputGroup", "Grid", "-OutputDownsample", "32", "-Filter", "Leveled"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
         },
@@ -454,7 +454,7 @@
             "args": [
                 "-debug", "-computational_library", "cupy",
                 "/volumes/${input:nornirVolumeName}",
-                "RefineSectionAlignment", "-InputGroup", "Grid", "-InputDownsample", "32", "-OutputGroup", "Grid", "-OutputDownsample", "16", "-Filter", "Leveled", "-UseMasks"
+                "RefineSectionAlignment", "-InputGroup", "Grid", "-InputDownsample", "32", "-OutputGroup", "Grid", "-OutputDownsample", "16", "-Filter", "Leveled"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
         },
@@ -590,11 +590,69 @@
                 "ExportImages", "-Channels", "Registered", "-Filters", "Leveled", "-Downsample", "32", "-Output", "/volumes/${input:nornirVolumeName}/Registered"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+        },
+        {
+            "name": "TEM Full Alignment",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "nornir_buildmanager.build",
+            "python": "${command:python.interpreterPath}",
+            "pythonArgs": ["-Xfrozen_modules=off"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": false,
+            "redirectOutput": true,
+            "args": [
+                "-debug", "-computational_library", "cupy",
+                "/volumes/${input:nornirVolumeName}",
+                "CreateBlobFilter", "-Channels", "TEM", "-InputFilter", "Leveled", "-Levels", "16,32,64", "-OutputFilter", "Blob", "-Radius", "9", "-Median", "7", "-Max", "3",
+                "--then", "AlignSections", "-NumAdjacentSections", "1", "-Filters", "Blob", "-UseMasks", "-Downsample", "64", "-Channels", "TEM",
+                "--then", "AssembleStosOverlays", "-StosGroup", "StosBrute", "-Downsample", "64", "-StosMap", "PotentialRegistrationChain",
+                "--then", "SelectBestRegistrationChain", "-StosGroup", "StosBrute", "-Downsample", "64", "-InputStosMap", "PotentialRegistrationChain", "-OutputStosMap", "FinalStosMap",
+                "--then", "RefineSectionAlignment", "-InputGroup", "StosBrute", "-InputDownsample", "64", "-OutputGroup", "Grid", "-OutputDownsample", "32", "-Filter", "Leveled",
+                "--then", "AssembleStosOverlays", "-StosGroup", "Grid", "-Downsample", "32", "-StosMap", "FinalStosMap",
+                "--then", "CreateVikingXML", "-StosGroup", "Grid32", "-StosMap", "FinalStosMap", "-OutputFile", "Grid32",
+                "--then", "RefineSectionAlignment", "-InputGroup", "Grid", "-InputDownsample", "32", "-OutputGroup", "Grid", "-OutputDownsample", "16", "-Filter", "Leveled",
+                "--then", "SliceToVolume", "-Downsample", "16", "-InputGroup", "Grid", "-OutputGroup", "SliceToVolume",
+                "--then", "ScaleVolumeTransforms", "-InputGroup", "SliceToVolume", "-InputDownsample", "16", "-OutputDownsample", "1",
+                "--then", "CreateVikingXML", "-OutputFile", "SliceToVolume", "-StosGroup", "SliceToVolume1", "-StosMap", "SliceToVolume",
+                "--then", "MosaicToVolume", "-InputTransform", "Grid", "-OutputTransform", "ChannelToVolume", "-Channels", "(?!Registered)",
+                "--then", "Assemble", "-Channels", "(?!Registered)", "-Filters", "Leveled", "-Downsample", "32", "-NoInterlace", "-Transform", "ChannelToVolume", "-ChannelPrefix", "Registered_",
+                "--then", "MosaicReport", "-PruneFilter", "Raw8", "-ContrastFilter", "Raw8", "-AssembleFilter", "Leveled", "-AssembleDownsample", "32", "-Output", "VolumeReport",
+                "--then", "ExportImages", "-Channels", "Registered", "-Filters", "Leveled", "-Downsample", "32", "-Output", "/volumes/${input:nornirVolumeName}/Registered"
+            ],
+            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+        },
+        {
+            "name": "TEM Build: full sequence (sequential)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "nornir_buildmanager.build",
+            "python": "${command:python.interpreterPath}",
+            "pythonArgs": ["-Xfrozen_modules=off"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": false,
+            "redirectOutput": true,
+            "args": [
+                "-debug", "-computational_library", "cupy",
+                "/volumes/${input:nornirVolumeName}",
+                "Prune", "-InputFilter", "Raw8", "-Downsample", "4", "-Channels", "TEM", "-DefaultThreshold", "10.0",
+                "--then", "Histogram", "-Filters", "Raw8", "-InputTransform", "Prune", "-Downsample", "4", "-Channels", "TEM",
+                "--then", "AdjustContrast", "-InputFilter", "Raw8", "-OutputFilter", "Leveled", "-InputTransform", "Prune", "-Channels", "TEM",
+                "--then", "Mosaic", "-InputFilter", "Leveled", "-RegistrationDownsample", "4", "-InputTransform", "Prune", "-OutputTransform", "Grid", "-Channels", "TEM",
+                "--then", "Assemble", "-Channels", "TEM", "-Filters", "Leveled", "-Downsample", "8,16,32", "-NoInterlace", "-Transform", "Grid",
+                "--then", "MosaicReport", "-PruneFilter", "Raw8", "-ContrastFilter", "Raw8", "-AssembleFilter", "Leveled", "-AssembleDownsample", "16", "-Output", "MosaicReport",
+                "--then", "CreateVikingXML", "-OutputFile", "Mosaic"
+            ],
+            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
         }
     ],
     "compounds": [
         {
-            "name": "TEM Build: full sequence",
+            "name": "TEM Build: full sequence (parallel)",
             "configurations": [
                 "TEM Build: Prune",
                 "TEM Build: Histogram",
@@ -607,7 +665,7 @@
             "stopAll": true
         },
         {
-            "name": "TEM Align: full sequence",
+            "name": "TEM Align: full sequence (parallel)",
             "configurations": [
                 "TEM Align: CreateBlobFilter",
                 "TEM Align: AlignSections",
