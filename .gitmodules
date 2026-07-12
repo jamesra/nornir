@@ -28,3 +28,6 @@
 [submodule "nornir-docker"]
 	path = nornir-docker
 	url = ../nornir-docker.git
+[submodule "nornir-builddashboard"]
+	path = nornir-builddashboard
+	url = https://github.com/jamesra/nornir-builddashboard.git
