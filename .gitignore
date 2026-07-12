@@ -66,3 +66,25 @@ docs/_build/
 
 # Pyright / basedpyright analysis dumps (regenerate locally; do not commit)
 pyright_full*.json
+
+# VS Code launch-input placeholder dirs (created when resolving ${input:…} paths)
+${input:nornirVolumePath}/
+${input:nornirVolumesRoot}/
+
+# Local AI rule mirror (canonical rules live under .cursor/)
+.aiassistant/
+
+# Local volume copies and machine-specific paths
+RPC3/
+/storage4/
+\storage4/
+
+# Generated release constraints with local file:// paths
+release/pyre-windows-constraints.txt
+
+# Scratch output and local bench scripts (not part of the monorepo package set)
+tmp/
+scripts/
+
+# Accidental Windows temp plot artifacts (literal backslash path names on WSL)
+C:\\Temp\\*.png
