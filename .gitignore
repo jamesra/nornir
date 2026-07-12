@@ -63,3 +63,6 @@ docs/_build/
 /.build.*.env
 /.hypothesis/
 /.pytest_cache/
+
+# Pyright / basedpyright analysis dumps (regenerate locally; do not commit)
+pyright_full*.json
