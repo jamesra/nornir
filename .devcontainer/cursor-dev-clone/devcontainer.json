@@ -1,6 +1,9 @@
 {
   "name": "Nornir (cursor-dev clone)",
-  "dockerComposeFile": "../../nornir-docker/compose.cursor-dev.yaml",
+  "dockerComposeFile": [
+  "../nornir-docker/compose.cursor-dev.yaml",
+  "${localEnv:NORNIR_DOCKER_USER_ROOT}/Run/nornir-dev/compose.net-mounts.override.yaml"
+],
   "service": "cursor-dev-clone",
   "workspaceFolder": "/workspace",
   "overrideCommand": false,

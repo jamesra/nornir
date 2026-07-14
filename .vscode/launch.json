@@ -187,7 +187,7 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "Prune", "-InputFilter", "Raw8", "-Downsample", "4", "-Channels", "TEM", "-DefaultThreshold", "10.0"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
@@ -206,7 +206,7 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "Histogram", "-Filters", "Raw8", "-InputTransform", "Prune", "-Downsample", "4", "-Channels", "TEM"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
@@ -225,7 +225,7 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "AdjustContrast", "-InputFilter", "Raw8", "-OutputFilter", "Leveled", "-InputTransform", "Prune", "-Channels", "TEM"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
@@ -244,7 +244,7 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "Mosaic", "-InputFilter", "Leveled", "-RegistrationDownsample", "4", "-InputTransform", "Prune", "-OutputTransform", "Grid", "-Channels", "TEM"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
@@ -263,7 +263,7 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "Assemble", "-Channels", "TEM", "-Filters", "Leveled", "-Downsample", "8,16,32", "-NoInterlace", "-Transform", "Grid"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
@@ -282,7 +282,7 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "MosaicReport", "-PruneFilter", "Raw8", "-ContrastFilter", "Raw8", "-AssembleFilter", "Leveled", "-AssembleDownsample", "16", "-Output", "MosaicReport"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
@@ -301,7 +301,7 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "CreateVikingXML", "-OutputFile", "Mosaic"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
@@ -320,7 +320,7 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "CreateBlobFilter", "-Channels", "TEM", "-InputFilter", "Leveled", "-Levels", "16,32,64", "-OutputFilter", "Blob", "-Radius", "9", "-Median", "7", "-Max", "3"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
@@ -339,7 +339,7 @@
             "redirectOutput": true,
             "args": [ 
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "AlignSections", "-NumAdjacentSections", "1", "-Filters", "Blob", "-UseMasks", "-Downsample", "64", "-Channels", "TEM"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
@@ -358,7 +358,7 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "AssembleStosOverlays", "-StosGroup", "StosBrute", "-Downsample", "64", "-StosMap", "PotentialRegistrationChain"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
@@ -377,7 +377,7 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "SelectBestRegistrationChain", "-StosGroup", "StosBrute", "-Downsample", "64", "-InputStosMap", "PotentialRegistrationChain", "-OutputStosMap", "FinalStosMap"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
@@ -396,7 +396,7 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "RefineSectionAlignment", "-InputGroup", "StosBrute", "-InputDownsample", "64", "-OutputGroup", "Grid", "-OutputDownsample", "32", "-Filter", "Leveled"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
@@ -415,7 +415,7 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "AssembleStosOverlays", "-StosGroup", "Grid", "-Downsample", "32", "-StosMap", "FinalStosMap"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
@@ -434,7 +434,7 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "CreateVikingXML", "-StosGroup", "Grid32", "-StosMap", "FinalStosMap", "-OutputFile", "Grid32"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
@@ -453,7 +453,7 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "RefineSectionAlignment", "-InputGroup", "Grid", "-InputDownsample", "32", "-OutputGroup", "Grid", "-OutputDownsample", "16", "-Filter", "Leveled"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
@@ -472,7 +472,7 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "SliceToVolume", "-Downsample", "16", "-InputGroup", "Grid", "-OutputGroup", "SliceToVolume"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
@@ -491,7 +491,7 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "ScaleVolumeTransforms", "-InputGroup", "SliceToVolume", "-InputDownsample", "16", "-OutputDownsample", "1"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
@@ -510,7 +510,7 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "CreateVikingXML", "-OutputFile", "SliceToVolume", "-StosGroup", "SliceToVolume1", "-StosMap", "SliceToVolume"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
@@ -529,7 +529,7 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "MosaicToVolume", "-InputTransform", "Grid", "-OutputTransform", "ChannelToVolume", "-Channels", "(?!Registered)"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
@@ -548,7 +548,7 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "Assemble", "-Channels", "(?!Registered)", "-Filters", "Leveled", "-Downsample", "32", "-NoInterlace", "-Transform", "ChannelToVolume", "-ChannelPrefix", "Registered_"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
@@ -567,7 +567,7 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "MosaicReport", "-PruneFilter", "Raw8", "-ContrastFilter", "Raw8", "-AssembleFilter", "Leveled", "-AssembleDownsample", "32", "-Output", "VolumeReport"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
@@ -586,8 +586,8 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
-                "ExportImages", "-Channels", "Registered", "-Filters", "Leveled", "-Downsample", "32", "-Output", "/volumes/${input:nornirVolumeName}/Registered"
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
+                "ExportImages", "-Channels", "Registered", "-Filters", "Leveled", "-Downsample", "32", "-Output", "${input:nornirVolumesRoot}/${input:nornirVolumeName}/Registered"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
         },
@@ -605,7 +605,7 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "CreateBlobFilter", "-Channels", "TEM", "-InputFilter", "Leveled", "-Levels", "16,32,64", "-OutputFilter", "Blob", "-Radius", "9", "-Median", "7", "-Max", "3",
                 "--then", "AlignSections", "-NumAdjacentSections", "1", "-Filters", "Blob", "-UseMasks", "-Downsample", "64", "-Channels", "TEM",
                 "--then", "AssembleStosOverlays", "-StosGroup", "StosBrute", "-Downsample", "64", "-StosMap", "PotentialRegistrationChain",
@@ -616,11 +616,11 @@
                 "--then", "RefineSectionAlignment", "-InputGroup", "Grid", "-InputDownsample", "32", "-OutputGroup", "Grid", "-OutputDownsample", "16", "-Filter", "Leveled",
                 "--then", "SliceToVolume", "-Downsample", "16", "-InputGroup", "Grid", "-OutputGroup", "SliceToVolume",
                 "--then", "ScaleVolumeTransforms", "-InputGroup", "SliceToVolume", "-InputDownsample", "16", "-OutputDownsample", "1",
-                "--then", "CreateVikingXML", "-OutputFile", "SliceToVolume", "-StosGroup", "SliceToVolume1", "-StosMap", "SliceToVolume",
+                "--then", "CreateVikingXML", "-OutputFile", "SliceToVolume", "-StosGroup", "SliceToVolume", "-StosMap", "SliceToVolume",
                 "--then", "MosaicToVolume", "-InputTransform", "Grid", "-OutputTransform", "ChannelToVolume", "-Channels", "(?!Registered)",
                 "--then", "Assemble", "-Channels", "(?!Registered)", "-Filters", "Leveled", "-Downsample", "32", "-NoInterlace", "-Transform", "ChannelToVolume", "-ChannelPrefix", "Registered_",
                 "--then", "MosaicReport", "-PruneFilter", "Raw8", "-ContrastFilter", "Raw8", "-AssembleFilter", "Leveled", "-AssembleDownsample", "32", "-Output", "VolumeReport",
-                "--then", "ExportImages", "-Channels", "Registered", "-Filters", "Leveled", "-Downsample", "32", "-Output", "/volumes/${input:nornirVolumeName}/Registered"
+                "--then", "ExportImages", "-Channels", "Registered", "-Filters", "Leveled", "-Downsample", "32", "-Output", "${input:nornirVolumesRoot}/${input:nornirVolumeName}/Registered"
             ],
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
         },
@@ -638,7 +638,7 @@
             "redirectOutput": true,
             "args": [
                 "-debug", "-computational_library", "cupy",
-                "/volumes/${input:nornirVolumeName}",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "Prune", "-InputFilter", "Raw8", "-Downsample", "4", "-Channels", "TEM", "-DefaultThreshold", "10.0",
                 "--then", "Histogram", "-Filters", "Raw8", "-InputTransform", "Prune", "-Downsample", "4", "-Channels", "TEM",
                 "--then", "AdjustContrast", "-InputFilter", "Raw8", "-OutputFilter", "Leveled", "-InputTransform", "Prune", "-Channels", "TEM",
@@ -650,42 +650,6 @@
             "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
         }
     ],
-    "compounds": [
-        {
-            "name": "TEM Build: full sequence (parallel)",
-            "configurations": [
-                "TEM Build: Prune",
-                "TEM Build: Histogram",
-                "TEM Build: AdjustContrast",
-                "TEM Build: Mosaic",
-                "TEM Build: Assemble",
-                "TEM Build: MosaicReport",
-                "TEM Build: CreateVikingXML"
-            ],
-            "stopAll": true
-        },
-        {
-            "name": "TEM Align: full sequence (parallel)",
-            "configurations": [
-                "TEM Align: CreateBlobFilter",
-                "TEM Align: AlignSections",
-                "TEM Align: AssembleStosOverlays (StosBrute)",
-                "TEM Align: SelectBestRegistrationChain",
-                "TEM Align: RefineSectionAlignment (64→32)",
-                "TEM Align: AssembleStosOverlays (Grid)",
-                "TEM Align: CreateVikingXML (Grid32)",
-                "TEM Align: RefineSectionAlignment (32→16)",
-                "TEM Align: SliceToVolume",
-                "TEM Align: ScaleVolumeTransforms",
-                "TEM Align: CreateVikingXML (SliceToVolume)",
-                "TEM Align: MosaicToVolume",
-                "TEM Align: Assemble",
-                "TEM Align: MosaicReport",
-                "TEM Align: ExportImages"
-            ],
-            "stopAll": true
-        }
-    ],
     "inputs": [
         {
             "id": "pyreStosPath",
@@ -694,9 +658,15 @@
             "default": "Y:\\Volumes\\volumes\\RPC3\\Grid16\\401-402_ctrl-TEM_Leveled_map-TEM_Leveled.stos"
         },
         {
+            "id": "nornirVolumesRoot",
+            "type": "promptString",
+            "description": "Absolute root path that holds volume folders (VolumeData.xml). Example: /storage4",
+            "default": "/storage4"
+        },
+        {
             "id": "nornirVolumeName",
             "type": "promptString",
-            "description": "Volume folder name under /volumes (change target volume here)",
+            "description": "Volume folder name under nornirVolumesRoot. Example: RPC3 → /storage4/RPC3",
             "default": "RPC3"
         }
     ]
