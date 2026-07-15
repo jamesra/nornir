@@ -190,7 +190,13 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "Prune", "-InputFilter", "Raw8", "-Downsample", "4", "-Channels", "TEM", "-DefaultThreshold", "10.0"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Build: Histogram",
@@ -209,7 +215,13 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "Histogram", "-Filters", "Raw8", "-InputTransform", "Prune", "-Downsample", "4", "-Channels", "TEM"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Build: AdjustContrast",
@@ -228,7 +240,13 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "AdjustContrast", "-InputFilter", "Raw8", "-OutputFilter", "Leveled", "-InputTransform", "Prune", "-Channels", "TEM"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Build: Mosaic",
@@ -247,7 +265,13 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "Mosaic", "-InputFilter", "Leveled", "-RegistrationDownsample", "4", "-InputTransform", "Prune", "-OutputTransform", "Grid", "-Channels", "TEM"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Build: Assemble",
@@ -266,7 +290,13 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "Assemble", "-Channels", "TEM", "-Filters", "Leveled", "-Downsample", "8,16,32", "-NoInterlace", "-Transform", "Grid"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Build: MosaicReport",
@@ -285,7 +315,13 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "MosaicReport", "-PruneFilter", "Raw8", "-ContrastFilter", "Raw8", "-AssembleFilter", "Leveled", "-AssembleDownsample", "16", "-Output", "MosaicReport"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Build: CreateVikingXML",
@@ -304,7 +340,13 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "CreateVikingXML", "-OutputFile", "Mosaic"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Align: CreateBlobFilter",
@@ -323,7 +365,13 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "CreateBlobFilter", "-Channels", "TEM", "-InputFilter", "Leveled", "-Levels", "16,32,64", "-OutputFilter", "Blob", "-Radius", "9", "-Median", "7", "-Max", "3"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Align: AlignSections",
@@ -342,7 +390,13 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "AlignSections", "-NumAdjacentSections", "1", "-Filters", "Blob", "-UseMasks", "-Downsample", "64", "-Channels", "TEM"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Align: AssembleStosOverlays (StosBrute)",
@@ -361,7 +415,13 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "AssembleStosOverlays", "-StosGroup", "StosBrute", "-Downsample", "64", "-StosMap", "PotentialRegistrationChain"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Align: SelectBestRegistrationChain",
@@ -380,7 +440,13 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "SelectBestRegistrationChain", "-StosGroup", "StosBrute", "-Downsample", "64", "-InputStosMap", "PotentialRegistrationChain", "-OutputStosMap", "FinalStosMap"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Align: RefineSectionAlignment (64→32)",
@@ -399,7 +465,13 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "RefineSectionAlignment", "-InputGroup", "StosBrute", "-InputDownsample", "64", "-OutputGroup", "Grid", "-OutputDownsample", "32", "-Filter", "Leveled"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Align: AssembleStosOverlays (Grid)",
@@ -418,7 +490,13 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "AssembleStosOverlays", "-StosGroup", "Grid", "-Downsample", "32", "-StosMap", "FinalStosMap"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Align: CreateVikingXML (Grid32)",
@@ -437,7 +515,13 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "CreateVikingXML", "-StosGroup", "Grid32", "-StosMap", "FinalStosMap", "-OutputFile", "Grid32"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Align: RefineSectionAlignment (32→16)",
@@ -456,7 +540,13 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "RefineSectionAlignment", "-InputGroup", "Grid", "-InputDownsample", "32", "-OutputGroup", "Grid", "-OutputDownsample", "16", "-Filter", "Leveled"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Align: SliceToVolume",
@@ -475,7 +565,13 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "SliceToVolume", "-Downsample", "16", "-InputGroup", "Grid", "-OutputGroup", "SliceToVolume"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Align: ScaleVolumeTransforms",
@@ -494,7 +590,13 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "ScaleVolumeTransforms", "-InputGroup", "SliceToVolume", "-InputDownsample", "16", "-OutputDownsample", "1"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Align: CreateVikingXML (SliceToVolume)",
@@ -513,7 +615,13 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "CreateVikingXML", "-OutputFile", "SliceToVolume", "-StosGroup", "SliceToVolume1", "-StosMap", "SliceToVolume"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Align: MosaicToVolume",
@@ -532,7 +640,13 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "MosaicToVolume", "-InputTransform", "Grid", "-OutputTransform", "ChannelToVolume", "-Channels", "(?!Registered)"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Align: Assemble",
@@ -551,7 +665,13 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "Assemble", "-Channels", "(?!Registered)", "-Filters", "Leveled", "-Downsample", "32", "-NoInterlace", "-Transform", "ChannelToVolume", "-ChannelPrefix", "Registered_"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Align: MosaicReport",
@@ -570,7 +690,13 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "MosaicReport", "-PruneFilter", "Raw8", "-ContrastFilter", "Raw8", "-AssembleFilter", "Leveled", "-AssembleDownsample", "32", "-Output", "VolumeReport"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Align: ExportImages",
@@ -589,7 +715,13 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "ExportImages", "-Channels", "Registered", "-Filters", "Leveled", "-Downsample", "32", "-Output", "${input:nornirVolumesRoot}/${input:nornirVolumeName}/Registered"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Full Alignment",
@@ -622,7 +754,13 @@
                 "--then", "MosaicReport", "-PruneFilter", "Raw8", "-ContrastFilter", "Raw8", "-AssembleFilter", "Leveled", "-AssembleDownsample", "32", "-Output", "VolumeReport",
                 "--then", "ExportImages", "-Channels", "Registered", "-Filters", "Leveled", "-Downsample", "32", "-Output", "${input:nornirVolumesRoot}/${input:nornirVolumeName}/Registered"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         },
         {
             "name": "TEM Build: full sequence (sequential)",
@@ -647,7 +785,13 @@
                 "--then", "MosaicReport", "-PruneFilter", "Raw8", "-ContrastFilter", "Raw8", "-AssembleFilter", "Leveled", "-AssembleDownsample", "16", "-Output", "MosaicReport",
                 "--then", "CreateVikingXML", "-OutputFile", "Mosaic"
             ],
-            "env": { "NORNIR_HEADLESS": "1", "PYTHONUNBUFFERED": "1" }
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
         }
     ],
     "inputs": [
