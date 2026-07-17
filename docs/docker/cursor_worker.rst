@@ -52,6 +52,8 @@ Compose (build then run)::
     docker compose -f nornir-docker/compose.cursor-worker.yaml build nornir-cursor-base nornir-cursor-worker
     docker compose -f nornir-docker/compose.cursor-worker.yaml run --rm nornir-cursor-worker
 
+Containers set ``nofile`` **65536** (same as production and cursor-dev) for long builds on NAS mounts. Check with ``ulimit -n`` inside the running container.
+
 PowerShell launcher ``start-cursor-worker.ps1``
 ------------------------------------------------
 

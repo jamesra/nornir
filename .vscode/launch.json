@@ -299,6 +299,31 @@
             }
         },
         {
+            "name": "TEM Build: AssembleTiles (optimized tileset 512x512)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "nornir_buildmanager.build",
+            "python": "${command:python.interpreterPath}",
+            "pythonArgs": ["-Xfrozen_modules=off"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": false,
+            "redirectOutput": true,
+            "args": [
+                "-debug", "-computational_library", "cupy",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
+                "AssembleTiles", "-Channels", "TEM", "-Filters", "Leveled", "-Transform", "Grid", "-Shape", "512,512"
+            ],
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
+        },
+        {
             "name": "TEM Build: MosaicReport",
             "type": "debugpy",
             "request": "launch",
@@ -549,7 +574,7 @@
             }
         },
         {
-            "name": "TEM Align: SliceToVolume",
+            "name": "TEM Align: SliceToVolume 16 (chain-linear)",
             "type": "debugpy",
             "request": "launch",
             "module": "nornir_buildmanager.build",
@@ -563,7 +588,61 @@
             "args": [
                 "-debug", "-computational_library", "cupy",
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
-                "SliceToVolume", "-Downsample", "16", "-InputGroup", "Grid", "-OutputGroup", "SliceToVolume"
+                "SliceToVolume", "-Downsample", "16", "-InputGroup", "Grid", "-OutputGroup", "SliceToVolume",
+                "-linear_factor", "0.05", "-travel_limit", "512", "-reblend_iterations", "8", "-reblend_tolerance", "0.5"
+            ],
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
+        },
+        {
+            "name": "TEM Align: SliceToVolume 1 (chain-linear)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "nornir_buildmanager.build",
+            "python": "${command:python.interpreterPath}",
+            "pythonArgs": ["-Xfrozen_modules=off"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": false,
+            "redirectOutput": true,
+            "args": [
+                "-debug", "-computational_library", "cupy",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
+                "SliceToVolume", "-Downsample", "1", "-InputGroup", "Grid", "-OutputGroup", "SliceToVolume",
+                "-linear_factor", "0.05", "-travel_limit", "512", "-reblend_iterations", "8", "-reblend_tolerance", "0.5"
+            ],
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
+        },
+        {
+            "name": "TEM Align: LinearizeVolume 1 (legacy post-pass)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "nornir_buildmanager.build",
+            "python": "${command:python.interpreterPath}",
+            "pythonArgs": ["-Xfrozen_modules=off"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": false,
+            "redirectOutput": true,
+            "args": [
+                "-debug", "-computational_library", "cupy",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
+                "LinearizeVolume", "-InputGroup", "SliceToVolume", "-InputDownsample", "1",
+                "-OutputGroup", "SliceToVolumeLinear",
+                "-linear_factor", "0.05", "-travel_limit", "512", "-reblend_iterations", "8", "-reblend_tolerance", "0.5"
             ],
             "env": {
                 "NORNIR_HEADLESS": "1",
@@ -747,8 +826,9 @@
                 "--then", "CreateVikingXML", "-StosGroup", "Grid32", "-StosMap", "FinalStosMap", "-OutputFile", "Grid32",
                 "--then", "RefineSectionAlignment", "-InputGroup", "Grid", "-InputDownsample", "32", "-OutputGroup", "Grid", "-OutputDownsample", "16", "-Filter", "Leveled",
                 "--then", "SliceToVolume", "-Downsample", "16", "-InputGroup", "Grid", "-OutputGroup", "SliceToVolume",
+                "-linear_factor", "0.05", "-travel_limit", "512", "-reblend_iterations", "8", "-reblend_tolerance", "0.5",
                 "--then", "ScaleVolumeTransforms", "-InputGroup", "SliceToVolume", "-InputDownsample", "16", "-OutputDownsample", "1",
-                "--then", "CreateVikingXML", "-OutputFile", "SliceToVolume", "-StosGroup", "SliceToVolume", "-StosMap", "SliceToVolume",
+                "--then", "CreateVikingXML", "-OutputFile", "SliceToVolume", "-StosGroup", "SliceToVolume1", "-StosMap", "SliceToVolume",
                 "--then", "MosaicToVolume", "-InputTransform", "Grid", "-OutputTransform", "ChannelToVolume", "-Channels", "(?!Registered)",
                 "--then", "Assemble", "-Channels", "(?!Registered)", "-Filters", "Leveled", "-Downsample", "32", "-NoInterlace", "-Transform", "ChannelToVolume", "-ChannelPrefix", "Registered_",
                 "--then", "MosaicReport", "-PruneFilter", "Raw8", "-ContrastFilter", "Raw8", "-AssembleFilter", "Leveled", "-AssembleDownsample", "32", "-Output", "VolumeReport",
