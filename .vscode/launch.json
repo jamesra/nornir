@@ -703,6 +703,31 @@
             }
         },
         {
+            "name": "TEM Align: CreateVikingXML (LinearSliceToVolume)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "nornir_buildmanager.build",
+            "python": "${command:python.interpreterPath}",
+            "pythonArgs": ["-Xfrozen_modules=off"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": false,
+            "redirectOutput": true,
+            "args": [
+                "-debug", "-computational_library", "cupy",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
+                "CreateVikingXML", "-OutputFile", "SliceToVolume", "-StosGroup", "SliceToVolumeLinear1", "-StosGroup", "SliceToVolume1", "-StosMap", "SliceToVolume"
+            ],
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
+        },
+        {
             "name": "TEM Align: MosaicToVolume",
             "type": "debugpy",
             "request": "launch",
