@@ -10,7 +10,7 @@
 			"**/.project": true,
 			"**/.pydevproject": true,
 			"**/*.egg-info": true,
-			"**/.idea": true,
+			"**/.idea": true
 		},
 		"python.analysis.include": [
 			"../nornir-*/**"
@@ -50,8 +50,8 @@
 			{
 				"path": "pyre",
 				"maxDepth": 5,
-				"includeAllSymbols": true				
-			},
+				"includeAllSymbols": true
+			}
 		],
 		"python.analysis.typeCheckingMode": "basic",
 		"python.linting.enabled": true,
@@ -74,8 +74,11 @@
 			"../nornir-*/**"
 		],
 		"cursorpyright.analysis.typeCheckingMode": "basic"
-
-		
-		
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-python.python",
+			"ms-python.debugpy"
+		]
 	}
 }

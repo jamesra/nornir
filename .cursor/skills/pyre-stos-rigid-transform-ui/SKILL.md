@@ -24,7 +24,7 @@ to **freeze the non-editing layer** during a drag or wheel notch.
 | **Space.Target** | Warped / section image native coordinates (green layer) |
 | **ViewType.Source** | Standalone fixed panel (`Space.Source` commands) |
 | **ViewType.Target** | Standalone warped panel (`Space.Target` commands) |
-| **ViewType.Composite** | Overlay of both layers (`Space.Source` commands; draws in target space) |
+| **ViewType.Composite** | Overlay of both layers (`Space.Source` commands; draws in target space). **Default user goal: adjust the warped (green) image** to match fixed (purple). |
 | **Registration** | `TransformModel` fields: `angle`, `target_offset`, `source_space_center_of_rotation`, `forward_matrix` |
 | **Display strategy** | `TransformDisplayStrategy.resolve_draw_state()` — GPU uniforms per panel pass |
 
@@ -57,16 +57,17 @@ Rigid model API (imageregistration):
 
 1. **Single transform** — Translate/rotate in any view updates the same registration; **all** views show the same alignment after the edit ends.
 2. **Composite is the alignment truth check** — Purple and green should match standalone panels.
-3. **Which layer moves** (rigid):
+3. **Composite default: adjust warped (green)** — The composite window is where users tune section-to-reference alignment. For mesh/grid/RBF, control-point edits should deform the **warped** layer on screen (fixed anchors in registration; display in target space via `composite_display.py`). Mouse, camera lookat, and CP pick/drag on composite must stay in **target display space** for non-rigid transforms so green follows the cursor, not move opposite it. Rigid whole-layer translate/rotate on composite is the exception: purple moves during the gesture, green frozen (`RigidDisplayStrategy`).
+4. **Which layer moves** (rigid):
    - **Composite + translate/rotate** → user edits the **fixed (purple)** layer; green stays still during the gesture.
    - **Warped panel + translate** → user edits the **warped (green)** layer (translation only).
    - **Rigid rotation** → **Composite window only** (`rigid_rotation_locked` blocks Ctrl+scroll on Fixed and Warped standalone).
    - **Fixed standalone (rigid/grid)** → whole-layer translate/rotate is **blocked** (`fixed_image_manipulation_locked`).
-4. **Rotation pivot** (rigid, composite only) — Ctrl+scroll rotates purple about the **cursor** via `RotateFixedAboutSourcePoint` (source pivot from `InverseTransform` of draw-world cursor).
-5. **Relative scale** (rigid) — Shift+scroll (no Ctrl) on composite/target when model is `CenteredSimilarity2DTransform` calls `ScaleWarpedAboutSourcePoint` with the same composite pivot as Ctrl+scroll rotate. Do not use Alt+scroll on Windows (Qt delivers zero wheel delta while Alt is on the event).
-6. **Zoom** — Mouse wheel without Ctrl zooms about cursor (`navigationcommandbase` lookat delta in active command space).
-7. **Reset Transform** (STOS menu) — Rigid: zero offset, zero angle (`reset_rigid_transform`).
-8. **Rotate translate estimate** (Operations submenu) — **Log Polar (Fast)** (`SliceToSliceMethod.LogPolar`) or **Brute Force (Slow)** (`SliceToSliceMethod.BruteForce`); both return `CenteredSimilarity2DTransform` for Shift+wheel scale.
+5. **Rotation pivot** (rigid, composite only) — Ctrl+scroll rotates purple about the **cursor** via `RotateFixedAboutSourcePoint` (source pivot from `InverseTransform` of draw-world cursor).
+6. **Relative scale** (rigid) — Shift+scroll (no Ctrl) on composite/target when model is `CenteredSimilarity2DTransform` calls `ScaleWarpedAboutSourcePoint` with the same composite pivot as Ctrl+scroll rotate. Do not use Alt+scroll on Windows (Qt delivers zero wheel delta while Alt is on the event).
+7. **Zoom** — Mouse wheel without Ctrl zooms about cursor (`navigationcommandbase` lookat delta in active command space).
+8. **Reset Transform** (STOS menu) — Rigid: zero offset, zero angle (`reset_rigid_transform`).
+9. **Rotate translate estimate** (Operations submenu) — **Log Polar (Fast)** (`SliceToSliceMethod.LogPolar`) or **Brute Force (Slow)** (`SliceToSliceMethod.BruteForce`); both return `CenteredSimilarity2DTransform` for Shift+wheel scale.
 
 ## Command routing
 
@@ -80,6 +81,10 @@ Non-rigid transforms (mesh, grid, RBF) use **`MeshLikeDisplayStrategy`** (Delaun
 
 Composite `ImageTransformViewPanel` uses `CompositeTransformView` with
 `display_space=Space.Target`. Both sub-FBOs render with `tween=1` (target space).
+
+`pyre/views/composite_display.py` maps the shared source-space camera to target
+display space for draw, mouse, and (mesh/grid) control-point interaction so the
+default composite workflow adjusts the warped image.
 
 ## Rendering architecture (rigid)
 
@@ -132,6 +137,7 @@ Rigid path maps native tile corners through `rigid_source_to_target`. Overlay un
 | `pyre/controllers/transformcontroller.py` | Registration calls, strategy delegation, interactive edit |
 | `pyre/views/imagetransformview.py` | Calls `resolve_draw_state` |
 | `pyre/views/compositetransformview.py` | Dual FBO composite draw |
+| `pyre/views/composite_display.py` | Camera/mouse/CP display-space mapping for composite |
 | `pyre/gl_engine/shaders/texture_shader.py` | Vertex transforms |
 | `pyre/commands/navigationcommandbase.py` | Wheel zoom/rotate |
 | `pyre/commands/stos/translaterigidcommand.py` | Drag translate |
