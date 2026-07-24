@@ -48,6 +48,8 @@ jobs:
 
       - name: Download CI fixture zip (cache miss)
         if: steps.fixture-cache.outputs.cache-hit != 'true'
+        id: fixture-download
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -59,6 +61,7 @@ jobs:
             -d "${{ github.workspace }}/ci-testdata"
 
       - name: Stage CI fixtures into TESTINPUTPATH
+        if: steps.fixture-cache.outputs.cache-hit == 'true' || steps.fixture-download.outcome == 'success'
         run: |
           cp -r "${{ github.workspace }}/ci-testdata/Images/." "$TESTINPUTPATH/Images/"
           cp -r "${{ github.workspace }}/ci-testdata/Transforms/." "$TESTINPUTPATH/Transforms/"
@@ -75,7 +78,7 @@ jobs:
           python -m pip install -e nornir-buildmanager --no-deps
           python -m pip install "validators>=0.23" "python-dotenv>=1.0.1"
 
-      - name: Run unit tests
+      - name: Run A-class unit tests
         run: >
           python -m pytest -q
           nornir-shared/tests/test_Histogram.py
@@ -145,6 +148,11 @@ jobs:
           nornir-buildmanager/tests/pipeline/test_VolumeManager.py
           nornir-buildmanager/tests/pipeline/metadata/test_tilesetinfo.py
           nornir-buildmanager/tests/volumemanager/test_save_xml.py
+
+      - name: Run B-class unit tests (requires ci-testdata-v1 fixture pack)
+        if: steps.fixture-cache.outputs.cache-hit == 'true' || steps.fixture-download.outcome == 'success'
+        run: >
+          python -m pytest -q
           nornir-shared/tests/test_images.py
           nornir-imageregistration/tests/test_refine_grid_input_section_functional.py
           nornir-imageregistration/tests/test_batched_refine_parity.py
