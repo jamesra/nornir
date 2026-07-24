@@ -1,5 +1,6 @@
-# Non-data unit tests across Nornir packages in the monorepo.
-# Does not fetch nornir-testdata, CuPy, or INPUT_NORNIR_DATA corpora.
+# Unit tests across Nornir packages in the monorepo.
+# A-class tests run with an empty TESTINPUTPATH.
+# B-class tests run after the ci-testdata-v1 fixture pack is staged into TESTINPUTPATH.
 
 name: Unit tests
 
@@ -12,6 +13,7 @@ on:
 
 permissions:
   contents: read
+  actions: write
 
 env:
   NORNIR_HEADLESS: "1"
@@ -32,9 +34,34 @@ jobs:
 
       - name: Create empty test data directories
         run: |
-          mkdir -p "${{ github.workspace }}/testdata" "${{ github.workspace }}/testdata_output"
+          mkdir -p "${{ github.workspace }}/testdata/Images" "${{ github.workspace }}/testdata/Transforms"
+          mkdir -p "${{ github.workspace }}/testdata_output"
           echo "TESTINPUTPATH=${{ github.workspace }}/testdata" >> "$GITHUB_ENV"
           echo "TESTOUTPUTPATH=${{ github.workspace }}/testdata_output" >> "$GITHUB_ENV"
+
+      - name: Restore CI fixtures cache
+        id: fixture-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/ci-testdata
+          key: ci-testdata-v1
+
+      - name: Download CI fixture zip (cache miss)
+        if: steps.fixture-cache.outputs.cache-hit != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download ci-testdata-v1 \
+            --repo jamesra/nornir-imageregistration \
+            --pattern "ci-testdata-v1.zip" \
+            --dir "${{ github.workspace }}"
+          unzip -q "${{ github.workspace }}/ci-testdata-v1.zip" \
+            -d "${{ github.workspace }}/ci-testdata"
+
+      - name: Stage CI fixtures into TESTINPUTPATH
+        run: |
+          cp -r "${{ github.workspace }}/ci-testdata/Images/." "$TESTINPUTPATH/Images/"
+          cp -r "${{ github.workspace }}/ci-testdata/Transforms/." "$TESTINPUTPATH/Transforms/"
 
       - name: Install Nornir packages from the monorepo
         run: |
@@ -48,7 +75,7 @@ jobs:
           python -m pip install -e nornir-buildmanager --no-deps
           python -m pip install "validators>=0.23" "python-dotenv>=1.0.1"
 
-      - name: Run non-data unit tests
+      - name: Run unit tests
         run: >
           python -m pytest -q
           nornir-shared/tests/test_Histogram.py
@@ -57,6 +84,7 @@ jobs:
           nornir-shared/tests/test_argparse_helpers.py
           nornir-shared/tests/test_console.py
           nornir-shared/tests/test_mqtt_config.py
+          nornir-shared/tests/test_mqtt_telemetry.py
           nornir-pools/tests/
           nornir-imageregistration/tests/test_grid_division.py
           nornir-imageregistration/tests/spatial/
@@ -72,6 +100,32 @@ jobs:
           nornir-imageregistration/tests/transforms/test_linearfit.py
           nornir-imageregistration/tests/transforms/test_transform_conversion.py
           nornir-imageregistration/tests/transforms/test_scale_translate_registration.py
+          nornir-imageregistration/tests/settings/test_mosaicoffsets.py
+          nornir-imageregistration/tests/settings/test_translatesettings.py
+          nornir-imageregistration/tests/test_assemble_gpu_threaded.py
+          nornir-imageregistration/tests/test_blob_filter.py
+          nornir-imageregistration/tests/test_blob_filter_golden.py
+          nornir-imageregistration/tests/test_blob_filter_legacy_parity.py
+          nornir-imageregistration/tests/test_build_pyramid_memory.py
+          nornir-imageregistration/tests/test_computational_lib_subprocess.py
+          nornir-imageregistration/tests/test_cuvs_and_nearest_neighbor.py
+          nornir-imageregistration/tests/test_ensure_array_backend.py
+          nornir-imageregistration/tests/test_generate_optimized_tiles_empty.py
+          nornir-imageregistration/tests/test_image_to_tiles_coverage.py
+          nornir-imageregistration/tests/test_layout.py
+          nornir-imageregistration/tests/test_logpolar_phase_a.py
+          nornir-imageregistration/tests/test_refine_shared.py
+          nornir-imageregistration/tests/test_tileset_functions_concurrent_merge.py
+          nornir-imageregistration/tests/test_tileset_functions_copy.py
+          nornir-imageregistration/tests/test_tileset_functions_lineage.py
+          nornir-imageregistration/tests/test_tileset_functions_missing_paths.py
+          nornir-imageregistration/tests/test_tileset_functions_skip_empty.py
+          nornir-imageregistration/tests/transforms/test_blend_transforms.py
+          nornir-imageregistration/tests/transforms/test_chain_linear_correction.py
+          nornir-imageregistration/tests/transforms/test_grid_on_fixed_point_changed.py
+          nornir-imageregistration/tests/transforms/test_linear_nd_cupy_fallback.py
+          nornir-imageregistration/tests/transforms/test_transforms.py
+          nornir-imageregistration/tests/views/test_showgrayscale.py
           nornir-buildmanager/tests/pipeline/test_pipelinemanager.py
           nornir-buildmanager/tests/pipeline/test_iterate_filters.py
           nornir-buildmanager/tests/pipeline/test_argparsexml.py
@@ -81,3 +135,23 @@ jobs:
           nornir-buildmanager/tests/pipeline/test_migration.py
           nornir-buildmanager/tests/validation/test_validation.py
           nornir-buildmanager/tests/importers/test_shared.py
+          nornir-buildmanager/tests/test_no_delete.py
+          nornir-buildmanager/tests/operations/test_slice_to_volume_chain.py
+          nornir-buildmanager/tests/operations/test_stosgroup_workers.py
+          nornir-buildmanager/tests/operations/test_tile_io_worker_count.py
+          nornir-buildmanager/tests/operations/test_vikingxml.py
+          nornir-buildmanager/tests/pipeline/test_pipeline_mqtt_events.py
+          nornir-buildmanager/tests/pipeline/test_transform_refine_orchestrator.py
+          nornir-buildmanager/tests/pipeline/test_VolumeManager.py
+          nornir-buildmanager/tests/pipeline/metadata/test_tilesetinfo.py
+          nornir-buildmanager/tests/volumemanager/test_save_xml.py
+          nornir-shared/tests/test_images.py
+          nornir-imageregistration/tests/test_refine_grid_input_section_functional.py
+          nornir-imageregistration/tests/test_batched_refine_parity.py
+          nornir-imageregistration/tests/test_tiles.py
+          nornir-imageregistration/tests/test_SliceToSliceBrute.py
+          nornir-imageregistration/tests/test_assemble.py
+          nornir-imageregistration/tests/test_ImageAlign.py
+          nornir-imageregistration/tests/transforms/test_addition.py
+          nornir-imageregistration/tests/transforms/test_metrics.py
+          nornir-imageregistration/tests/test_assemble_tiles_basics.py
