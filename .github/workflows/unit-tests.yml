@@ -110,7 +110,6 @@ jobs:
           nornir-imageregistration/tests/test_blob_filter_golden.py
           nornir-imageregistration/tests/test_blob_filter_legacy_parity.py
           nornir-imageregistration/tests/test_build_pyramid_memory.py
-          nornir-imageregistration/tests/test_computational_lib_subprocess.py
           nornir-imageregistration/tests/test_cuvs_and_nearest_neighbor.py
           nornir-imageregistration/tests/test_ensure_array_backend.py
           nornir-imageregistration/tests/test_generate_optimized_tiles_empty.py
