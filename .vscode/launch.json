@@ -299,6 +299,31 @@
             }
         },
         {
+            "name": "TEM Build: Assemble Section",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "nornir_buildmanager.build",
+            "python": "${command:python.interpreterPath}",
+            "pythonArgs": ["-Xfrozen_modules=off"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": false,
+            "redirectOutput": true,
+            "args": [
+                "-debug", "-computational_library", "cupy",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
+                "Assemble", "-Channels", "TEM", "-Filters", "Leveled", "-Sections", "1024", "-Downsample", "8,16,32", "-NoInterlace", "-Transform", "Grid"
+            ],
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
+        },
+        {
             "name": "TEM Build: AssembleTiles (optimized tileset 512x512)",
             "type": "debugpy",
             "request": "launch",
@@ -495,11 +520,12 @@
                 "PYTHONUNBUFFERED": "1",
                 "NORNIR_MQTT_HOST": "host.docker.internal",
                 "NORNIR_MQTT_PORT": "1883",
-                "NORNIR_MQTT_ENABLE": "1"
+                "NORNIR_MQTT_ENABLE": "1",
+                "NORNIR_REFINE_PHASE_TIMING": "1"
             }
         },
         {
-            "name": "TEM Align: AssembleStosOverlays (Grid)",
+            "name": "TEM Align: AssembleStosOverlays (Grid32)",
             "type": "debugpy",
             "request": "launch",
             "module": "nornir_buildmanager.build",
@@ -570,7 +596,8 @@
                 "PYTHONUNBUFFERED": "1",
                 "NORNIR_MQTT_HOST": "host.docker.internal",
                 "NORNIR_MQTT_PORT": "1883",
-                "NORNIR_MQTT_ENABLE": "1"
+                "NORNIR_MQTT_ENABLE": "1",
+                "NORNIR_REFINE_PHASE_TIMING": "1"
             }
         },
         {
@@ -621,6 +648,33 @@
             "env": {
                 "NORNIR_HEADLESS": "1",
                 "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
+        },
+        {
+            "name": "TEM Align: LinearizeVolume 1 (No Delete 1% - 5% 256)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "nornir_buildmanager.build",
+            "python": "${command:python.interpreterPath}",
+            "pythonArgs": ["-Xfrozen_modules=off"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": false,
+            "redirectOutput": true,
+            "args": [
+                "-debug", "-no-delete", "-computational_library", "cupy",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
+                "LinearizeVolume", "-InputGroup", "SliceToVolume", "-InputDownsample", "1",
+                "-OutputGroup", "SliceToVolumeLinear",
+                "-min_blend", "0.01", "-max_blend", "0.1", "-travel_limit", "256", "-reblend_iterations", "8", "-reblend_tolerance", "0.5"
+                
+            ],
+            "env": {
+                "NORNIR_HEADLESS": "1",  
                 "NORNIR_MQTT_HOST": "host.docker.internal",
                 "NORNIR_MQTT_PORT": "1883",
                 "NORNIR_MQTT_ENABLE": "1"
