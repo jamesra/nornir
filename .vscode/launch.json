@@ -520,8 +520,7 @@
                 "PYTHONUNBUFFERED": "1",
                 "NORNIR_MQTT_HOST": "host.docker.internal",
                 "NORNIR_MQTT_PORT": "1883",
-                "NORNIR_MQTT_ENABLE": "1",
-                "NORNIR_REFINE_PHASE_TIMING": "1"
+                "NORNIR_MQTT_ENABLE": "1"
             }
         },
         {
@@ -597,7 +596,6 @@
                 "NORNIR_MQTT_HOST": "host.docker.internal",
                 "NORNIR_MQTT_PORT": "1883",
                 "NORNIR_MQTT_ENABLE": "1",
-                "NORNIR_REFINE_PHASE_TIMING": "1"
             }
         },
         {
