@@ -27,7 +27,7 @@
 	url = ../nornir-pyre.git
 [submodule "nornir-docker"]
 	path = nornir-docker
-	url = ../nornir-docker.git
+	url = ./nornir-docker
 [submodule "nornir-builddashboard"]
 	path = nornir-builddashboard
 	url = ../nornir-builddashboard.git
