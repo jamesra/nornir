@@ -86,7 +86,7 @@ Symptom                              Likely cause
 Missing ``nas-mounts.tsv``           Run initializer; edit site files
 ``Operation not permitted`` on mount Caps/override missing (path B not applied)
 ``cifs`` mount error (2)             ``cifs`` not loaded in WSL kernel
-``Permission denied`` (13)           Bad/missing ``.cred`` or loose permissions
+``Permission denied`` (13)           Bad/missing ``.cred``, wrong password, or cred file permissions (Windows hosts: rebuild image with current ``mount-network-shares.sh``)
 No GPU / wrong image                 ``Test-NornirGpu.ps1``; NVIDIA Docker setup
 Dashboard unreachable                ``start-dashboard.ps1``; bind host 127.0.0.1
 ==================================== ===============================================
