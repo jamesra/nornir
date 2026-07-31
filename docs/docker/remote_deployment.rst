@@ -15,8 +15,9 @@ Quickstart: new production box
 2. **Clone** the monorepo with submodules (scripts/compose only — images come from GHCR).
 3. **Initialize** once (layout + pull + dashboard)::
 
-     $env:NORNIR_DOCKER_USER_ROOT = 'C:\Docker'   # if unset; default is C:\Docker
-     .\nornir-docker\Initialize-NornirBuildAppliance.ps1 -MonorepoRoot D:\src\git\nornir -PromptLogin
+     .\nornir-docker\Initialize-NornirBuildAppliance.ps1 -PromptLogin
+     # prompts for monorepo root; Enter accepts parent of nornir-docker
+     # or: -MonorepoRoot D:\src\git\nornir
 
 4. **Edit site-specific files only:**
 
