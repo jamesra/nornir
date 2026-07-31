@@ -35,12 +35,17 @@ On Windows, run ``Initialize-NornirCursorWorkerLayout.ps1`` once to create the `
 Dev-container mount parity (opt-in)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-By default the worker only bind-mounts ``/workspace``. To mirror **cursor-dev** data paths (``/volumes``, ``/nornir-testdata``, ``/data``, test output, optional in-container NAS mounts), configure ``D:\Docker\Run\nornir-dev\`` first (see ``nornir-docker/windows-docker-layout/NORNIR_DEV_VOLUMES.md``), then either:
+By default the worker only bind-mounts ``/workspace``. To mirror **cursor-dev** data paths
+(``/nornir-testdata``, ``/data``, test output, and in-container CIFS from ``nas-mounts.tsv``),
+configure ``Run\nornir-net-mounts`` (or legacy ``Run\nornir-dev``) first
+(see ``nornir-docker/windows-docker-layout/NORNIR_DEV_VOLUMES.md``), then either:
 
 - Set ``NORNIR_WORKER_DEV_PARITY_MOUNTS=1`` in the worker run env, or
 - Pass ``-DevParityMounts`` to ``start-cursor-worker.ps1``.
 
-Host paths are read from ``Run/nornir-dev/.run.nornir-dev.env`` and ``nornir-docker/.env``; do not duplicate ``NORNIR_VOLUMES_HOST`` in the worker run file.
+Host paths are read from ``Run/nornir-net-mounts/.run.nornir-net-mounts.env`` (preferred),
+``Run/nornir-dev/.run.nornir-dev.env``, and ``nornir-docker/.env``. NAS data uses path-B
+in-container CIFS (``NORNIR_NET_MOUNTS_*``), not a host bind of the share.
 
 Build::
 

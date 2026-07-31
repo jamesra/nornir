@@ -61,10 +61,12 @@ Layout::
     secrets\net-creds\*.cred
     .run.nornir-net-mounts.env
 
-**Path B (chosen for I/O):** in-container CIFS via ``mount-network-shares.sh`` with
-``CAP_SYS_ADMIN``, ``DAC_READ_SEARCH``, and ``apparmor:unconfined``. Host-bind / WSL-only
-CIFS is not the supported deploy path for this appliance. Credentials stay outside the
-image; privileges are opt-in per container start.
+**Path B (sole NAS path):** in-container CIFS via ``mount-network-shares.sh`` with
+``CAP_SYS_ADMIN``, ``DAC_READ_SEARCH``, and ``apparmor:unconfined`` for the mount
+phase. After mounts succeed, the entrypoint drops ``CAP_SYS_ADMIN`` when
+``setpriv`` or ``capsh`` is available (CIFS stays mounted; remount requires a
+container restart). Credentials stay outside the image; privileges are opt-in
+per container start.
 
 Verify checklist
 ----------------
@@ -74,6 +76,7 @@ Inside the appliance shell::
   echo "$NORNIR_NET_MOUNTS"   # expect 1
   findmnt -t cifs
   # expect shares from nas-mounts.tsv (e.g. /storage4)
+  # CAP_SYS_ADMIN should be dropped after entry when setpriv/capsh are present
 
 On the host: open http://127.0.0.1:8087 for the dashboard.
 
