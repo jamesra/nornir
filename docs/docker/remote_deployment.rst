@@ -15,9 +15,10 @@ Quickstart: new production box
 2. **Clone** the monorepo with submodules (scripts/compose only — images come from GHCR).
 3. **Initialize** once (layout + pull + dashboard)::
 
-     .\nornir-docker\Initialize-NornirBuildAppliance.ps1 -PromptLogin
+     .\nornir-docker\Initialize-NornirBuildAppliance.ps1
      # prompts for monorepo root; Enter accepts parent of nornir-docker
      # or: -MonorepoRoot D:\src\git\nornir
+     # On auth failure: docker login ghcr.io -u <github-user> (PAT with read:packages)
 
 4. **Edit site-specific files only:**
 
