@@ -1,33 +1,44 @@
 [submodule "nornir-web"]
 	path = nornir-web
 	url = ../nornir-web.git
+	branch = master
 [submodule "nornir-volumecontroller"]
 	path = nornir-volumecontroller
 	url = ../nornir-volumecontroller.git
+	branch = master
 [submodule "nornir-volumemodel"]
 	path = nornir-volumemodel
 	url = ../nornir-volumemodel.git
+	branch = master
 [submodule "nornir-pools"]
 	path = nornir-pools
 	url = ../nornir-pools
+	branch = master
 [submodule "nornir-shared"]
 	path = nornir-shared
 	url = ../nornir-shared.git
+	branch = dev
 [submodule "nornir-buildmanager"]
 	path = nornir-buildmanager
 	url = ../nornir-buildmanager.git
+	branch = dev
 [submodule "nornir-imageregistration"]
 	path = nornir-imageregistration
 	url = ../nornir-imageregistration.git
+	branch = dev
 [submodule "dm4"]
 	path = dm4
 	url = ../dm4.git
+	branch = master
 [submodule "nornir-pyre"]
 	path = nornir-pyre
 	url = ../nornir-pyre.git
+	branch = dev
 [submodule "nornir-docker"]
 	path = nornir-docker
 	url = ../nornir-docker
+	branch = main
 [submodule "nornir-builddashboard"]
 	path = nornir-builddashboard
 	url = ../nornir-builddashboard.git
+	branch = main
