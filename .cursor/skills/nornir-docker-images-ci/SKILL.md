@@ -36,15 +36,17 @@ Shared constraints: `nornir-docker/constraints-headless.txt` (dev + prod pip ins
 
 ## `docker-build.ps1` build order
 
-From the **invocation directory** (script `cd`s to monorepo root for context `.`):
+From the **invocation directory** (script `cd`s to monorepo root for context `.`). Default builds all five in this order; `-Images` filters the set (same order):
 
 1. `nornir:dev`
 2. `nornir:dev-cursor-base` (`INSTALL_MONOREPO_EDITABLES=0`)
-3. `nornir:cursor-worker` (depends on `dev-cursor-base`)
+3. `nornir:cursor-worker` (depends on `dev-cursor-base`; selecting `cursor-worker` auto-includes the base)
 4. `nornir:prod`
 5. `nornir:cupy`
 
-Reads **`VERSION`**, git `HEAD` → `SOURCE_REVISION`, UTC `BUILD_DATE`, and `release/docker_package_versions_json.py` + `release/package-versions.yaml` → `PACKAGE_VERSIONS_JSON_B64`. Sets OCI labels (`org.opencontainers.image.*`, `org.nornir.variant`, `org.nornir.package_versions.json.base64`).
+Examples: `.\docker-build.ps1 -Images prod,cupy` (appliance only); `-NoCache` passes `--no-cache`. Accepts `cupy`, `nornir:cupy`, or `nornir-cupy`.
+
+Reads **`VERSION`**, git `HEAD` → `SOURCE_REVISION`, UTC `BUILD_DATE`, and `release/docker_package_versions_json.py` + `release/package-versions.yaml` → `PACKAGE_VERSIONS_JSON_B64`. Sets OCI labels (`org.opencontainers.image.*`, `org.nornir.variant`, `org.nornir.package_versions.json.base64`). Tags `nornir:<suffix>-<VERSION>` after each successful build.
 
 Optional per-invocation overrides: `build.env`, `.build.<id>.env` where `<id>` is tag with `:` → `-` (e.g. `.build.nornir-dev.env`). Committed `example.*.build.env` files are **templates only**—copy values into invocation-dir files if needed.
 

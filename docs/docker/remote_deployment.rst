@@ -81,9 +81,10 @@ Inside the appliance shell::
   # CAP_SYS_ADMIN should be dropped after entry when setpriv/capsh are present
 
 Interactive shells print a short welcome with ``nornir-build`` usage and list
-entry wrappers in ``~/scripts`` (on ``PATH``): ``TEMImport.sh``, ``TEMBuild.sh``,
-``TEMBuild-import.sh``, ``TEMAlign.sh``. Bind-mounted workspace trees refresh
-those scripts from ``nornir-buildmanager/scripts`` on container start.
+entry wrappers in ``~/scripts`` (on ``PATH``): ``TEMImport``, ``TEMBuild``,
+``TEMBuild-import``, ``TEMAlign``. Bind-mounted workspace trees refresh
+those scripts from ``nornir-buildmanager/scripts`` on container start
+(extension stripped for the ``TEM*`` entry points).
 
 On the host: open http://127.0.0.1:8087 for the dashboard.
 

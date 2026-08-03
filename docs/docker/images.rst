@@ -45,6 +45,21 @@ Recommended (OCI labels + BOM JSON) — run from ``nornir-docker/`` (or any dire
     .\docker-build.ps1     # PowerShell
     build.cmd              # cmd
 
+Build only selected tags with ``-Images`` (catalogue order; skips everything else).
+Names may be short (``prod``), ``nornir:prod``, or ``nornir-prod``. Selecting
+``cursor-worker`` also builds ``dev-cursor-base`` first. ``prod`` / ``cupy`` do
+**not** require ``nornir:dev``::
+
+    .\docker-build.ps1 -Images prod,cupy
+
+Force a clean rebuild of those tags::
+
+    .\docker-build.ps1 -Images prod,cupy -NoCache
+
+After each successful image, the script prints ``Id`` / ``Created`` / OCI labels and also tags
+``nornir:<name>-<VERSION>`` (from the monorepo ``VERSION`` file). ``docker-push.ps1`` prints the
+same local metadata before push and warns if the floating tag looks stale.
+
 Optional build-arg overrides: place ``build.env`` (shared) and ``.build.<id>.env`` per image (``<id>`` is the tag with ``:`` replaced by ``-``, e.g. ``.build.nornir-dev.env``) in that **invocation** directory. The script does not read committed ``example.*.build.env`` files; use those files in the repo only as templates.
 
 Minimal samples (Compose / same builds from repo root)::
