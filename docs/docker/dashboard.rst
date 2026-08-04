@@ -31,3 +31,20 @@ Default UI bind: ``127.0.0.1:8087``. Build containers publish with
 ``NORNIR_MQTT_HOST=host.docker.internal`` (set by ``start-nornir-build.ps1``).
 
 Compose file: ``nornir-docker/compose.dashboard.yaml``.
+
+Log retention and UI history
+----------------------------
+
+``NORNIR_DASHBOARD_MAX_EVENTS`` (default ``100000``, template in
+``example.dashboard.run.env``) caps how many events SQLite keeps **per run**.
+Set ``0`` to disable prune (disk growth is then operator-owned). Events removed
+by prune or by ``NORNIR_DASHBOARD_RETENTION_DAYS`` are gone from the dashboard DB;
+authoritative full session files remain under ``NORNIR_LOG_ROOT``.
+
+The log pane loads a newest page first, then **Load older** / scroll-to-edge
+pages through retained history without dumping the full multi‑MB transcript into
+the DOM. **Search** and level checkboxes (errors, warnings, info, debug, events,
+status) are applied on the server against all retained events for the run;
+unchecked types are excluded from search results, filtered pages, live matches
+while filtering, and **Download logs**
+(``GET /api/runs/{run_id}/events/export``).
