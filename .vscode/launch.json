@@ -513,7 +513,9 @@
             "args": [
                 "-debug", "-computational_library", "cupy",
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
-                "RefineSectionAlignment", "-InputGroup", "StosBrute", "-InputDownsample", "64", "-OutputGroup", "Grid", "-OutputDownsample", "32", "-Filter", "Leveled"
+                "RefineSectionAlignment", "-InputGroup", "StosBrute", "-InputDownsample", "64", "-OutputGroup", "Grid", "-OutputDownsample", "32", "-Filter", "Leveled",
+                "-CellArea", "512",
+                "-Spacing", "384"
             ],
             "env": {
                 "NORNIR_HEADLESS": "1",
@@ -588,14 +590,16 @@
             "args": [
                 "-debug", "-computational_library", "cupy",
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
-                "RefineSectionAlignment", "-InputGroup", "Grid", "-InputDownsample", "32", "-OutputGroup", "Grid", "-OutputDownsample", "16", "-Filter", "Leveled"
+                "RefineSectionAlignment", "-InputGroup", "Grid", "-InputDownsample", "32", "-OutputGroup", "Grid", "-OutputDownsample", "16", "-Filter", "Leveled",
+                "-CellArea", "256",
+                "-Spacing", "192"
             ],
             "env": {
                 "NORNIR_HEADLESS": "1",
                 "PYTHONUNBUFFERED": "1",
                 "NORNIR_MQTT_HOST": "host.docker.internal",
                 "NORNIR_MQTT_PORT": "1883",
-                "NORNIR_MQTT_ENABLE": "1",
+                "NORNIR_MQTT_ENABLE": "1"
             }
         },
         {
@@ -872,10 +876,10 @@
                 "--then", "AlignSections", "-NumAdjacentSections", "1", "-Filters", "Blob", "-UseMasks", "-Downsample", "64", "-Channels", "TEM",
                 "--then", "AssembleStosOverlays", "-StosGroup", "StosBrute", "-Downsample", "64", "-StosMap", "PotentialRegistrationChain",
                 "--then", "SelectBestRegistrationChain", "-StosGroup", "StosBrute", "-Downsample", "64", "-InputStosMap", "PotentialRegistrationChain", "-OutputStosMap", "FinalStosMap",
-                "--then", "RefineSectionAlignment", "-InputGroup", "StosBrute", "-InputDownsample", "64", "-OutputGroup", "Grid", "-OutputDownsample", "32", "-Filter", "Leveled",
+                "--then", "RefineSectionAlignment", "-InputGroup", "StosBrute", "-InputDownsample", "64", "-OutputGroup", "Grid", "-OutputDownsample", "32", "-Filter", "Leveled", "-CellArea", "512", "-Spacing", "384",
                 "--then", "AssembleStosOverlays", "-StosGroup", "Grid", "-Downsample", "32", "-StosMap", "FinalStosMap",
                 "--then", "CreateVikingXML", "-StosGroup", "Grid32", "-StosMap", "FinalStosMap", "-OutputFile", "Grid32",
-                "--then", "RefineSectionAlignment", "-InputGroup", "Grid", "-InputDownsample", "32", "-OutputGroup", "Grid", "-OutputDownsample", "16", "-Filter", "Leveled",
+                "--then", "RefineSectionAlignment", "-InputGroup", "Grid", "-InputDownsample", "32", "-OutputGroup", "Grid", "-OutputDownsample", "16", "-Filter", "Leveled", "-CellArea", "256", "-Spacing", "192",
                 "--then", "SliceToVolume", "-Downsample", "16", "-InputGroup", "Grid", "-OutputGroup", "SliceToVolume", "-NoLinearBlend",
                 "--then", "ScaleVolumeTransforms", "-InputGroup", "SliceToVolume", "-InputDownsample", "16", "-OutputDownsample", "1",
                 "--then", "LinearizeVolume", "-InputGroup", "SliceToVolume", "-InputDownsample", "1", "-OutputGroup", "SliceToVolumeLinear", "-min_blend", "0.005", "-max_blend", "0.05", "-travel_limit", "512", "-reblend_iterations", "8", "-reblend_tolerance", "0.5",
