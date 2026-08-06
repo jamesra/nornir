@@ -31,6 +31,11 @@ Quickstart: new production box
   & "$env:NORNIR_DOCKER_USER_ROOT\Builds\nornir-build\start-nornir-build.ps1"
   # GPU probe picks nornir:cupy vs nornir:prod; path-B CIFS; interactive shell
 
+To refresh images later without re-running initialize::
+
+  .\nornir-docker\docker-pull.ps1 -IncludeDashboard -ContinueOnError
+  # or pin to monorepo VERSION: -PreferVersioned
+
 Dashboard UI: http://127.0.0.1:8087 — see :doc:`dashboard`.
 
 Open file limits
