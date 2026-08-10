@@ -13,13 +13,14 @@
       "extensions": [
         "ms-python.python",
         "ms-python.debugpy",
-        "ms-python.vscode-pylance",
+//        "ms-python.vscode-pylance", //Not available in the container.  Using Jedi instead.
         "lextudio.restructuredtext"
       ],
       "settings": {
         "python.defaultInterpreterPath": "/opt/venv/bin/python",
         "python.testing.pytestEnabled": true,
-        "python.testing.unittestEnabled": false
+        "python.testing.unittestEnabled": false,
+        "python.languageServer": "Jedi"
       }
     }
   }

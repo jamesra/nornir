@@ -88,3 +88,5 @@ scripts/
 
 # Accidental Windows temp plot artifacts (literal backslash path names on WSL)
 C:\\Temp\\*.png
+/nornir-dashboard.db
+*.pstats
