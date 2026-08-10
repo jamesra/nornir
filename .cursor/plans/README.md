@@ -6,6 +6,7 @@ Completed plans are archived under **[Built Plans](../Built%20Plans/)** with a d
 
 | File | Status |
 |------|--------|
+| [morning_design_improvements_2026-08-09.plan.md](morning_design_improvements_2026-08-09.plan.md) | Proposed — overnight follow-up design themes |
 | [assemble_tiles_profiling.plan.md](assemble_tiles_profiling.plan.md) | Not started — benchmark/profile RPC3 601 optimized tile assembly (512×512, NumPy/CuPy) |
 | [fix_grid690_python_parity.plan.md](fix_grid690_python_parity.plan.md) | In progress — Phase 0 C++ audit checklist at `docs/refine-grid-cpp-parity-checklist.md` |
 
