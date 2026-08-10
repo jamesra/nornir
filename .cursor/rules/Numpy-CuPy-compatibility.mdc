@@ -1,6 +1,9 @@
 ---
-description: 
-alwaysApply: true
+description: >-
+  NumPy/CuPy dual-backend rules for nornir_imageregistration — xp selection,
+  minimize host↔device transfers, CuPyX vs SciPy boundaries.
+globs: nornir-imageregistration/**/*.py
+alwaysApply: false
 ---
 
 ## NumPy / CuPy in `nornir_imageregistration`

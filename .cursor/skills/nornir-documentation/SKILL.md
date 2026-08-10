@@ -7,6 +7,8 @@ description: Build and deploy the umbrella Sphinx monodoc under docs/; align pac
 
 Use when editing **`docs/`**, changing GitHub Pages deploy, or adjusting package **`README.md`** / **`README.rst`** files that point at the public manual.
 
+**Policy** (short READMEs, no hand-edit of `nornir.github.io`, RST vs Markdown): see [`.cursor/rules/Documentation-and-monodoc.mdc`](../../rules/Documentation-and-monodoc.mdc). This skill is **build/deploy procedure** only.
+
 ## Build locally
 
 From the monorepo root (Python 3.13+ recommended):
@@ -28,7 +30,3 @@ Open **`docs/_build/html/index.html`**. On Unix you can run **`make -C docs html
 - **Version banner:** repo-root **`VERSION`** (read in **`docs/conf.py`**).
 - **CI:** **`.github/workflows/docs.yml`** — builds on PRs; on **`main`/`master`** push, deploys to **`nornir/nornir.github.io`** using secret **`NORNIR_GITHUB_IO_DEPLOY_TOKEN`**.
 - **Human-facing publish instructions:** **`docs/development/publishing_documentation.rst`**.
-
-## README vs monodoc
-
-Keep package READMEs short: intro + links to **https://nornir.github.io/** and the relevant **packages/** and **api/** pages. Put depth in **`docs/`**, not in README duplicates.
