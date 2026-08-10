@@ -30,11 +30,20 @@
             "console": "integratedTerminal",
             "args": [],
             "redirectOutput": true,
+            "presentation": {
+  "reveal": "always",
+  "panel": "new",
+  "group": "pyre"
+},
             "justMyCode": false,
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/nornir-pyre;${workspaceFolder}/nornir-imageregistration;${workspaceFolder}/nornir-pools;${workspaceFolder}/nornir-shared;${workspaceFolder}/nornir-buildmanager",
                 "DEBUG": "1",
-                "PYTHONUNBUFFERED": "1"
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_REFINE_PHASE_TIMING": "1",
+                "NORNIR_REFINE_PASS_DIAGNOSTICS": "1",
+                "NORNIR_LOG_GPU_MEM": "1",
+                "NORNIR_PROFILE": "${workspaceFolder}/.nornir-pools-profile"
             }
         },
         {
@@ -53,7 +62,11 @@
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/nornir-pyre;${workspaceFolder}/nornir-imageregistration;${workspaceFolder}/nornir-pools;${workspaceFolder}/nornir-shared;${workspaceFolder}/nornir-buildmanager",
                 "DEBUG": "1",
-                "PYTHONUNBUFFERED": "1"
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_REFINE_PHASE_TIMING": "1",
+                "NORNIR_REFINE_PASS_DIAGNOSTICS": "1",
+                "NORNIR_LOG_GPU_MEM": "1",
+                "NORNIR_PROFILE": "${workspaceFolder}/.nornir-pools-profile"
             }
         },
         {
@@ -72,7 +85,11 @@
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/nornir-pyre;${workspaceFolder}/nornir-imageregistration;${workspaceFolder}/nornir-pools;${workspaceFolder}/nornir-shared;${workspaceFolder}/nornir-buildmanager",
                 "DEBUG": "1",
-                "PYTHONUNBUFFERED": "1"
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_REFINE_PHASE_TIMING": "1",
+                "NORNIR_REFINE_PASS_DIAGNOSTICS": "1",
+                "NORNIR_LOG_GPU_MEM": "1",
+                "NORNIR_PROFILE": "${workspaceFolder}/.nornir-pools-profile"
             }
         },
         {
@@ -313,7 +330,7 @@
             "args": [
                 "-debug", "-computational_library", "cupy",
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
-                "Assemble", "-Channels", "TEM", "-Filters", "Leveled", "-Sections", "1024", "-Downsample", "8,16,32", "-NoInterlace", "-Transform", "Grid"
+                "Assemble", "-Channels", "TEM", "-Filters", "Leveled", "-Sections", "1200-1500", "-Downsample", "8,16,32", "-NoInterlace", "-Transform", "Grid"
             ],
             "env": {
                 "NORNIR_HEADLESS": "1",
@@ -389,6 +406,31 @@
                 "-debug", "-computational_library", "cupy",
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "CreateVikingXML", "-OutputFile", "Mosaic"
+            ],
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
+        },
+        {
+            "name": "TEM Build: Cleanup",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "nornir_buildmanager",
+            "python": "${command:python.interpreterPath}",
+            "pythonArgs": ["-Xfrozen_modules=off"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": false,
+            "redirectOutput": true,
+            "args": [
+                "-debug", "-computational_library", "cupy",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
+                "Cleanup"
             ],
             "env": {
                 "NORNIR_HEADLESS": "1",
@@ -872,8 +914,8 @@
             "args": [
                 "-debug", "-computational_library", "cupy",
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
-                "CreateBlobFilter", "-Channels", "TEM", "-InputFilter", "Leveled", "-Levels", "16,32,64", "-OutputFilter", "Blob", "-Radius", "9", "-Median", "7", "-Max", "3",
-                "--then", "AlignSections", "-NumAdjacentSections", "1", "-Filters", "Blob", "-UseMasks", "-Downsample", "64", "-Channels", "TEM",
+                /*"CreateBlobFilter", "-Channels", "TEM", "-InputFilter", "Leveled", "-Levels", "16,32,64", "-OutputFilter", "Blob", "-Radius", "9", "-Median", "7", "-Max", "3",
+                "--then",*/"AlignSections", "-NumAdjacentSections", "1", "-Filters", "Blob", "-UseMasks", "-Downsample", "64", "-Channels", "TEM",
                 "--then", "AssembleStosOverlays", "-StosGroup", "StosBrute", "-Downsample", "64", "-StosMap", "PotentialRegistrationChain",
                 "--then", "SelectBestRegistrationChain", "-StosGroup", "StosBrute", "-Downsample", "64", "-InputStosMap", "PotentialRegistrationChain", "-OutputStosMap", "FinalStosMap",
                 "--then", "RefineSectionAlignment", "-InputGroup", "StosBrute", "-InputDownsample", "64", "-OutputGroup", "Grid", "-OutputDownsample", "32", "-Filter", "Leveled", "-CellArea", "512", "-Spacing", "384",
@@ -884,10 +926,10 @@
                 "--then", "ScaleVolumeTransforms", "-InputGroup", "SliceToVolume", "-InputDownsample", "16", "-OutputDownsample", "1",
                 "--then", "LinearizeVolume", "-InputGroup", "SliceToVolume", "-InputDownsample", "1", "-OutputGroup", "SliceToVolumeLinear", "-min_blend", "0.005", "-max_blend", "0.05", "-travel_limit", "512", "-reblend_iterations", "8", "-reblend_tolerance", "0.5",
                 "--then", "CreateVikingXML", "-OutputFile", "SliceToVolume", "-StosGroup", "SliceToVolume1", "-StosGroup", "SliceToVolumeLinear1", "-StosMap", "SliceToVolume",
-                "--then", "MosaicToVolume", "-InputTransform", "Grid", "-OutputTransform", "ChannelToVolume", "-Channels", "(?!Registered)",
-                "--then", "Assemble", "-Channels", "(?!Registered)", "-Filters", "Leveled", "-Downsample", "32", "-NoInterlace", "-Transform", "ChannelToVolume", "-ChannelPrefix", "Registered_",
+                "--then", "MosaicToVolume", "-InputTransform", "Grid", "-OutputTransform", "ChannelToVolume", "-Channels", "(?!Registered)"
+                /*"--then", "Assemble", "-Channels", "(?!Registered)", "-Filters", "Leveled", "-Downsample", "32", "-NoInterlace", "-Transform", "ChannelToVolume", "-ChannelPrefix", "Registered_",
                 "--then", "MosaicReport", "-PruneFilter", "Raw8", "-ContrastFilter", "Raw8", "-AssembleFilter", "Leveled", "-AssembleDownsample", "32", "-Output", "VolumeReport",
-                "--then", "ExportImages", "-Channels", "Registered", "-Filters", "Leveled", "-Downsample", "32", "-Output", "${input:nornirVolumesRoot}/${input:nornirVolumeName}/Registered"
+                "--then", "ExportImages", "-Channels", "Registered", "-Filters", "Leveled", "-Downsample", "32", "-Output", "${input:nornirVolumesRoot}/${input:nornirVolumeName}/Registered"*/
             ],
             "env": {
                 "NORNIR_HEADLESS": "1",
