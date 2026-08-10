@@ -14,7 +14,10 @@ alwaysApply: false
 ### Secrets and local env
 
 - **Do not** commit real `.env`, tokens, PATs, or machine-specific host paths.
-- Use committed **`example.*`** templates; operators copy to gitignored names (`nornir-docker/.env`, `.env.cursor-worker`, `build.env`, `.build.<id>.env`) or under **`$NORNIR_DOCKER_USER_ROOT`** (see **docker-build-run-phases** and **docker-machine-layout** skills).
+- Use committed **`example.*`** templates. Machine-local files live under **`$NORNIR_DOCKER_USER_ROOT`** (default **`D:\Docker`**):
+  - **Build:** `Builds/nornir/` → `build.env`, `.build.<id>.env` (invoke `docker-build.ps1` from that directory).
+  - **Run:** `Run/<project-key>/` (e.g. `Run/nornir-dev/.env` for cursor-dev; worker/net-mounts under their keys).
+- **Compose bridge (cursor-dev):** Docker Compose / Dev Containers auto-load **`nornir-docker/.env`** only. Hardlink or copy the Run file there (junctions are directories-only; SymbolicLink needs Developer Mode). See **docker-machine-layout** and **nornir-docker-devcontainer**.
 - **`docker-build.ps1`** merges build-args only from the **invocation directory** (`build.env`, `.build.<id>.env`); it does not read committed `example.*.build.env` files automatically.
 
 ### Submodule workflow

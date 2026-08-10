@@ -12,6 +12,15 @@ description: >-
 
 # Docker build and run phases
 
+## Which Docker skill?
+
+| Skill | Use when |
+|-------|----------|
+| **docker-build-run-phases** (this) | Build vs run scripts, `example.*.env` templates, env layering |
+| **docker-machine-layout** | Where machine-local files live under `D:\Docker` |
+| **nornir-docker-images-ci** | Image matrix, OCI/BOM, Dockerfile/CI review |
+| **nornir-docker-devcontainer** | Day-to-day cursor-dev / Dev Containers setup |
+
 ## Model
 
 Treat **image build** and **container run** as **two distinct phases**, each with its **own script** (e.g. `build.sh` / `build.ps1` and `run.sh` / `run.ps1`, or language-specific equivalents). Do not fold unrelated concerns into one script unless the user explicitly asks.
@@ -55,11 +64,19 @@ There is **no** separate `build/` or `run/` directory tree under `nornir-docker/
 
 ## User-local configuration root (not in git)
 
-Per-developer machine settings—real `.env` files, secrets, host-specific bind paths—**must not** be committed. For **run** templates and Compose, they often live under a **user-local root** (`NORNIR_DOCKER_USER_ROOT`) with filenames that **mirror** the co-located layout but **drop the `example.` prefix** (e.g. `nornir-cursor-worker.run.env`). **`docker-build.ps1` does not merge that tree** for image build args; use invocation-directory **`build.env`** / **`.build.<id>.env`** instead.
+Per-developer machine settings—real `.env` files, secrets, host-specific bind paths—**must not** be committed. Layout root: **`NORNIR_DOCKER_USER_ROOT`** (documented default **`D:\Docker`**; see **docker-machine-layout**).
 
-- **Convention:** `NORNIR_DOCKER_USER_ROOT` points to that directory (set in the user shell or system environment). Scripts should document this variable and fail clearly if a required path is missing when not using defaults.
-- Developers may **copy** from `example.*` in the submodule and rename, or maintain parallel non-example files under `$NORNIR_DOCKER_USER_ROOT`.
-- CI should supply build-args via **CWD `build.env` / `.build.<id>.env`**, **`docker build --build-arg`**, or the CI provider’s secret/env injection—**no** interactive user directory. **`docker-build.ps1`** does not read committed `example.*.build.env` automatically.
+| Phase | Machine-local path | Notes |
+|-------|--------------------|--------|
+| **Build** | `$NORNIR_DOCKER_USER_ROOT/Builds/nornir/` | `build.env`, `.build.<id>.env`; invoke `docker-build.ps1` from here |
+| **Run (cursor-dev)** | `$NORNIR_DOCKER_USER_ROOT/Run/nornir-dev/.env` | Source of truth for host paths / MQTT / etc. |
+| **Compose bridge** | `nornir-docker/.env` | Hardlink or copy of the Run file — Compose/Dev Containers only auto-load this path |
+| **Run (worker)** | `$NORNIR_DOCKER_USER_ROOT/Run/nornir-cursor-worker/nornir-cursor-worker.run.env` | See `start-cursor-worker.ps1` |
+| **Net mounts** | `$NORNIR_DOCKER_USER_ROOT/Run/nornir-net-mounts/` | Prefer over legacy `Run/nornir-dev/` for shared CIFS |
+
+- **`docker-build.ps1` does not merge** the Run tree for image build args.
+- Do **not** use `$NORNIR_DOCKER_USER_ROOT/dev/cursor-dev.run.env` — that path is obsolete; use `Run/nornir-dev/`.
+- CI should supply build-args via **CWD `build.env` / `.build.<id>.env`**, **`docker build --build-arg`**, or the CI provider’s secret/env injection.
 
 ## Environment file discovery
 
@@ -70,7 +87,7 @@ Per-developer machine settings—real `.env` files, secrets, host-specific bind 
 
 Committed **`example.*.build.env`** under `nornir-docker/` are **not** read by this script—copy from them when authoring `build.env` / `.build.<id>.env` or when calling `docker build` manually.
 
-**Run:** copy from `example.<id>.run.env` to the runtime filename the stack expects (e.g. `nornir-docker/.env` for cursor-dev, `nornir-docker/.env.cursor-worker` for the worker), or point Compose at an env file path you control. Optional **`$NORNIR_DOCKER_USER_ROOT`** mirrors apply to **run** / local Compose workflows as documented per script—not to **`docker-build.ps1`** build-arg merge.
+**Run (cursor-dev):** copy from `dev/example.cursor-dev.run.env` into `$NORNIR_DOCKER_USER_ROOT/Run/nornir-dev/.env`, then **bridge** to `nornir-docker/.env` (hardlink or copy) so Compose substitutes `${NORNIR_TESTDATA_HOST}`. Junctions do not work for files.
 
 Unless the user specifies otherwise, for **run** templates load and **merge** so **later layers override earlier** (same key wins for the last source listed).
 
@@ -85,7 +102,7 @@ After loading, if **required** variables for that phase are still unset or empty
 - [ ] **Put** build-args that exist for a downstream image on the **final** image’s co-located build template, not a separate base “stack”
 - [ ] **Document** required env vars per phase; **prompt** or **fail fast** when missing
 - [ ] **Build (`docker-build.ps1`):** optional CWD `build.env` + `.build.<id>.env`; script logs each file as merged or not found
-- [ ] **Run / Compose:** merge or copy from `example.*.run.env` and user-local `$NORNIR_DOCKER_USER_ROOT/...` as documented for that stack
+- [ ] **Run / Compose:** machine-local under `Run/<key>/`; cursor-dev bridged to `nornir-docker/.env`
 - [ ] **Name** new committed templates `example.<id>.build.env` or `example.<id>.run.env` and place them next to the relevant Dockerfile or compose docs
 - [ ] **Do not** commit secrets; reference secret **file paths** in run configs where possible
 

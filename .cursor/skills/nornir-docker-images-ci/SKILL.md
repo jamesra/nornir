@@ -11,6 +11,15 @@ description: >-
 
 # Nornir Docker images and CI maintenance
 
+## Which Docker skill?
+
+| Skill | Use when |
+|-------|----------|
+| **docker-build-run-phases** | Build vs run scripts, `example.*.env` templates, env layering |
+| **docker-machine-layout** | Where machine-local files live under `D:\Docker` |
+| **nornir-docker-images-ci** (this) | Image matrix, OCI/BOM, Dockerfile/CI review |
+| **nornir-docker-devcontainer** | Day-to-day cursor-dev / Dev Containers setup |
+
 ## Source of truth (do not duplicate long guides here)
 
 - Image catalogue and build commands: [docs/docker/images.rst](../../../docs/docker/images.rst)

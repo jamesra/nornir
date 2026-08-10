@@ -5,6 +5,15 @@ description: Standardizes machine-local Docker layout under D:\Docker for runtim
 
 # Docker machine layout
 
+## Which Docker skill?
+
+| Skill | Use when |
+|-------|----------|
+| **docker-build-run-phases** | Build vs run scripts, `example.*.env` templates, env layering |
+| **docker-machine-layout** (this) | Where machine-local files live under `D:\Docker` |
+| **nornir-docker-images-ci** | Image matrix, OCI/BOM, Dockerfile/CI review |
+| **nornir-docker-devcontainer** | Day-to-day cursor-dev / Dev Containers setup |
+
 ## Canonical rule text
 
 Any project that has docker images uses D:\Docker for the instances, variables, configurations, secrets, etc... to my machine.
@@ -31,12 +40,27 @@ For each project, enforce:
 - Mounted-config parent for runtime-generated persistent files: `D:\Docker\mounted-configs\<PROJECT_KEY>`
 - Run-time root for start-time env/secrets: `D:\Docker\Run\<PROJECT_KEY>`
 
+Override the root with **`NORNIR_DOCKER_USER_ROOT`** when not using `D:\Docker`. Documented default in skills and layout docs is **`D:\Docker`**. Some older `nornir-docker` scripts still fall back to `C:\Docker` when the variable is unset — set `NORNIR_DOCKER_USER_ROOT` explicitly until those defaults are aligned.
+
+## cursor-dev Compose bridge
+
+Run env for cursor-dev belongs under **`Run\nornir-dev\`** (e.g. `.env` or `cursor-dev.run.env`), not under `Builds\`.
+
+Docker Compose and Cursor Dev Containers only auto-load **`nornir-docker/.env`** (Compose project directory). Bridge with a **hardlink** or **copy** from the Run file to `nornir-docker/.env`:
+
+- Windows **junctions are directories-only** — do not use them for `.env` files.
+- **SymbolicLink** needs Developer Mode or an elevated shell.
+- Prefer: `New-Item -ItemType HardLink -Path '...\nornir-docker\.env' -Target 'D:\Docker\Run\nornir-dev\.env'` (same volume) or `Copy-Item`.
+
+Net-mount override YAML and shared CIFS layout: prefer `Run\nornir-net-mounts\` (legacy `Run\nornir-dev\` still works). See **nornir-docker-devcontainer** and `nornir-docker/windows-docker-layout/NORNIR_DEV_VOLUMES.md`.
+
 ## Implementation checklist
 
 - [ ] Script/docs default to `D:\Docker\Builds\<PROJECT_KEY>` (Builds plural)
 - [ ] Build-time variables and build helper script resolve from `D:\Docker\Builds\<PROJECT_KEY>`
 - [ ] Runtime-generated persistent mounted files resolve from `D:\Docker\mounted-configs\<PROJECT_KEY>`
 - [ ] Run/start-time variables and secrets resolve from `D:\Docker\Run\<PROJECT_KEY>`
+- [ ] cursor-dev: Run file bridged to `nornir-docker/.env` for Compose substitution
 - [ ] Repo contains only templates and examples
 - [ ] Use a project-appropriate layout initializer when needed (do not require `Initialize-NornirCursorWorkerLayout.ps1`)
 - [ ] Any override uses an explicit layout-root override mechanism (for example `-LayoutRoot`) and keeps the same directory model

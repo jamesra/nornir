@@ -14,18 +14,30 @@ description: >-
 
 # Nornir Docker dev container (Cursor and PyCharm)
 
+## Which Docker skill?
+
+| Skill | Use when |
+|-------|----------|
+| **docker-build-run-phases** | Build vs run scripts, `example.*.env` templates, env layering |
+| **docker-machine-layout** | Where machine-local files live under `D:\Docker` |
+| **nornir-docker-images-ci** | Image matrix, OCI/BOM, Dockerfile/CI review |
+| **nornir-docker-devcontainer** (this) | Day-to-day cursor-dev / Dev Containers setup |
+
 ## Source of truth
 
 Dockerfiles, Compose files, and **checked-in env examples** for Nornir live in the **`nornir-docker/`** directory. In the monorepo that directory is the **`nornir-docker` git submodule** (same content as the standalone `nornir/nornir-docker` repository). Overview and script index: [nornir-docker/README.md](../../../nornir-docker/README.md); narrative docs in the monodoc under `docs/docker/`.
 
-For **build vs run scripts**, `docker-build.ps1` CWD-only build-arg files (`build.env`, `.build.<id>.env`), user-local `NORNIR_DOCKER_USER_ROOT` for run templates, and co-located `example.<id>.build.env` / `example.<id>.run.env` templates, see the **docker-build-run-phases** skill.
+For **build vs run scripts** and env layering, see **docker-build-run-phases**. For `Builds` / `Run` / `mounted-configs`, see **docker-machine-layout**.
 
 ## Examples vs local environment (do not commit secrets)
 
 - **Committed:** templates such as `nornir-docker/dev/example.cursor-dev.run.env`, `nornir-docker/example._shared.build.env`, plus root stubs like `.env.cursor-dev.example` pointing at those files.
-- **Not committed:** real `.env` files, tokens, or machine-specific paths. [`nornir-docker/.gitignore`](../../../nornir-docker/.gitignore) ignores `.env`, `build.env`, `.build.*.env`, legacy `.env.build*`, non-example `*.build.env` / `*.run.env`, etc.; keep secrets in a **user-local** tree or paths under `$NORNIR_DOCKER_USER_ROOT` (see docker-build-run-phases).
+- **Not committed:** real `.env` files, tokens, or machine-specific paths. [`nornir-docker/.gitignore`](../../../nornir-docker/.gitignore) ignores `.env`, `build.env`, `.build.*.env`, etc.
 
-**cursor-dev:** copy **`nornir-docker/dev/example.cursor-dev.run.env`** to **`nornir-docker/.env`** so Compose can substitute `${NORNIR_TESTDATA_HOST}` (project directory `nornir-docker/`). Prefer the user-local root for overrides rather than committing a personal `.env`.
+**cursor-dev (recommended):**
+
+1. Copy `nornir-docker/dev/example.cursor-dev.run.env` → `$NORNIR_DOCKER_USER_ROOT/Run/nornir-dev/.env` (default root `D:\Docker`).
+2. **Bridge** that file to `nornir-docker/.env` (hardlink or copy) so Compose/Dev Containers substitute `${NORNIR_TESTDATA_HOST}`. Junctions are directories-only; SymbolicLink needs Developer Mode.
 
 ## What this is
 
@@ -68,10 +80,12 @@ Compose sets `TESTINPUTPATH` / `TESTOUTPUTPATH` on **cursor-dev**; keep PyCharm 
 
 ## Host configuration (WSL test data)
 
-1. Copy `nornir-docker/dev/example.cursor-dev.run.env` to `nornir-docker/.env` (or place the same variables under `$NORNIR_DOCKER_USER_ROOT/dev/cursor-dev.run.env`—see docker-build-run-phases; Compose still expects `nornir-docker/.env` for variable substitution unless you use another mechanism).
-2. Set `NORNIR_TESTDATA_HOST` to the **Linux path** where `nornir-testdata` lives (e.g. from WSL: `echo $HOME` and append `/nornir-testdata`).
-3. Optionally set `NORNIR_REPRO_DATA_HOST` to the **Linux path** of the large repro dataset (mirror of Windows `D:\Data`); it is mounted at `/data` and compose sets `INPUT_NORNIR_DATA=/data`.
-4. Ensure Docker can bind-mount that path (Docker Desktop file sharing prompts if needed).
+1. Set user env `NORNIR_DOCKER_USER_ROOT=D:\Docker` (restart Cursor after changing).
+2. Copy `nornir-docker/dev/example.cursor-dev.run.env` to `$NORNIR_DOCKER_USER_ROOT/Run/nornir-dev/.env`.
+3. Set `NORNIR_TESTDATA_HOST` in that file to the **Linux / WSL path** (or Docker Desktop UNC) where `nornir-testdata` lives.
+4. Bridge: hardlink or copy Run `.env` → `nornir-docker/.env` (required for Compose substitution).
+5. Optionally set `NORNIR_REPRO_DATA_HOST` for the large repro corpus at `/data`.
+6. Ensure Docker can bind-mount those paths.
 
 Compose binds `${NORNIR_TESTDATA_HOST}` → `/nornir-testdata`; the container exposes that path as the value of `TESTINPUTPATH`. When set, `${NORNIR_REPRO_DATA_HOST}` → `/data` (read-only). `${NORNIR_TESTOUTPUT_HOST:-D:/nornir-test-output}` → `/tmp/nornir-test-output` (writable test output).
 
@@ -144,7 +158,7 @@ Set `user.name` / `user.email` in the container (or via repo-local git config) b
 
 ## Quick verification checklist
 
-- [ ] `nornir-docker/.env` exists with `NORNIR_TESTDATA_HOST` pointing at WSL-side test data
+- [ ] `$NORNIR_DOCKER_USER_ROOT/Run/nornir-dev/.env` is the run source of truth; `nornir-docker/.env` is a hardlink/copy bridge with `NORNIR_TESTDATA_HOST` set
 - [ ] Optional: `NORNIR_REPRO_DATA_HOST` set for a real `/data` repro mount (otherwise placeholder empty `/data`)
 - [ ] `docker compose ... run` includes **`--gpus all`** (or compose-level GPU) when GPU access is required
 - [ ] In container: `echo $TESTINPUTPATH` → `/nornir-testdata`, `echo $TESTOUTPUTPATH` → under `/tmp`, `echo $INPUT_NORNIR_DATA` → `/data`
