@@ -12,16 +12,16 @@ All images are built from the monorepo root (context ``.``).
      - Notes
    * - ``nornir:dev``
      - ``dev/Dockerfile``
-     - CuPy (``cupy-cuda13x`` by default) + pytest. Use ``--gpus all`` / ``nd-build -Gpu`` for GPU.
+     - CuPy (``cupy-cuda13x``) + cuVS (``cuvs-cu13``) + pytest. Use ``--gpus all`` / ``nd-build -Gpu`` for GPU.
    * - ``nornir:prod``
      - ``prod/Dockerfile``
      - CPU-only production (``INSTALL_CUPY=0``, default).
    * - ``nornir:cupy``
      - ``prod/Dockerfile`` with ``--build-arg INSTALL_CUPY=1``
-     - Production + CuPy.
+     - Production + CuPy + cuVS.
    * - ``nornir:dev-cursor-base``
      - ``dev/Dockerfile`` with ``INSTALL_MONOREPO_EDITABLES=0``
-     - CuPy + pytest + venv **without** baking the monorepo; base for ``cursor-worker``.
+     - CuPy + cuVS + pytest + venv **without** baking the monorepo; base for ``cursor-worker``.
    * - ``nornir:cursor-worker``
      - ``Dockerfile.cursor-worker``
      - ``dev-cursor-base`` + Cursor lab agent CLI; packages come from ``/workspace`` at start.
@@ -74,9 +74,10 @@ Manual ``docker build`` (from monorepo root)::
     docker build -f nornir-docker/prod/Dockerfile -t nornir:prod .
     docker build -f nornir-docker/prod/Dockerfile --build-arg INSTALL_CUPY=1 -t nornir:cupy .
 
-Override the CuPy wheel (default ``cupy-cuda13x``)::
+Override the CuPy wheel (default ``cupy-cuda13x``). Match cuVS to the same CUDA major
+(``cuvs-cu12`` with ``cupy-cuda12x``)::
 
-    docker build -f nornir-docker/dev/Dockerfile --build-arg CUPY_PACKAGE=cupy-cuda12x -t nornir:dev .
+    docker build -f nornir-docker/dev/Dockerfile --build-arg CUPY_PACKAGE=cupy-cuda12x --build-arg CUVS_PACKAGE=cuvs-cu12 -t nornir:dev .
 
 OCI image labels
 -----------------

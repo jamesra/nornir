@@ -64,7 +64,7 @@ Optional per-invocation overrides: `build.env`, `.build.<id>.env` where `<id>` i
 | Change | Touch |
 |--------|--------|
 | Python 3.14 base, ImageMagick, pytest, shared pip pins | `dev/Dockerfile`, `prod/Dockerfile`, `constraints-headless.txt` |
-| CuPy CUDA generation | `CUPY_PACKAGE` in Dockerfiles / compose build args; document host driver requirement |
+| CuPy CUDA generation | `CUPY_PACKAGE` / `CUVS_PACKAGE` in Dockerfiles / compose build args (same CUDA major); document host driver requirement |
 | New headless package in editable set | `install-monorepo-editables.sh`, `dev/Dockerfile` COPY list, `prod/Dockerfile` if prod bakes it |
 | Cursor dev workspace behavior | `cursor-dev-entry.sh`, `compose.cursor-dev.yaml` (see **nornir-docker-devcontainer**) |
 | Worker agent CLI / workspace strategies | `Dockerfile.cursor-worker`, `cursor-worker-entry.sh`, `example.nornir-cursor-worker.run.env` |
