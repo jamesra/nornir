@@ -10,6 +10,24 @@ Scripts and libraries for **constructing 3D volumes** from 2D image sets using t
 
 * :doc:`../api/nornir_buildmanager`
 
+VolumeData dirty / save ownership
+---------------------------------
+
+Pipeline stages and volumemanager getters follow this contract:
+
+* **Create children** only in setters / ``GetOrCreate*`` / ``UpdateOrAddChild*``.
+  Ordinary getters must not create (example: ``BlockNode.NonStosSectionNumbers``
+  returns an empty frozenset when the child is missing).
+* **Dirty flags** (``_AttributesChanged``, ``_ChildrenChanged``) live on the
+  mutated node. Linked children do not bubble dirtiness to parents.
+* **Stage yields** should return the node that needs saving (often Volume or
+  Block after membership changes). ``PipelineManager._SaveNodes`` treats an
+  ``ElementTree.Element`` as a single save target (not an iterable of children)
+  and skips ``None``.
+
+See the package ``README.md`` table of ``VolumeData.xml`` locations and
+``tests/test_import_volumedata_save.py``.
+
 Common workflow
 ---------------
 

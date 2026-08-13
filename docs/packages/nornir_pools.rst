@@ -127,3 +127,24 @@ custom orchestration; see the API reference.
 Set ``NORNIR_POOL_DIAG=1`` to log pool names, kinds, and active task counts on each
 lifecycle call.  ``NORNIR_KEEP_PROCESS_POOLS=1`` skips process-pool shutdown in
 ``CloseProcessPools`` (normally unnecessary when using ``ReleaseStagePools``).
+
+Which pool for which work
+-------------------------
+
+* **Python callables (CPU):** ``GetGlobalMultiprocessPool`` / local machine pool.
+* **Python callables (I/O / light):** ``GetGlobalThreadPool``.
+* **Shell / external binaries:** subprocess ``GetGlobalProcessPool`` —
+  ``add_task`` expects a command string (or process args), not a Python callable.
+* **Remote cluster callables:** ``GetGlobalClusterPool`` (Parallel Python).
+
+Every ``add_*`` returns a Task; shutdown and stage boundaries must drain waits
+(``ReleaseStagePools`` / ``WaitOnAllPools`` / ``ClosePools``).
+
+Parallel Python callback timeout
+--------------------------------
+
+If the remote callback never fires after ``server.wait``, ``CTask.wait`` uses a
+bounded secondary timeout (default 60s after the 300s primary wait), then
+**unwinds** ``ActiveJobCount`` once and raises ``RuntimeError`` instead of
+blocking forever. See the package ``README.md`` and
+``tests/test_parallelpython_callback_timeout.py``.

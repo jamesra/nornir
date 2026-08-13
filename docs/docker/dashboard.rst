@@ -35,11 +35,13 @@ Compose file: ``nornir-docker/compose.dashboard.yaml``.
 Log retention and UI history
 ----------------------------
 
-``NORNIR_DASHBOARD_MAX_EVENTS`` (default ``100000``, template in
-``example.dashboard.run.env``) caps how many events SQLite keeps **per run**.
-Set ``0`` to disable prune (disk growth is then operator-owned). Events removed
-by prune or by ``NORNIR_DASHBOARD_RETENTION_DAYS`` are gone from the dashboard DB;
-authoritative full session files remain under ``NORNIR_LOG_ROOT``.
+``NORNIR_DASHBOARD_MAX_EVENTS`` (default ``0`` = unlimited / no prune; template in
+``example.dashboard.run.env``) optionally caps how many events SQLite keeps
+**per run**. Set a positive value to enable prune. Disk growth with the default
+is then operator-owned (whole runs still age out via
+``NORNIR_DASHBOARD_RETENTION_DAYS``). Events removed by prune or by retention are
+gone from the dashboard DB; authoritative full session files remain under
+``NORNIR_LOG_ROOT``.
 
 The log pane loads a newest page first, then **Load older** / scroll-to-edge
 pages through retained history without dumping the full multi‑MB transcript into
