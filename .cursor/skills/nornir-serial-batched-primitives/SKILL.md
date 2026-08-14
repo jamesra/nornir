@@ -27,7 +27,7 @@ Maintain these tables in the **same commit** when adding, removing, or renaming 
 | Pathway | Scripts (update as inventory changes) |
 |---------|----------------------------------------|
 | Phase correlation | `nornir-imageregistration/scripts/microbench*.py`, `compare*.py`, `verify*.py`, `audit*.py` (incl. opt-in `audit_cupy_item_bench.py`), `tabulate*.py`, `run_*investigation*.sh` |
-| STOS / refine | Scripts and launch configs that exercise `stos_brute` / refine under `nornir-imageregistration/scripts/` |
+| STOS / refine | Scripts and launch configs that exercise `stos_brute` / refine under `nornir-imageregistration/scripts/`; `python -m nornir_imageregistration.stos_registration_debug` |
 | Mosaic arrange | Scripts touching `arrange_mosaic` |
 
 ### Pytest modules
@@ -35,7 +35,7 @@ Maintain these tables in the **same commit** when adding, removing, or renaming 
 | Area | Test modules (glob / names) |
 |------|----------------------------|
 | Align / phase | `tests/test_*Align*.py`, `tests/test_*phase*.py` |
-| STOS / refine | `tests/test_*stos*.py`, `tests/test_*refine*.py` |
+| STOS / refine | `tests/test_*stos*.py` (incl. `test_stos_registration_debug.py`), `tests/test_*refine*.py` |
 | Arrange / masks | `tests/test_arrange.py`, `tests/test_overlapmasking.py` |
 
 ### Verification matrix (minimum)

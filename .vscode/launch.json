@@ -330,7 +330,8 @@
             "args": [
                 "-debug", "-computational_library", "cupy",
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
-                "Assemble", "-Channels", "TEM", "-Filters", "Leveled", "-Sections", "1200-1500", "-Downsample", "8,16,32", "-NoInterlace", "-Transform", "Grid"
+                "Assemble", "-Channels", "TEM", "-Filters", "Leveled",  "-Downsample", "8,16,32", "-NoInterlace", "-Transform", "Grid",
+                "-Sections", "1200-1500",
             ],
             "env": {
                 "NORNIR_HEADLESS": "1",
