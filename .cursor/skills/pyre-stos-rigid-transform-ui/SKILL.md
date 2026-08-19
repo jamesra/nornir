@@ -44,6 +44,8 @@ Color convention in composite overlay shader: **magenta = source**, **green = ta
 | Composite target FBO | Static quads | `Space.Target` |
 | Composite source FBO | Deformable CP mesh (`warp_into_target_display`) | `Space.Source` (tween 0 → TargetPoints) |
 
+During control-point drag, patch existing tile-mesh **Target XY** from live `TargetPoints` (grid: bilinear lattice; mesh: source Delaunay). Do **not** call `Transform()` / rebuild interpolators / Delaunay on mouse-move. Full remesh runs on mouse-up.
+
 Texture shader: `mix(target_pos, source_pos, tween)` with packed `(TargetPoints, SourcePoints)`. **Do not** draw the Target image with a CP warp mesh — moving `TargetPoints` folds Delaunay and shatters the green layer.
 
 ### Control point space (mesh / grid / RBF)
