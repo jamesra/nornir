@@ -12,6 +12,7 @@ Procedures for agents. Policy/guardrails live in [`.cursor/rules/`](../rules/). 
 | [nornir-docker-devcontainer](nornir-docker-devcontainer/SKILL.md) | cursor-dev / Dev Containers | [nornir-docker-conventions](../rules/nornir-docker-conventions.mdc) |
 | [nornir-docker-images-ci](nornir-docker-images-ci/SKILL.md) | Image matrix, OCI/BOM, Docker CI review | [nornir-docker-conventions](../rules/nornir-docker-conventions.mdc) |
 | [nornir-documentation](nornir-documentation/SKILL.md) | Sphinx monodoc build/deploy | [Documentation-and-monodoc](../rules/Documentation-and-monodoc.mdc) |
+| [nornir-debug-profiling](nornir-debug-profiling/SKILL.md) | PhaseProfiler, performance investigation | [Unified-Logging-Convention](../rules/Unified-Logging-Convention.mdc) |
 | [nornir-headless-unit-tests](nornir-headless-unit-tests/SKILL.md) | `NORNIR_HEADLESS`, plot artifact triage | — |
 | [nornir-serial-batched-primitives](nornir-serial-batched-primitives/SKILL.md) | Serial/batched registration verification | [Serial-batched-primitives](../rules/Serial-batched-primitives.mdc) |
 | [pyre-stos-rigid-transform-ui](pyre-stos-rigid-transform-ui/SKILL.md) | Pyre STOS rigid UI semantics | [Pyre-STOS-rigid-transform-UI](../rules/Pyre-STOS-rigid-transform-UI.mdc) |

@@ -31,6 +31,7 @@ Default virtual environment: `D:\src\git\nornir\venv\pyre314` (see **Virtual-Env
 |-----------|-------------------------|---------|
 | [python-standards.mdc](.cursor/rules/python-standards.mdc) | `**/*.py` | Imports, typing, class members, docstrings |
 | [Numpy-CuPy-compatibility.mdc](.cursor/rules/Numpy-CuPy-compatibility.mdc) | `nornir-imageregistration` | `xp` / CuPyX / host↔device boundaries |
+| [Pyre-host-array-boundary.mdc](.cursor/rules/Pyre-host-array-boundary.mdc) | `nornir-pyre` | `xp` math; `EnsureNumpyArray` only at Qt/GL/SciPy/floats |
 | [Streaming-and-memory-bounded-processing.mdc](.cursor/rules/Streaming-and-memory-bounded-processing.mdc) | buildmanager, imageregistration, pools, shared | Stream work; bound peak memory |
 | [Documentation-and-monodoc.mdc](.cursor/rules/Documentation-and-monodoc.mdc) | `docs/**`, READMEs | Monodoc under `docs/`; short package READMEs |
 | [powershell-scripts.mdc](.cursor/rules/powershell-scripts.mdc) | `**/*.ps1` | Comment-based help on generated scripts |
@@ -54,6 +55,7 @@ Full catalog: [`.cursor/skills/README.md`](.cursor/skills/README.md).
 | [nornir-docker-devcontainer](.cursor/skills/nornir-docker-devcontainer/SKILL.md) | cursor-dev / Dev Containers setup |
 | [nornir-docker-images-ci](.cursor/skills/nornir-docker-images-ci/SKILL.md) | Image matrix, OCI/BOM, Docker CI |
 | [nornir-documentation](.cursor/skills/nornir-documentation/SKILL.md) | Build/deploy Sphinx monodoc |
+| [nornir-debug-profiling](.cursor/skills/nornir-debug-profiling/SKILL.md) | PhaseProfiler, slowness and queue profiling |
 | [nornir-headless-unit-tests](.cursor/skills/nornir-headless-unit-tests/SKILL.md) | `NORNIR_HEADLESS`, plot artifact triage |
 | [nornir-serial-batched-primitives](.cursor/skills/nornir-serial-batched-primitives/SKILL.md) | Serial/batched registration verification |
 | [pyre-stos-rigid-transform-ui](.cursor/skills/pyre-stos-rigid-transform-ui/SKILL.md) | Pyre STOS rigid UI semantics |

@@ -1,0 +1,35 @@
+---
+description: >-
+  Pyre NumPy/CuPy: use xp from get_array_module for array math; EnsureNumpyArray
+  only at Qt, OpenGL, SciPy, pickle, and Python-float consumers.
+globs: nornir-pyre/**/*.py
+alwaysApply: false
+---
+
+# Pyre host vs CuPy arrays
+
+Same policy as [Numpy-CuPy-compatibility.mdc](Numpy-CuPy-compatibility.mdc). Do **not** invent a second array model. Pyre does not run on the build pathway; do not import Pyre helpers from `nornir-buildmanager` or imageregistration pipelines.
+
+## `xp` from the input array
+
+- `from nornir_imageregistration import cp` (real CuPy or `cupy_thunk`). Never `import cupy as xp`. Never use `GetComputationModule()` to pick output type when a concrete array is already in hand.
+- `xp = cp.get_array_module(arr)` (or the first of related arrays). Use `xp.fliplr`, `xp.vstack`, `xp.squeeze`, `xp.floor`, `xp.asarray`.
+- numpy-in → numpy-out; cupy-in → cupy-out.
+
+## Host conversion only at host APIs
+
+Call `nornir_imageregistration.EnsureNumpyArray` **once** when the consumer cannot take CuPy:
+
+- Qt / Python floats / `PointPair` (use `pyre.array_host.yx_host` for a 2-float YX vector)
+- OpenGL (`DrawTriangles`, VAO upload)
+- SciPy `Delaunay` / `KDTree`
+- Process-pool pickle
+
+After that conversion, further `np.*` in the same function is fine.
+
+`yx_host` is only for **2-float Qt/Python** endpoints (create-point, registration snapshot, mouse). It is not a general “make this numpy” hammer. Do not convert whole `TargetPoints` per mouse move. Do not change imageregistration APIs to always-NumPy for Pyre safety.
+
+## Anti-patterns
+
+- `np.asarray` / `np.fliplr` / `np.vstack` / `np.squeeze` / `np.floor` on a live transform array that may be CuPy — use `xp`, or convert first if the next call is already a host-only API.
+- `GetFixedPoint` returning NumPy “for safety” (it is a view into live storage; keep device affinity).

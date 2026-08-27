@@ -10,8 +10,10 @@ alwaysApply: false
 
 ### Picking the array module (`xp`)
 
-- **`xp = nornir_imageregistration.GetComputationModule()`** -- Use when there is no input array yet and code should follow the process-wide backend (numpy vs cupy), e.g. allocating scratch buffers for the active lib.
+- **`xp = nornir_imageregistration.GetComputationModule()`** -- Use when there is no input array yet and code should follow the process-wide backend (numpy vs cupy), e.g. allocating scratch buffers for the active lib. This **is** the cached process-wide numpy/cupy choice.
 - **`xp = cp.get_array_module(x)`** -- Use when behavior must match a **specific** array `x` (or the first of several related arrays). Prefer this for helpers that transform data: keep outputs on the same kind of array as the inputs (numpy in -> numpy out; cupy in -> cupy out).
+
+**`get_array_module` is cheap** (type checks only; not a device sync). Bind `xp` **once at function entry** from the input arrays and reuse it in the body. Do **not** call `get_array_module` inside pixel/cell loops, and do **not** skip it “for speed.” Do **not** invent a second global cache of “xp from the last array” — that would ignore a NumPy caller while the process is in CuPy mode.
 
 Transitioning from system memory (numpy) and gpu memory (cupy) is very expensive.  Transitions should be kept to the minimum number possible. 
 - **Do not** use `import cupy as xp` or other aliases that steal the name `xp` from this meaning.
@@ -41,6 +43,13 @@ Transitioning from system memory (numpy) and gpu memory (cupy) is very expensive
 
 - Use **CPU SciPy** only when there is **no** suitable CuPyX API, when required spatial support is unavailable in the active CuPy environment, or when the algorithm is inherently host-based. At that boundary, pass **NumPy arrays** (e.g. `np.asarray(x.get())` for CuPy `x`). Examples: **Qhull / `scipy.spatial.Delaunay`**, **`scipy.spatial.transform.Rotation`**. Do not pass CuPy arrays into those calls without converting.
 
+### Function contract (docstrings)
+
+On helpers that take image or point `NDArray`s, state the backend in the docstring when it is not obvious:
+
+- Accepts NumPy or CuPy; ops follow `cp.get_array_module`.
+- Host-only: SciPy Qhull / file I/O.
+
 ### Anti-patterns
 
 - **`cp.asarray(scipy.some_func(...))`** as a default -- avoids type errors but forces host work and sync; prefer `cupyx.scipy` when available, or a small dispatcher (e.g. cdist) that chooses GPU vs CPU explicitly.
@@ -50,3 +59,7 @@ Transitioning from system memory (numpy) and gpu memory (cupy) is very expensive
 ### Thunks
 
 - When CuPy is unavailable, **`nornir_imageregistration.cupy_thunk`** and **`cupyx_thunk`** stand in for `cp` / `cupyx.scipy`; the same `get_array_module` patterns should still read as "numpy path" vs "cupy path" in code reviews.
+
+### Related rules
+
+- Pyre UI ([Pyre-host-array-boundary.mdc](Pyre-host-array-boundary.mdc)): same `xp` convention; `EnsureNumpyArray` only at Qt / OpenGL / SciPy / Python-float consumers. Do not import Pyre helpers from build or imageregistration pipelines.

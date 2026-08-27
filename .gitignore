@@ -90,3 +90,10 @@ scripts/
 C:\\Temp\\*.png
 /nornir-dashboard.db
 *.pstats
+
+# Pool profiling output (runtime artifact)
+.nornir-pools-profile/
+
+# Scratch/one-off scripts
+_tmp_*.py
+tmp_check_progress.sh
