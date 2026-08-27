@@ -36,6 +36,7 @@ Maintain these tables in the **same commit** when adding, removing, or renaming 
 |------|----------------------------|
 | Align / phase | `tests/test_*Align*.py`, `tests/test_*phase*.py` |
 | STOS / refine | `tests/test_*stos*.py` (incl. `test_stos_registration_debug.py`), `tests/test_*refine*.py` |
+| RBF / transform composition | `tests/test_rbf_singular_recovery.py`, `tests/transforms/test_addition.py`, `tests/transforms/test_rbf_precompute_and_duplicates.py` |
 | Arrange / masks | `tests/test_arrange.py`, `tests/test_overlapmasking.py` |
 
 ### Verification matrix (minimum)
@@ -45,13 +46,15 @@ Maintain these tables in the **same commit** when adding, removing, or renaming 
 | `phasecorrelation` / `batched_phase_correlation` | Unit tests for affected APIs; serial vs batched parity on a small fixture; microbench or compare script if perf-sensitive |
 | `stos_brute` / refine shared | Relevant `test_*stos*` / `test_*refine*`; ≥100-tile section for final perf sign-off |
 | `arrange_mosaic` / overlap masking | `test_arrange` / `test_overlapmasking` as applicable |
+| RBF weight solve / degeneracy recovery | `tests/test_rbf_singular_recovery.py`; `tests/transforms` as a whole (CPU **and** `_GPUComponent` mirrors must change together) |
 | New script or gate | Add row here; run it once before merge |
 
 ### Known gaps
 
 | Gap | Notes |
 |-----|--------|
-| _(none recorded)_ | Add when creating new coverage debt; remove when filled |
+| `tests/transforms` has 18 pre-existing failures | `test_AlignmentRecord`, `test_linear_nd_cupy_fallback`, `test_metrics`, `test_points_to_linear_fit`. Same count with and without local changes; compare against a stashed baseline rather than expecting green |
+| GPU (`_GPUComponent`) RBF recovery is untested | `_is_singular_matrix_error` is shared by both mirrors, but the CuPy branch needs a CUDA host to exercise |
 
 ## Same-commit sync
 
