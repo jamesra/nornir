@@ -1,0 +1,439 @@
+# Nornir master concerns list — bugs and performance
+
+**Started:** 2026-08-26
+**Scope:** Nornir umbrella repo (11 submodules), reviewed in 10 chunks.
+**Plan:** `nornir_chunked_bug_review_92567ec8.plan.md`
+
+Builds on the Aug 2026 overnight review (`.cursor/overnight-bug-review-progress.md`) and
+the CuPy transfer audit (`.cursor/cupy-audit-item-outcomes.md`). Items already fixed
+overnight are **not** re-listed; only open/carried items appear below.
+
+## Legend
+
+- **Severity:** P0 (data loss / wrong science), P1 (silent wrong output), P2 (perf / ops pain), P3 (maintainability / debt)
+- **Type:** `bug` | `perf` | `parity` | `debt`
+- **Status:** `open` | `confirmed` | `fixed` | `wontfix` | `deferred`
+
+## Chunk status
+
+- [x] 01-foundation (shared + pools)
+- [x] 02-phase-stos (phase correlation + STOS brute)
+- [x] 03-refine (grid refine + local distortion)
+- [x] 04-assemble (assemble + tile I/O)
+- [x] 05-transforms (transforms + spatial)
+- [x] 06-mosaic (arrange + overlap + layout)
+- [x] 07-pipeline (buildmanager pipeline core)
+- [x] 08-operations (buildmanager operations)
+- [x] 09-importers (importers + dm4)
+- [x] 10-pyre (Pyre UI + GL)
+- [ ] 11-infra (Docker, builddashboard, web) — optional, deferred per plan
+
+See the **Summary** at the end of this file for P0/P1 counts, top risks, and recommended fix order.
+
+---
+
+## Chunk 00 — Seeded from prior review
+
+Carried forward from overnight Theme 4 (memory-bounded I/O inventory) and the
+morning design themes. These are pre-existing, still-open concerns.
+
+| ID | Chunk | Severity | Type | Location | Concern | Evidence | Status |
+|----|-------|----------|------|----------|---------|----------|--------|
+| C00-P001 | 00-seed | P0 | perf | `nornir-shared` `FileChecksum` | Reads entire file into memory to hash; large mosaics/STOS on 100TB NAS | Overnight Theme 4 P0 | open |
+| C00-P002 | 00-seed | P2 | perf | `nornir-shared` / buildmanager `DataChecksum` | Materializes whole mosaic/transform lists; accept for metadata sizes, reject if image bytes embed | Overnight Theme 4 P0 | open |
+| C00-P003 | 00-seed | P1 | perf | `assemble.TransformImage` | Full-section assemble buffers; prefer tileset path + memmap spill | Overnight Theme 4 P1 | open |
+| C00-P004 | 00-seed | P1 | perf | `assemble_tiles` output buffer | In-memory output before write; acceptable only with `_use_memmap` | Overnight Theme 4 P1 | open |
+| C00-P005 | 00-seed | P1 | perf | `ConvertImagesInDict*` | Unbounded tile dict; needs in-flight bound + path handoff | Overnight Theme 4 P1 | open |
+| C00-P006 | 00-seed | P2 | perf | `nornir-buildmanager` `mosaicvolume` helpers | Loads full mosaic files into pools; should pass paths and stream tile jobs | Overnight Theme 4 P2 | open |
+| C00-D001 | 00-seed | P3 | debt | `nornir-imageregistration/transforms` | CPU/GPU dual-class drift invites one-sided fixes (epsilon, Flip, dedupe) | Morning theme 1 | open |
+| C00-D002 | 00-seed | P3 | debt | `nornir-buildmanager/volumemanager` | Volume XML dirty/save ownership undocumented; create-on-read getters | Morning theme 2 | open |
+| C00-D003 | 00-seed | P1 | bug | `nornir-pools` ParallelPython | ActiveJobCount leak if remote callback never fires; needs bounded wait + unwind | Morning theme 3 | open |
+| C00-D004 | 00-seed | P3 | debt | mosaic / idoc / transform Flip-Flop | No single written axis/origin contract; caused overnight Y-shift bug | Morning theme 5 | open |
+| C00-D005 | 00-seed | P3 | debt | `xelementwrapper.py` | Element copy with children marked "possibly undefined behavior", untested | Source comment | open |
+| C00-B001 | 00-seed | P1 | parity | grid refine vs C++ `ir-refine-grid` | ~3.7 px golden gap on Grid690 | `test_refine_grid_legacy_parity.py` (env-gated) | open |
+
+---
+
+## Chunk 01 — Foundation: shared + pools
+
+Paths: `nornir-shared/nornir_shared`, `nornir-pools/nornir_pools`
+
+| ID | Chunk | Severity | Type | Location | Concern | Evidence | Status |
+|----|-------|----------|------|----------|---------|----------|--------|
+| C01-B001 | 01 | P1 | bug | `nornir_shared/histogram.py:195,239,256` | `Median`/`Mean`/`PeakValue` exclude the top bin, so stats use `NumBins-1` bins; feeds auto-level/gamma | `_MinMaxBinIndicies` returns `iMax = NumBins-1`; slices `Bins[iMin:iMax]` | open |
+| C01-B002 | 01 | P1 | bug | `nornir_shared/histogram.py:29` | `_FindValueAtPercentile` divides by cutoff bin count with no guard; blank tile raises ZeroDivision/IndexError | reached from `Median` and both `AutoLevel` branches | open |
+| C01-B003 | 01 | P1 | bug | `nornir_shared/files.py:728` | Dir recursion filters on full **path** containing a dot, not dir **name**; a dotted ancestor (e.g. `RC3.v2`) prunes the whole scan | `filter(lambda d: d.path.find('.') > -1, dirs)` — **verified by hand** | confirmed |
+| C01-B004 | 01 | P1 | bug | `nornir_shared/misc.py:396,400` | Fallback log filename uses `%M` (minutes) where `%m` (month) intended; names mislead and collide across months | `strftime('log-%M.%d.%y_%H.%M.txt')` | open |
+| C01-B005 | 01 | P1 | bug | `nornir_pools/parallelpythonpool.py:212,253` | PP pool never implements abstract `num_active_tasks`, so the class cannot be instantiated at all | `IPool.num_active_tasks` is `@abstractmethod`; only `ActiveTasks` defined | open |
+| C01-B006 | 01 | P2 | bug | `nornir_pools/parallelpythonpool.py:218` | `server` property references undefined name `pp`; first submit raises `NameError`, not a missing-cluster error | no `import pp` in module | open |
+| C01-B007 | 01 | P2 | bug | `nornir_pools/serialpool.py:24` | `SerialPool._process_pool` reads `self.Name`; `PoolBase` exposes lowercase `name` → `AttributeError` | `GetProcessPool(self.Name + ...)` | open |
+| C01-B008 | 01 | P2 | bug | `nornir_shared/files.py:677` | Downsample exclusion applies `'%03d' % level` to values `ensure_string_set` may have stringified → `TypeError` | set built at line 673 without int coercion | open |
+| C01-B009 | 01 | P2 | parity | `nornir_shared/files.py:758-764` vs `793-799` | Threaded recursion branch drops `caseInsensitive` and the `MatchNames is not None` guard; behavior changes past 3 subdirs | serial branch passes both | open |
+| C01-B010 | 01 | P2 | parity | `nornir_pools/multiprocessthreadpool.py:246-273` | `wait_return` returns `None` on failure while `wait` re-raises; callers silently treat failures as empty | `ThreadTask` raises in both | open |
+| C01-B011 | 01 | P2 | bug | `nornir_pools/multiprocessthreadpool.py:351` | Shutdown `assert len(self._active_tasks) == 0` vanishes under `-O`; with asserts on, a leak crashes teardown | callback_wrapper itself raises if id missing | open |
+| C01-B012 | 01 | P2 | debt | `nornir_pools/processpool.py:40,58` | `ImmediateProcessTask.Run` / `_handle_proc_completion` are dead code duplicating process launch; invites re-introducing double-spawn | worker Popens `entry.cmd` itself | open |
+| C01-B013 | 01 | P2 | bug | `nornir_shared/parallel.py:37,55,115,124` | Lock-file handle leaks on error path; bare `except:` makes stale-lock read indistinguishable from real I/O error | `open()` outside `with`, close skipped on raise | open |
+| C01-B014 | 01 | P3 | bug | `nornir_pools/task.py:74` | `__str__` pads by length of time string not assembled line; log columns misalign | should measure `out_string` | open |
+| C01-B015 | 01 | P3 | bug | `nornir_shared/files.py:593` | `ensure_string_set` returns caller `set`/`frozenset` unchanged, skipping the promised lowercasing | list path lowercases at 599 | open |
+| C01-P001 | 01 | P1 | perf | `nornir_shared/checksum.py:64` | `FileChecksum` still `f.read()`s whole file; the open P0 streaming ticket (concrete location for C00-P001) | `return DataChecksum(f.read())` | confirmed |
+| C01-P002 | 01 | P2 | perf | `nornir_shared/files.py:308-397` | `rmtree` submits dir work into the same executor then blocks on `as_completed` inside workers → deadlock/starvation risk on deep trees | nested `rmtree` partial submitted at 350 | open |
+| C01-P003 | 01 | P2 | perf | `nornir_shared/files.py:737,828` | New 8-worker executor per recursion level and each subtree materialized to a list, defeating the generator API | `ThreadPoolExecutor` per frame; `return list(...)` | open |
+| C01-P004 | 01 | P2 | perf | `nornir_pools/threadpool.py:239` + `poolbase.py:173` | Queue bounded at `max_threads*32` with blocking `put`; a task enqueueing onto its own pool deadlocks once full | no re-entrancy guard; `tasks.join()` never returns | open |
+| C01-P005 | 01 | P3 | debt | `nornir_shared/profiling.py:17,128-133` | Phase profiling writes its own NDJSON outside the unified session layout and swallows write errors | `NORNIR_PHASE_PROFILE_LOG`, `except OSError: pass` | open |
+| C01-P006 | 01 | P3 | debt | `nornir_shared/misc.py:347-350,383` | With `NORNIR_LOG_ROOT` unset, `SetupLogging` writes logs into CWD, scattering per-run logs | `BaseLoggingDir = os.getcwd()` fallback | open |
+
+**Notes:** Overnight fixes verified as holding (DataChecksum length prefix, shared-memory round trip, PP callback secondary timeout, histogram trim guards, GenNameFromDict). Remaining high-value items are numerical (histogram off-by-one feeds every auto-level decision). PP and Serial pools appear untested — both fail on first use.
+
+---
+
+## Chunk 02 — Phase correlation + STOS brute
+
+Paths: `phasecorrelation.py`, `batched_phase_correlation.py`, `stos_brute.py`, `hann_window_cache.py`
+
+| ID | Chunk | Severity | Type | Location | Concern | Evidence | Status |
+|----|-------|----------|------|----------|---------|----------|--------|
+| C02-B001 | 02 | P1 | bug | `phasecorrelation.py:577` | `peak_ratio` measured on the **thresholded** surface when `allow_in_place=True`, so 2nd peak is ~0 and the ratio is inflated; gates ambiguity everywhere | line 527 zeroes sub-cutoff in same buffer; `find_offset` (677) and `_peak_from_correlation_image` both pass in-place | open |
+| C02-B002 | 02 | P1 | bug | `stos_brute.py:676` | `image_stats is None` recovery calls `CalcStats(image_stats)` (passes `None`) instead of `CalcStats(image)`; raises instead of recovering | **verified by hand** | confirmed |
+| C02-B003 | 02 | P1 | parity | `batched_phase_correlation.py:242` | Batched degeneracy gate weaker than serial `is_alignable_cell`; low-contrast cells serial rejects get noise peaks in batched mode | serial also checks `NORNIR_REFINE_LOW_CONTENT_STD_MIN` | open |
+| C02-B004 | 02 | P1 | bug | `stos_brute.py:1676-1679` | Radial/scale magnitude spectra computed with `use_dog=True`, contradicting documented "DoG for angle, raw for scale" | 4 calls all `use_dog=True`; docstring line 209 | open |
+| C02-B005 | 02 | P1 | bug | `batched_phase_correlation.py:255-260` | NaN/inf correlation still yields a peak; only weights/ratios zeroed while `peaks` keeps garbage argmax | serial zeroes whole image when `corr_max` non-finite | open |
+| C02-B006 | 02 | P1 | bug | `stos_brute.py:1709-1714` | Peak-search normalization divides by `max()` with no zero guard; guarded only by NumPy-only `FloatingPointError` → NaN on CuPy | same at 277-281 | open |
+| C02-B007 | 02 | P2 | bug | `stos_brute.py:1788-1792` | +180° disambiguation rotate omits `power_of_two=True` used by the 0° call; shapes can mismatch the shared target FFT | `fft_phase_correlation` raises on mismatch | open |
+| C02-B008 | 02 | P2 | bug | `stos_brute.py:286` | Log-polar scale silently clamped to [0.90, 1.12]; a failed estimate is indistinguishable from a good one at the boundary | `np.clip(...)` with no log or flag | open |
+| C02-B009 | 02 | P2 | bug | `stos_brute.py:418-435` | `_correlation_peak_ratio` takes global top-2 with no exclusion radius, so "2nd peak" is usually adjacent → ratio collapses to 1.0 | compare `masked_peak_ratio` which uses exclusion radius | open |
+| C02-B010 | 02 | P2 | bug | `batched_phase_correlation.py:160-179` | Centroid window clamped rather than truncated, so border peaks refine against an off-center window, biasing offsets inward | `cr = xp.clip(peak_r, r, h-1-r)` | open |
+| C02-B011 | 02 | P2 | bug | `stos_brute.py:855,868` | `NarrowAngleSearchRangeWithResult` uses exact float equality for lookup and can divide by zero `nSteps` | `.index(target_angle)`; `int(range/min_step)` → 0 | open |
+| C02-B012 | 02 | P2 | debt | `phasecorrelation.py:68-76,465,534,545` | Three distinct failure modes all return the same zero-offset record with no logging; `stos_brute` uses `print()` | no `logging` in module; prints at 1267/1436/1712 | open |
+| C02-P001 | 02 | P2 | perf | `batched_phase_correlation.py:73-74,235-236` | Batched force-upcasts every stack to float64, doubling FFT workspace vs serial native dtype | unconditional `dtype=xp.float64` second copy | open |
+| C02-P002 | 02 | P2 | perf | `stos_brute.py:1678-1679` | DoG+FFT magnitude spectrum computed 4× per log-polar registration when 2 would do | radial pair args identical to angle pair | open |
+| C02-P003 | 02 | P2 | perf | `stos_brute.py:690` | Per-angle device→host sync in the angle sweep (`int(xp_out.sum(...))`) | called once per angle from `ScoreManyAnglesGpu` | open |
+| C02-P004 | 02 | P2 | perf | `stos_brute.py:1311-1314,586-599` | Scale refinement re-zooms source + recomputes full `ImageStats` per score; ternary loop does 14×2 scores → ~40 pad/rotate/FFT cycles | `_SCALE_REFINE_TERNARY_ITERATIONS = 14` | open |
+| C02-P005 | 02 | P2 | perf | `hann_window_cache.py` + `stos_brute.py:1772` | Hann window cache is host-only, so the window re-uploads to device every log-polar call | `_coerce_to_source_module` does fresh `xp.asarray` | open |
+| C02-P006 | 02 | P3 | perf | `phasecorrelation.py:464,482` | `count_nonzero(overlap_mask)` evaluated and host-synced twice for the same mask | lines 464 and 482 | open |
+| C02-P007 | 02 | P3 | debt | `phasecorrelation.py:563-567` | Sub-pixel offset computed in float32, discarding float64 centroid precision on large frames | float32 cast of `center_of_mass` | open |
+
+**Notes:** Highest-value fix is C02-B001 — every caller passes `allow_in_place=True`, so the uniqueness ratio that gates ambiguity is measured on a surface where sub-cutoff pixels are exactly zero. Serial/batched divergence clusters in the validity gate, the dtype contract, and the non-finite guard, none of which the 4-tile `verify_cpu_vs_batched.py` tolerances would necessarily catch.
+
+---
+
+## Chunk 03 — Grid refine + local distortion
+
+Paths: `local_distortion_correction.py`, `refine_shared/*`, `mosaic_refine.py`, `stos_refine.py`
+
+| ID | Chunk | Severity | Type | Location | Concern | Evidence | Status |
+|----|-------|----------|------|----------|---------|----------|--------|
+| C03-B001 | 03 | **P0** | parity | `local_distortion_correction.py:4175` | Pooled STOS path builds `EnhancedAlignmentRecord` **without** `peak_ratio`, so every peak-ratio gate silently no-ops: no ambiguous-peak REJECT, empty `soft_discontinuity_ids`, finalize skips the ambiguity bar | 4175-4181 omits the kwarg present at 4100-4108; `is_ambiguous_peak(None)` returns False — **verified by hand** | confirmed |
+| C03-B002 | 03 | P1 | bug | `local_distortion_correction.py:3762` | `if i == num_iterations - 1: final_pass = True` runs **after** `i += 1`, so refine terminates one pass early | `i += 1` at 3736, break at 3738; comment describes pre-increment | open |
+| C03-B003 | 03 | P1 | parity | `local_distortion_correction.py:1408` | Batched returns `None` for a legitimately empty result; caller reads that as "batched unavailable" and re-measures the whole grid through a different peak finder → run-to-run CP differences | `return records if len(records) > 0 else None`; fallback at 4062-4072 | open |
+| C03-B004 | 03 | P1 | bug | `local_distortion_correction.py:2772` | Batched ZNCC wrapped in `except Exception: pass` with no logging; fallback sets score 0.0, which is below `identity_zncc_min` → infra failure looks like `IDENTITY_SUSPECT` | 2772-2773, 2798-2799 | open |
+| C03-B005 | 03 | P1 | bug | `refine_shared/phase_timer.py:93` | Two sources of truth for `NORNIR_REFINE_PHASE_TIMING`: module global snapshots env at import, config re-reads per call → benchmarks setting it late get empty buckets | phase_timer 33-37 vs runtime_config 26-29 | open |
+| C03-B006 | 03 | P2 | bug | `refine_shared/runtime_config.py:66,81` | Two output-changing flags default ON when unset; `NORNIR_REFINE_SHARP_WARPS` has no recorded golden-gate sign-off | `sharp_flag == '' → True` | open |
+| C03-B007 | 03 | P2 | parity | `local_distortion_correction.py:4062` | `NORNIR_REFINE_BATCHED` is documented as the mosaic vertex gate but also gates STOS cell measurement, so `0` moves STOS onto the path that drops `peak_ratio` (C03-B001) | docstring 140-146 scopes it to mosaic | open |
+| C03-B008 | 03 | P3 | bug | `local_distortion_correction.py:3139` | Residual/global-FOV recovery branches `continue` without incrementing `i`, so pass `i` runs twice; on the final pass this exceeds the iteration budget | 3112-3139, 3145-3172 | open |
+| C03-B009 | 03 | P3 | bug | `local_distortion_correction.py:3837` | `final_grid_n` reads loop-local `alignment_points`; `num_iterations < 1` raises `NameError` instead of a validation error | `RefineTransform` lacks the guard `RefineGridMosaic` has | open |
+| C03-B010 | 03 | P3 | debt | `refine_shared/discontinuity.py:21,32` | Duplicate env parse for `NORNIR_REFINE_DISCONTINUITY_K` / `_TRAVEL_MULT` alongside `RefineRuntimeConfig` | two clamp implementations can diverge | open |
+| C03-P001 | 03 | P1 | perf | `refine_shared/cell_validity.py:82` | `low_content_std_min_threshold()` calls `get_runtime_config(refresh=True)`, clearing the `lru_cache` and re-reading ~14 env vars **per cell** (×2 per measurement) | all 18 call sites in chunk use `refresh=True` | open |
+| C03-P002 | 03 | P1 | perf | `refine_shared/cell_validity.py:76` | Serial path retains 3+ device→host scalar syncs per cell that the batched path removed | `amin == amax`, `amax == 0`, `float(xp.std(...))` | open |
+| C03-P003 | 03 | P1 | perf | `local_distortion_correction.py:781` | Batched vertex measurement accumulates every candidate cell/mask in lists then stacks twice → peak ≈3× candidate set; downstream FFT chunking cannot bound it | caller stacks before `cell_measurement.py:88-90` budget | open |
+| C03-P004 | 03 | P1 | perf | `local_distortion_correction.py:1241` | `BuildAlignmentROIsBatched` materializes whole-grid `(N,H,W)` stacks then upcasts both to float64 (~1.6 GB for Grid16-scale, per pass) | 1290-1293 | open |
+| C03-P005 | 03 | P2 | perf | `local_distortion_correction.py:1028` | Four full-source-image reductions per invocation (isnan/min/max with host syncs) recomputed every pass though the image never changes | `ImageStats` already carries this | open |
+| C03-P006 | 03 | P2 | perf | `refine_shared/anchor_smooth.py:186` | `transform.Transform(point.reshape(1,2))` called once **per record** inside the emit loop; thousands of single-point mesh/RBF queries per pass | batched form exists at 98-104 | open |
+| C03-P007 | 03 | P2 | perf | `local_distortion_correction.py:1972` | `_refine_tileset` holds every prewarped tile (image + bool mask) simultaneously; dominant resident set at 100+ tile sections, no chunking or spill | `prewarped` dict, `_PrewarpedTile` | open |
+| C03-P008 | 03 | P3 | perf | `local_distortion_correction.py:1979` | `_grid_refine_neighbors` recomputed inside the pass loop, O(N²) in tiles (~16.9k pairs at 130 tiles, every pass) | only bounding boxes change between passes | open |
+| C03-P009 | 03 | P3 | perf | `local_distortion_correction.py:2026` | Full `gc.collect()` + CuPy `free_all_blocks()` after every pass forfeits allocator reuse for identically-shaped next-pass stacks | `_release_refinement_worker_memory` | open |
+
+**Notes:** C03-B001 is the single highest-value fix in the whole review so far — a one-kwarg omission that disables the entire peak-ratio reject machinery, failing open rather than erroring. `get_runtime_config(refresh=True)` at all 18 call sites means the `lru_cache` never serves a hit. Batched paths were memory-bounded at the FFT stage only; callers stack the full candidate set upstream of the VRAM budget.
+
+---
+
+## Chunk 04 — Assemble + tile I/O
+
+Paths: `assemble.py`, `assemble_tiles.py`, `tileset.py`, `tileset_functions.py`, `mmap_metadata.py`, `transformed_image_data_temp_files.py`
+
+| ID | Chunk | Severity | Type | Location | Concern | Evidence | Status |
+|----|-------|----------|------|----------|---------|----------|--------|
+| C04-B001 | 04 | P1 | bug | `assemble.py:809-851` | `TransformStos` returns/saves the **unwarped** source image; the assemble call is commented out and `stos is None` branches are dead | `stos = None` at 820 never reassigned; 844 commented; returns raw `warpedImage` — **verified by hand** | confirmed |
+| C04-B002 | 04 | P1 | bug | `assemble.py:622-626,688-692` | Both deprecated wrappers discard every caller argument, silently substituting full-bbox warp with cval 0 | pass `None`/`False` literals instead of received args | open |
+| C04-B003 | 04 | P2 | bug | `assemble.py:456-462` | Empty-subroi shared-memory branch passes the CuPy `output_area` into `create_shared_memory_array` instead of `output_area_shape` | sibling at 557 already corrected | open |
+| C04-B004 | 04 | P2 | bug | `assemble.py:484-550` | NaN survives the warp: order lowered to 1 but `xp.clip` leaves NaN, and `CompositeImageWithZBuffer` treats NaN as nonzero → written into the canvas | `sub_image != 0` is True for NaN | open |
+| C04-B005 | 04 | P2 | bug | `assemble_tiles.py:913-914` | `distance_image_cache` mutated from worker threads without a lock; the lock held at 496 is released before `TransformTile` re-enters the cache | `KeepGetOrCreate` at 914 unlocked | open |
+| C04-B006 | 04 | P2 | bug | `tileset.py:167-208` | `__CorrectBrightfieldShading` never appends tasks, so the wait loop is dead and it returns before files are written on a non-serial pool | `outputPaths.append` also double-adds | open |
+| C04-B007 | 04 | P2 | bug | `transformed_image_data_temp_files.py:50,177,199` | Class declares `sharedTempRoot` but code reads `_sharedTempRoot`; `SaveArrayToTemporaryFile` raises `AttributeError` unless another call ran first | name mismatch | open |
+| C04-B008 | 04 | P2 | bug | `transformed_image_data_temp_files.py:196-202` | `_temp_folder_created` check-then-set is not thread-safe; concurrent calls each `mkdtemp` and only the last is `atexit`-registered → leaked temp roots | no lock; driven from a threading pool | open |
+| C04-B009 | 04 | P2 | bug | `transformed_image_data_temp_files.py:99-101,222-239` | `Clear()` schedules `os.remove` on files whose memmap may still be alive; failures swallowed and never retried → temp file leak | `_RemoveTempFiles` catches `IOError` and logs only | open |
+| C04-B010 | 04 | P2 | bug | `tileset_functions.py:265-269` | Per-tile `os.rmdir(temp_input_dir)` removes the **shared** level cache dir other in-flight tiles are reading | dir is level-wide from caller at 174-176 | open |
+| C04-B011 | 04 | P3 | bug | `tileset_functions.py:315-316,362-363` | Silent skips: failed tile open returns `None` via bare `except IOError`; a 3-of-4 quadrant load yields a silently incomplete pyramid tile | warning only fires when all four fail | open |
+| C04-P001 | 04 | P1 | perf | `assemble_tiles.py:560-573` | `TilesToImageThreaded` submits all work at once and holds each warped tile until in-order composite → in-flight memory O(tiles), not O(workers) | serial path has `_PREFETCH_DEPTH`, parallel has `CheckTaskInterval`; threaded has no gate | open |
+| C04-P002 | 04 | P1 | perf | `assemble.py:994-1019` | Tiled `TransformImage` sets `return_shared_memory=False`, pickling every 2048² warped tile back through the pool pipe | the matching `unlink_shared_memory` at 1019 silently no-ops on an ndarray | open |
+| C04-P003 | 04 | P1 | perf | `assemble.py:964-972,1025-1033` | `enforce_background_cval` re-runs a whole-section inverse transform then copies the whole section after the tiled warp already finished | `GetROICoords` over full canvas + `output.copy()` | open |
+| C04-P004 | 04 | P2 | perf | `assemble.py:484,538-544` | Three full-array reductions plus host syncs per warp per tile, inconsistent with the kept A1/A7 lazy-stats decisions | `bool(xp.any(xp.isnan(...)))`, min/max, two `float()` | open |
+| C04-P005 | 04 | P2 | perf | `assemble.py:583-588` | `return_valid_mask` allocates a full bool mask plus a second full output via `xp.where` instead of in-place cval assignment | peak 2× output + mask | open |
+| C04-P006 | 04 | P2 | parity | `assemble_tiles.py:376,540` vs `649` | Output dtype comes from tile 0 in serial/threaded but `default_image_dtype()` in parallel — same mosaic assembles to different dtypes by entry point | also loads a full tile just to read a dtype | open |
+| C04-P007 | 04 | P3 | perf | `tileset_functions.py:314` | Each pyramid quadrant decoded then fully re-copied via `tobytes()`, tripling transient memory, four concurrent | `Image.frombytes(..., img.tobytes())` | open |
+| C04-D001 | 04 | P3 | debt | `assemble_tiles.py:94-97,173-182,221-231` | The whole spill-to-disk path is disabled behind `_use_memmap() -> False`, and the dead code is internally inconsistent (missing finalizer, possibly-unbound name in `except`) | two standing TODOs; unused `finalizer` | open |
+
+**Notes:** `TransformStos` returning an unwarped image is the sharpest correctness finding here. Memory-boundedness is uneven across the three assemble entry points — only the threaded one has no in-flight gate at all, which is ~3 GB of warped tiles for a 100-tile section at the documented 2-3 GB/core envelope. Path-vs-pickle infrastructure exists but tiled `TransformImage` opts out while retaining the dead unlink call.
+
+---
+
+## Chunk 05 — Transforms + spatial
+
+Paths: `transforms/*`, `spatial/*`, `spatial_distance.py`, `nearest_neighbor.py`
+
+**Regression check on the recent `cdist` fix: intact.** `_cdist_same_dtype` runs first (`spatial_distance.py:89`), `ascontiguousarray` after (94-95), so a dtype-driven copy cannot reintroduce a strided array.
+
+| ID | Chunk | Severity | Type | Location | Concern | Evidence | Status |
+|----|-------|----------|------|----------|---------|----------|--------|
+| C05-B001 | 05 | **P0** | bug | `nearest_neighbor.py:72-81` | Same strided-view hazard as the fixed `cdist` bug, still live: `cp.asarray(pts, dtype=float32)` is a **no-op** on an already-float32 CuPy view, and callers pass `_points[:, 2:4]` views (strides 16,4). At >=4096 pts CuVS brute-force reads packed garbage | both `hasattr` branches identical, no `ascontiguousarray` — **verified by hand**; callers `triangulation.py:195,202`, `gridtransform.py:332,339` | confirmed |
+| C05-B002 | 05 | P1 | parity | `transforms/one_way_rbftransform.py:545-550` | GPU `Transform` does not return early for `UseRigidTransform`; it zeroes weight sums and falls into RBF math with a (1,N)/(N,) broadcast mismatch. CPU twin returns at 197-198 | one-sided twin drift | open |
+| C05-B003 | 05 | P1 | bug | `transforms/utils.py:62` | `InvalidIndices` masks only `isnan`; `±Inf` treated as valid, so an `inf` from the discrete interpolator is never routed to the RBF fallback | every fallback router keys on this mask (`gridwithrbffallback.py:195,231,528,569`) | open |
+| C05-B004 | 05 | P1 | bug | `spatial/converters.py:52-53` | `BoundsArrayFromPoints` uses bare `min`/`max` with no finite guard; one NaN/Inf control point makes the whole bounding box NaN | feeds `Target/MappedBoundingBox`, hence `FlipWarped` default center | open |
+| C05-B005 | 05 | P1 | parity | `transforms/gridwithrbffallback.py:206` | CPU unconditionally downcasts fallback query points to float32; the GPU twin has that line commented out. CPU `InverseTransform` (241) also lacks it, so the CPU class is inconsistent with itself | GPU line 539 is commented | open |
+| C05-B006 | 05 | P1 | parity | `transforms/controlpointbase.py:322` vs `574` | Host `SourceBoundingBox` uses `BoundingRectangleFromPoints`, GPU `MappedBoundingBox` uses `BoundingPrimitiveFromPoints` — different return types for 3D input; host is also internally inconsistent between its two axes | line 279 uses the primitive variant | open |
+| C05-B007 | 05 | P2 | bug | `transforms/controlpointbase.py:463-482` | GPU `GetPointPairsInRect` is a straight copy of the host body: `np.vstack` on CuPy rows and per-point CuPy scalar indexing | no backend adaptation | open |
+| C05-B008 | 05 | P2 | bug | `transforms/addition.py:104-105` | `_AddGridTransforms` computes `AToC_pointPairs` and never uses it; the returned grid carries only `TargetPoints`, dropping the composed source correspondence | dead value suggests unwired composition | open |
+| C05-B009 | 05 | P2 | bug | `transforms/addition.py:63-79` | Rigid∘rigid adds `target_offset` without rotating by B→C's angle and keeps only A→B's rotation center; correct only when centers coincide and scale is 1 | also reaches into private `_target_offset` | open |
+| C05-B010 | 05 | P2 | parity | `transforms/controlpointbase.py:392` | `ControlPointBase_GPUComponent` implements `Flip` but does not inherit `ITransformFlip`, so `isinstance` capability checks silently fail for every GPU control-point transform | host class inherits it at 126 | open |
+| C05-B011 | 05 | P2 | bug | `transforms/gridtransform.py:178-179,232-233` | Bare `except Exception: pass` around interpolator evaluation turns OOM/dtype errors into a silent all-NaN return plus a discarded interpolator | non-degenerate `ValueError` branch also lacks `raise` | open |
+| C05-B012 | 05 | P3 | parity | `transforms/triangulation.py:575` | Host `Triangulation.Scale` mutates in place while the GPU twin and both Landmark classes rebind; in-place also mutates a caller array passed through without copy | vs 1052, `landmark.py:308,615` | open |
+| C05-B013 | 05 | P3 | debt | `nearest_neighbor.py:75-78` | Both branches of the `hasattr(points, 'get')` test execute the identical statement — dead conditional hiding the missing contiguity handling | same line twice | confirmed |
+| C05-P001 | 05 | P2 | perf | `nearest_neighbor.py:37-41` | CuVS import gate evaluated once at module import against `UsingCupy()`; a process selecting CuPy later keeps `_cuvs_brute_force is None` and silently never uses the GPU index | `_use_cuvs_nn` short-circuits at 141 | open |
+| C05-P002 | 05 | P2 | perf | `transforms/controlpointbase.py:208-215,469-476` | `GetPointPairsInRect` is a per-point Python loop with `np.vstack` per hit — O(N²) copying where a vectorized mask would be one pass | grid transforms route every rect query here | open |
+| C05-P003 | 05 | P2 | perf | `transforms/gridwithrbffallback.py:417,759` | `RotateTargetPoints` eagerly rebuilds the whole RBF fallback while `TranslateFixed/Warped` correctly defer via `_defer_continuous_rbf`; interactive rotation pays a full RBF rebuild per event | compare 382-384 / 724-726 | open |
+| C05-P004 | 05 | P2 | perf | `transforms/one_way_rbftransform.py:527-528` | Chunked weight-sum loop asserts on a **device** element every iteration, forcing a GPU→host sync per chunk | `assert MatrixWeightSumX[iStart] == 0` inside the while loop | open |
+| C05-P005 | 05 | P3 | perf | `transforms/meshwithrbffallback.py:427-436` | GPU rebuild copies both point sets to host, constructs two GPU RBFs from host arrays, and solves serially; the CPU twin fans its two solves to the thread pool | vs CPU 186-198 | open |
+
+**Notes:** C05-B001 is the direct sibling of the bug just fixed in `cdist` and is the top action item; the fix mirrors `spatial_distance.py:94`, and a regression test needs >=4096 points to reach the CuVS branch. Non-finite handling is NaN-only across the whole chunk while `converters.py`/`gridtransform.py` correctly use `isfinite` — the inconsistency matters most at `gridwithrbffallback.py:212/246`. Four twin-drift items (B002, B005, B006, B012) should be added to `docs/cpu_gpu_dual_class_parity.md`.
+
+---
+
+## Chunk 06 — Mosaic arrange + overlap
+
+Paths: `arrange_mosaic.py`, `overlapmasking.py`, `layout.py`, `mosaic_tileset.py`, `mosaic.py`
+
+| ID | Chunk | Severity | Type | Location | Concern | Evidence | Status |
+|----|-------|----------|------|----------|---------|----------|--------|
+| C06-B001 | 06 | P1 | bug | `layout.py:830-855` | `RelaxNodes` leaves zero rows for isolated nodes, then the movement loop reads every row — node ID 0 gets relaxed once per isolated node (double-moved), or `KeyError` if no node 0 exists | `continue` at 832 skips the assignment at 842; isolated nodes are expected after prune | open |
+| C06-B002 | 06 | P1 | bug | `layout.py:1426-1452` | Offset averaging includes rows skipped by `continue`, so the merge offset is biased toward zero | pre-zeroed array + `np.mean(..., axis=0)` at 1452 | open |
+| C06-B003 | 06 | P1 | bug | `layout.py:1454-1456,1415-1422` | After a merge `layout_list[iLayout_B]` is rebound but pending pair indices are stale, so a later pair can translate a layout against **itself**; `tile_to_layout` is never updated | assert compares indices, not identity | open |
+| C06-B004 | 06 | P1 | bug | `arrange_mosaic.py:630-638` | `f_score` used outside the `feature_scores is not None` guard that binds it → `UnboundLocalError` when `use_feature_score` is on and scores are None | assigned only at 631-632, used at 636-637 | open |
+| C06-B005 | 06 | P2 | bug | `arrange_mosaic.py:610-641` | Failed alignments are removed from the layout then immediately re-added with weight 0; the removal is dead and a spurious zero-weight spring survives into relaxation | both except branches set `offset`, falling into `SetOffset` at 641 | open |
+| C06-B006 | 06 | P2 | bug | `arrange_mosaic.py:455-462` | Feature-score normalization divides by a max that can be 0 (all-blank tiles); `max()` also raises `TypeError` on the `None` scores `ScoreTileOverlaps` explicitly allows | `max_score = 0` only grows via `max(...)` | open |
+| C06-B007 | 06 | P2 | bug | `layout.py:347-362,1000-1006` | `ScaleOffsetWeightsByPosition` is unconditionally broken — a `raise NotImplementedError` sits after the computation, before the assignment; the public wrapper calls it for every node | unreachable line 360 | open |
+| C06-B008 | 06 | P2 | bug | `layout.py:321-332` | `MaxTensionMagnitude` sums over axis 1 of a 1-D `(2,)` vector → `AxisError`; the subsequent `argmax` on a scalar is meaningless | `np.sum(v ** 2, 1)` at 330 | open |
+| C06-B009 | 06 | P2 | parity | `overlapmasking.py:265` vs `294,326` | The brute-force **reference** mask reduces over the wrong axis (per-image min vs per-dimension min), so any parity check against it is invalid | axis 1 vs axis 0 | open |
+| C06-B010 | 06 | P2 | bug | `arrange_mosaic.py:661-665` | Default `cval='random'` reaches `np.isnan(cval)` → `TypeError` on the documented default `dtype=None` path | `issubdtype` False so `isnan('random')` evaluates | open |
+| C06-B011 | 06 | P2 | bug | `arrange_mosaic.py:120-247` | `relaxed_layout` can still be `None` at loop exit (break on pass 0 with no qualifying overlaps) and is then dereferenced | `# type: ignore[union-attr]` acknowledges the unproven invariant | open |
+| C06-B012 | 06 | P2 | bug | `layout.py:217-230` | `RemoveOffset`'s warning is a no-op — it constructs a `Warning` object and discards it — and sits outside the `if`, so it also "fires" on success | should go through logging per the unified rule | open |
+| C06-B013 | 06 | P2 | parity | `layout.py:1009-1053` vs `1065-1113` | `NormalizeOffsetWeights` and `ScaleOffsetWeightsByPopulationRank` interpret `min/max_allowed_weight` in opposite directions, so the configured weight floor is never applied by `TranslateTiles2` | docstring contradicts the mapping at 1046 | open |
+| C06-B014 | 06 | P3 | bug | `mosaic.py:158-171` | `mapped_bbox_shape` unbound when `all_same_dims=False` → `UnboundLocalError` on the documented non-default path | assigned only inside the `if` | open |
+| C06-B015 | 06 | P3 | bug | `arrange_mosaic.py:983-988` | `finally` block `del`s names that may be unbound, raising `NameError` and masking the original exception | `del OverlappingRegionA/B` | open |
+| C06-B016 | 06 | P3 | bug | `arrange_mosaic.py:735` | `__tile_offset_remote` hard-overwrites its `excess_scalar` parameter with literal `2`, so `TranslateSettings.excess_scalar` has no effect; the adjacent comment says 1 | parameter shadowed immediately | open |
+| C06-P001 | 06 | P2 | perf | `layout.py:830-855,1161-1177` | Relaxation computes `WeightedNetTensionVector` twice per node per iteration, then `MaxWeightedNetTensionMagnitude` recomputes them all again — ~3× work in a function whose own comment calls it a bottleneck | line 850 comment | open |
+| C06-P002 | 06 | P2 | perf | `layout.py:128-136,295-345` | `OffsetArray` property allocates a full copy plus `setflags` on **every** access, and tension helpers index it once per node per query | should use `_OffsetArray` internally | open |
+| C06-P003 | 06 | P2 | perf | `layout.py:983-995,199-210` | Quadratic array growth: `OffsetsSortedByWeight` `vstack`s per node and `SetOffset` re-sorts the full offset array on every insertion | collect into a list and concatenate once | open |
+| C06-P004 | 06 | P3 | perf | `overlapmasking.py:54-71` | LRU insert recomputes total cache bytes by summing every entry — O(entries) per insertion against a 512 MB budget of small masks | running counter would be O(1) | open |
+| C06-P005 | 06 | P3 | perf | `layout.py:1297-1324` | `MergeDisconnectedLayouts` grows `matrix_A` and runs a full pairwise `cdist` against every previously merged node — O(N²) work and memory across a section | line 1311/1324 | open |
+
+**Notes:** No `set.add(iterable)` misuse found; `nonoverlapping_tile_IDs -= set(overlap.ID)` is correct but fragile, and `removed_offset_IDs` is annotated `set[int]` while holding tuples. Per A5 nothing here proposes parallelizing `find_offset` — but note `_FindTileOffsets` (567-570) only forces the serial pool under CuPy, so the "arrange stays serial" guidance and the NumPy code path diverge and deserve an explicit decision. Exact float position comparisons in `mosaic_tileset.py:222,227` pass today only because the translation is exact subtraction.
+
+---
+
+## Chunk 07 — Buildmanager pipeline core
+
+Paths: `pipelinemanager.py`, `build.py`, `volumemanager/*`, `validation/*`
+
+| ID | Chunk | Severity | Type | Location | Concern | Evidence | Status |
+|----|-------|----------|------|----------|---------|----------|--------|
+| C07-B001 | 07 | **P0** | bug | `volumemanager/pyramidlevelhandler.py:70-77` | `GetScale()` never advances the walk variable — guaranteed infinite loop / build hang whenever no ancestor exposes `Scale` | line 75 is `Parent = self.Parent` again instead of `Parent.Parent` — **verified by hand** | confirmed |
+| C07-B002 | 07 | **P0** | bug | `volumemanager/channelnode.py:78-84` | `ChannelNode.Scale` always returns `None`; `__init__` sets `self._scale = None`, so the `hasattr(self, '_scale') is False` guard never fires and the lazy XML read is dead code | any channel loaded from XML reports no scale until `SetScale` runs in-process — **verified by hand** | confirmed |
+| C07-B003 | 07 | **P0** | bug | `volumemanager/mosaicbasenode.py:48-57` | `Checksum` getter writes `attrib['Checksum']` **without** setting `_AttributesChanged`, so the computed checksum is silently discarded; also stores `None` when the file is missing, which will later fail string validation | contrast `ResetChecksum` (46) and the setter (63), which both set the flag | open |
+| C07-B004 | 07 | P1 | bug | `volumemanager/xcontainerelementwrapper.py:281-287` | `_replace_links` validates/cleans the wrong element — `wrapped_loaded_element` is whatever the previous loop left bound, never rebound in the `clean_tasks` loop | assigned at 243 in the first loop | open |
+| C07-B005 | 07 | P1 | bug | `volumemanager/xcontainerelementwrapper.py:282-287` | `if IsValid:` tests a `(bool, reason)` tuple, always truthy, so invalid linked containers are never cleaned on the multi-link path | `IsValid()` returns a tuple (`xelementwrapper.py:333`); the `else` at 287 is unreachable | open |
+| C07-B006 | 07 | P1 | bug | `volumemanager/xelementwrapper.py:874-880` | A read-only query writes the volume to disk: `findall` calls `self.Save()` while resolving links, so any `Filters`/`Sections`/`Levels` access can rewrite VolumeData.xml. Sibling `find` (833) deliberately does not | the two accessors disagree | open |
+| C07-B007 | 07 | P1 | bug | `volumemanager/filternode.py:70-79,101-111` | Create-on-read: `TilePyramid` and `Imageset` **properties** append a new child, marking the filter dirty during a query | `append` sets `_ChildrenChanged`; `HasTilePyramid`/`HasImageset` sit beside them doing the non-mutating check | open |
+| C07-B008 | 07 | P1 | bug | `volumemanager/blocknode.py:121-143` | `NonStosSectionNumbers` getter rewrites `StosExemptNode.text` and forces `_AttributesChanged` during a read | docstring only promises it won't create the child | open |
+| C07-B009 | 07 | P1 | bug | `volumemanager/xelementwrapper.py:779-788` | `_ReplaceChildElementInPlace` swaps via `self[i] = new`, bypassing `append`/`remove`, so `_ChildrenChanged` is never set — `ReplaceChildWithLink` converts a container to a link stub without marking the parent dirty | vs `append` (731) / `remove` (738) | open |
+| C07-B010 | 07 | P1 | bug | `volumemanager/inputtransformhandler.py:201-204` | Recursive `EnumerateTransformDependents` drops `child_element_name`, so recursion searches with `findall(None)` | 4 args against a 5-param signature | open |
+| C07-B011 | 07 | P1 | bug | `volumemanager/channelnode.py:89-92` | `_try_remove_scale_node` deletes the `Scale` child but leaves `_scale` populated, so a stale Scale stays readable through the property | only `SetScale` repopulates | open |
+| C07-B012 | 07 | P2 | bug | `volumemanager/xelementwrapper.py:651-659` | `Contains` unpacks `for k, v in c.attrib` — iterating a dict yields keys, so this raises for any attribute name whose length is not 2; it also ignores its `Element` parameter entirely | line 653 | open |
+| C07-B013 | 07 | P2 | bug | `pipelinemanager.py:1030-1036` | Stage functions are documented as allowed to return `True`/`False`, but `_SaveNodes` passes the bool to `VolumeManager.Save`, which raises `ValueError` | no bool guard at 930-948 | open |
+| C07-B014 | 07 | P2 | bug | `validation/transforms.py:19,55` | Bare `except:` around `float(...)` swallows `KeyboardInterrupt`/`SystemExit`; the comment shows `except ValueError` was intended | two sites | open |
+| C07-B015 | 07 | P2 | bug | `volumemanager/xcontainerelementwrapper.py:255-258` | Broad `except Exception: continue` in parallel link loading leaves the unresolved `*_Link` stub in the tree; the single-link path re-raises instead | divergent handling at 197-200 | open |
+| C07-B016 | 07 | P2 | bug | `volumemanager/xcontainerelementwrapper.py:224-233` | Loop variable `fullpath` shadows the function parameter, so every error message in the except blocks reports an arbitrary child path | messages at 248, 252, 257 | open |
+| C07-B017 | 07 | P2 | bug | `pipelinemanager.py:640-642` | `_WriteStageTimings` reads `StageTimings.json` with an unguarded `json.load`; a truncated file from a killed run raises inside `Execute`'s `finally`, masking the original exception | call site is `finally:` at 614 | open |
+| C07-B018 | 07 | P3 | debt | `volumemanager/volumemanager.py:85-90` | `__SortNodes__` reaches into `element._children`, which does not exist on the C-accelerated `ElementTree.Element` | line 87 | open |
+| C07-P001 | 07 | P1 | perf | `volumemanager/xelementwrapper.py:883-918` | `findall` runs the same XPath scan **three** times per call and the middle loop discards its result; combined with C07-B006, every property-style enumeration is a triple scan plus a possible disk write | 883, 890-902, 904 | open |
+| C07-P002 | 07 | P2 | perf | `pipelinemanager.py:866-868` | `ProcessIterateNode` materializes every iterate candidate into a list before processing any, defeating the streaming contract; each resolution may force linked VolumeData.xml loads | only `len()` needs the list | open |
+| C07-P003 | 07 | P2 | perf | `volumemanager/xcontainerelementwrapper.py:485-486` | One dirty attribute rewrites the container's entire VolumeData.xml with full backup rotation and subtree re-indent; no per-node or append-only path | `__SaveXML` 503-595 | open |
+
+**Notes on the dirty/save model as found:** ownership is per-`XContainerElementWrapper` with `SaveAsLinkedElement == True` — each owns one `VolumeData.xml` and its own `_AttributesChanged`/`_ChildrenChanged` pair, set at mutation time by `append`/`remove`/`__setattr__`/`__delattr__` and cleared by `ResetElementChangeFlags` after a successful write. Linked-child dirtiness deliberately does not bubble; non-linked children are consulted via `ElementHasChangesToSave`. The model is now documented in docstrings (morning theme 2 partly addressed) but **not enforced**: three escape hatches break it — direct `attrib[...]` writes that skip the flag (C07-B003), in-place child replacement (C07-B009), and reads that dirty or save (C07-B006/B007/B008).
+
+**The `if element:` truthiness bug class is essentially absent** from this tree — every element test uses `is None` / `is not None`. The analogous mistake that *is* present is testing a `(bool, reason)` tuple for truth (C07-B005), which fails in the same silent direction. Save-on-read is the dominant remaining structural problem, and two of the three P0s are single-line logic slips that fail as "no scale" or "slow" rather than as an exception, which is why tests miss them.
+
+---
+
+## Chunk 08 — Buildmanager operations
+
+Paths: `operations/block.py`, `operations/tile.py`, `operations/stosgroup_workers.py`
+
+| ID | Chunk | Severity | Type | Location | Concern | Evidence | Status |
+|----|-------|----------|------|----------|---------|----------|--------|
+| C08-B001 | 08 | **P0** | bug | `operations/block.py:3414-3422` | NaN/Inf compose failure is escalated to a hard `NornirUserException` that aborts the whole SliceToVolume stage; non-NaN errors fall through to the graceful log/`Clean()`/`continue` immediately below, so the NaN case is *deliberately* the only hard failure. Contradicts the design intent that unmapped points be filled by the RBF fallback | `_reraise_stos_nonfinite(...)` precedes the skip path — **verified by hand** | confirmed |
+| C08-B002 | 08 | **P0** | bug | `nornir-imageregistration/.../files/stosfile.py:1168-1170` | The composition raises `ValueError("...introduced NaN/Inf transform values")` on its own **output** text, so one unmapped grid point kills the hop that C08-B001 then turns into a run abort | `if transform_text_contains_nonfinite(A_To_C_Stos.Transform): raise` | confirmed |
+| C08-B003 | 08 | P1 | bug | `operations/block.py:2908-2912` | `_reraise_stos_nonfinite` classifies by substring `'nan' in text or 'inf' in text`, so any unrelated error whose message contains "info", "insufficient", or a path with `inf` is misreported as a NaN transform and hard-aborted | `text = str(err).lower()` | open |
+| C08-B004 | 08 | P1 | bug | `operations/block.py:4147-4179` | `MosaicToVolume`: per-tile `AddTransforms` failures are swallowed by a bare `except:` that only warns; the failed tile keeps its **original section-space** transform and the mosaic is saved as valid with a fresh checksum → silently mis-registered output that will never be rebuilt | `except:` then `Save(...)` + `ResetChecksum()` | open |
+| C08-B005 | 08 | P1 | bug | `operations/block.py:2477-2481` | Because refine is serial (C08-P002), `_run_refine_or_manual_copy` re-raising every `RefineFunc` exception aborts the entire refine stage on the first bad slice; sibling slices never run | `except Exception as e: ...; raise` | open |
+| C08-B006 | 08 | P2 | bug | `operations/block.py:3883-3890` | `ScaleStosGroup` raises past `ReleaseStagePools()` with no `try/finally`, leaking the stage pool into the next stage. Same shape at `block.py:4043`, `block.py:1374`, `tile.py:2204`; only `tile.py:3177-3181` uses `finally` | release sits on the happy path | open |
+| C08-B007 | 08 | P2 | bug | `operations/block.py:4131-4134` | Third independent NaN hard-abort site, on the SliceToVolume STOS entering `MosaicToVolume`; one bad slice aborts the whole block's stage | `raise _stos_nonfinite_user_error` | open |
+| C08-B008 | 08 | P2 | bug | `operations/block.py:3956-3960` | `LinearBlendStosGroup` omits `chain_consistent_linear=` from `IsLinearBlendParamsMatched`, so toggling `-ChainConsistentLinear` does not invalidate its outputs → stale blends silently reused | SliceToVolume path passes it at 3354-3359 | open |
+| C08-B009 | 08 | P2 | bug | `operations/tile.py:921-926` | `NumberOfTiles += 1` accumulates across re-runs (get-or-create level, never reset); the inflated count breaks the up-to-date shortcut at `tile.py:2670`, forcing full pyramid rebuilds forever | `if exists: NumberOfTiles += 1` | open |
+| C08-B010 | 08 | P2 | bug | `operations/block.py:1756-1767` | `except: pass` in "best mean" selection swallows every per-mapping failure, so a section can end with `WinningTransform is None` and be silently dropped from the output stos map | bare except in the `wait_return` loop | open |
+| C08-B011 | 08 | P3 | bug | `operations/block.py:243-273,282-298` | `except: pass` hides malformed ir-stom output; the adjacent `while True` filename-randomization loop has no max attempts and no backoff | 272, 282 | open |
+| C08-B012 | 08 | P3 | bug | `operations/block.py:2866-2870` | `except Exception: old_full = None` silently skips migration of an existing short-named STOS file, orphaning it and its `.unblended` sidecar | try/except around `FullPath` | open |
+| C08-B013 | 08 | P3 | bug | `operations/block.py:2062` | `OutputDownsample == InputDownsample` compares an XML-sourced `float` (default `'NaN'`, `stosgroupnode.py:33`) against an `int` pipeline arg; a `NaN` default makes it always false, silently forcing a rescale | mixed types | open |
+| C08-P001 | 08 | P1 | perf | `operations/block.py:4154-4163` | Unbounded `pool.add_task` over every tile of a section with no in-flight gate; each task pickles a whole dense-grid `StoVTransform`, and all composed results are retained | violates streaming rule at the 2-3 GB/core envelope | open |
+| C08-P002 | 08 | P1 | perf | `operations/block.py:2619-2620` | STOS grid refine — the most expensive STOS stage — is dispatched `pool=None, max_in_flight=1`, i.e. fully serial regardless of `workers`, while `ScaleStosGroup`/`LinearBlendStosGroup` do use a pool. Looks like a leftover debug pin | `run_bounded_stos_jobs(None, pool_jobs, max_in_flight=1)` | open |
+| C08-P003 | 08 | P2 | perf | `operations/tile.py:3127-3136` | The documented "map one column, wait for the previous" gate is broken: `last_column_tasks` is dead and `extend(executor.map(...))` eagerly drains each row, so rows never overlap **and** every row's results accumulate for the whole level | assigned-never-used variable | open |
+| C08-P004 | 08 | P2 | perf | `operations/tile.py:2989-3010` | ImageMagick tileset row gate awaits only the **first** task of a row, and only past a 256/512 queue-depth threshold — a wide section can enqueue thousands of `magick montage` subprocesses first | `FirstTaskForRow.wait()` behind qsize | open |
+| C08-P005 | 08 | P2 | perf | `operations/tile.py:897-919,475-498` | Invert and min-correction stages glob every tile of a level and queue one task per tile with no in-flight gate, then drain | unbounded queue depth on NAS-sized levels | open |
+| C08-P006 | 08 | P3 | perf | `operations/tile.py:2662-2685` | Pyramid level check builds full glob lists plus three frozensets of basenames for both levels on every transition — O(tiles) host memory per level | streaming `scandir` compare would do | open |
+| C08-D001 | 08 | P3 | debt | `tile.py:345,752,2057`; `block.py:3718,3766`; `registration.py:141` | Open TODOs on correctness-relevant paths: 8-bit-only background assumption, unverified gamma match, non-robust tileset-populated check, transforms referencing deleted filters | TODO grep | open |
+
+**Notes — answers to the three targeted checks:**
+
+1. **Unmapped/NaN points are still a hard failure, in three places.** `stosfile.py:1168` raises on the composed *output* text; `block.py:3414` converts that into a stage-aborting `NornirUserException` (while the non-NaN branch right below correctly logs, cleans, and continues); `block.py:4131` raises again in `MosaicToVolume`. Input-side guards are defensible validation, but the output-side raise directly contradicts the intent that unmapped points be RBF-filled and squared up by linearize.
+2. **Non-finite checks are consistent** — everything funnels through `transform_text_contains_nonfinite`, covering both NaN and Inf. The weakness is the *classifier* (C08-B003), not the checker.
+3. **Row/column gating is partial.** STOS group stages are properly gated via `run_bounded_stos_jobs(max_in_flight=...)`, but `block.py:4154`, `tile.py:897`, and `tile.py:481` queue one task per tile for a whole section with no gate; `tile.py:2989` gates only on a row's first task behind a queue-depth threshold; `tile.py:3127` has lost its column gate to dead code. Only the level-001 save path (`tile.py:1796`, bounded `queue.Queue`) is correctly bounded.
+
+---
+
+## Chunk 09 — Importers + DM4
+
+Paths: `nornir_buildmanager/importers/*`, `dm4/`
+
+| ID | Chunk | Severity | Type | Location | Concern | Evidence | Status |
+|----|-------|----------|------|----------|---------|----------|--------|
+| C09-B001 | 09 | **P0** | bug | `importers/mrc.py:340` vs `385-405` | Tile image is Y-flipped but the mosaic coordinates never are, and `FlipList` is declared but never read → systematic Y-shift/mirror for every MRC section | `np.flipud(img)` in `ExportImage`; `CreateMosaic` builds `warped_offset=pixel_position` with no Y inversion; `FlipList` appears only in signatures at 50, 74, 93 — **verified by hand** | confirmed |
+| C09-B002 | 09 | P1 | bug | `importers/mrc.py:332-341` | Flip is applied only on the contrast-adjusted branch, so tile orientation depends on whether `min_max_gamma` was supplied | the `if min_max_gamma is None` branch has no flip — **verified by hand** | confirmed |
+| C09-B003 | 09 | P1 | bug | `importers/mdoc.py:120-122` | `ContrastCutoffs` passed positionally as `(0.0, 100.0)` into an importer whose contract is 0-1 fractions, so `AutoLevel(0.0, 1.0-100.0)` gets a large negative tail | `idoc.py:144-151` rejects cutoffs outside 0-1; `shared.py:650` computes `1.0 - cutoffs[1]` | open |
+| C09-B004 | 09 | P1 | bug | `importers/dm4.py:288-379` | `FlipList` and `ContrastMap` are accepted and forwarded by `Import` but never read in `ToMosaic` — DM4 sections listed in FlipList.txt import unflipped and contrast overrides are silently dropped | neither name appears again in the body | open |
+| C09-B005 | 09 | P1 | bug | `importers/dm4.py:444-445` | Grid bounds assert compares the **X** index against the **Y** grid extent, so out-of-grid tiles pass and in-grid tiles can falsely assert | `grid_position[1]` is the X index but is compared to `YDim` | open |
+| C09-B006 | 09 | P1 | bug | `importers/pmg.py:240-243` | Flip applied to mosaic coordinates but explicitly disabled for the images — the exact inverse of the MRC bug | `ConvertImagesInDict(..., Flip=False)` then `MosaicFile.Write(..., Flip=Flip)` | open |
+| C09-B007 | 09 | P1 | bug | `importers/pmg.py:50-51` | PMG importer defaults its search extension to `idoc`, so a plain PMG import matches nothing and silently returns having imported zero sections | `if extension is None: extension = 'idoc'` | open |
+| C09-B008 | 09 | P1 | bug | `importers/dm4.py:29,189-195` | `TileExtension = 'png'` contradicts its own comment; 16-bit data is loaded as `I;16`, converted to mode `I`, and saved as PNG, which Pillow cannot write for 32-bit integer images | comment says "we use the npy extension" | open |
+| C09-B009 | 09 | P2 | bug | `importers/idoc.py:938-942` | Camera clamp uses `1 << bpp` instead of `(1 << bpp) - 1`, one greater than the real max; the histogram path in the same file uses the correct form | vs `idoc.py:609` | open |
+| C09-B010 | 09 | P2 | bug | `importers/idoc.py:952-966` | `GetImageBpp` fallback is dead — `DataMode` is always set in `__init__`, so an idoc without a DataMode line returns `None` instead of deriving bpp from Max | `self.DataMode = None` at 916 | open |
+| C09-B011 | 09 | P2 | bug | `importers/idoc.py:1058-1059` | Unvalidated metadata parsing: `values[0]` / `vTemp[0]` raise `IndexError` on a key with an empty value, aborting the whole idoc load | no length guard before `vTemp[0].isdigit()` | open |
+| C09-B012 | 09 | P2 | bug | `importers/idoc.py:355-361,428-438` | Missing-tile removal followed by renumber-from-zero silently shifts tile identity, so target tile N no longer corresponds to source tile N; an extension case mismatch on a case-sensitive filesystem drops all tiles | the log at 357 already suspects extension mismatch; `ImageNumber += 1` at 738 | open |
+| C09-B013 | 09 | P2 | bug | `importers/dm4.py:250-259` | Bare `except:` around both `int()` conversions; an unexpected filename layout yields `section_number = None`, which flows into `GetOrCreateSection(None)` | no format validation | open |
+| C09-B014 | 09 | P2 | bug | `importers/dm4.py:343-352` | Scale unit conversion handles only `µm`/`um` with no else/raise; Angstrom, `m`, or `mm` silently produce a scale off by orders of magnitude | `nm` works only by accident | open |
+| C09-P001 | 09 | P1 | perf | `importers/idoc.py:183-191` | The section generator is fully materialized before any import work starts, delaying the first section by a NAS-wide scan and defeating the incremental design its own comment documents at 201-202 | `found_sections = list(find_sections(...))` | open |
+| C09-P002 | 09 | P1 | perf | `importers/mrc.py:276-285,310-319` | Unbounded task queueing: one memmap plus one histogram task per tile for the whole file, and `ExportImages` queues every tile before waiting — in-flight memory scales with tile count, not cores | single `pool.shutdown()` after the full loop | open |
+| C09-P003 | 09 | P2 | perf | `dm4/dm4/dm4file.py:320-345` + `importers/dm4.py:182-195` | Whole-image DM4 reads with no offset/count or memmap, then a second full copy via `.tobytes()` → ~2-3× tile size in RAM per worker, though the tag header already carries `data_offset`/`byte_length` | `data.fromfile(dmfile, array_length)` + in-place `byteswap()` on the full buffer | open |
+| C09-D001 | 09 | P2 | debt | `importers/idoc.py:274-275,489-496` | Two hardcoded artifacts in the main import path: a no-op stub (`i = 5`) swallowing unparseable section numbers, and a volume-name-specific (`'RC3' in FullPath`) mosaic invalidation hack | leaves `SectionNumber = 0` | open |
+| C09-D002 | 09 | P3 | debt | `importers/mdoc.py:77-84` | `subprocess.call(..., shell=True)` on an unquoted path (breaks on spaces; `subprocess` only in scope via a star-import), plus lowercase-only `.tif` globs | `cmd = "mrc2tif " + stNameFullPath + ...` | open |
+
+**Notes — Flip/Flop coordinate contract as found:** only the idoc importer implements the Utah convention end to end. It flops the pixels via `ConvertImagesInDict(Flip=Flip)` (`idoc.py:468`) and compensates in the coordinate write with `MosaicFile.Write(..., Flip=not Flip)` (`idoc.py:513`), with the reasoning in the comment at 511-512. Every other importer breaks the contract in a different direction: MRC flips pixels and never touches coordinates (C09-B001), PMG flips coordinates and never touches pixels (C09-B006), DM4 does neither despite accepting a `FlipList` (C09-B004). The contract is a per-file convention rather than a shared helper, which is exactly why each importer drifted independently — this is the concrete evidence for morning design theme 5, and the `Flip=not Flip` pairing is load-bearing and documented in only that one comment.
+
+Generator hygiene is now good in the modern importers (idoc, mrc, dm4 all use `yield from` correctly). The remaining streaming problem is the opposite one: idoc materializes its section generator (C09-P001) and MRC queues per-tile tasks with no backpressure (C09-P002). `pmg.Import` and `sectionimage.Import` are still non-incremental — `pmg.Import` discards every `ToMosaic` return value, so VolumeData.xml is written once at the very end.
+
+---
+
+## Chunk 10 — Pyre UI + GL
+
+Paths: `pyre/gl_engine/`, `pyre/views/`, `pyre/controllers/transformcontroller.py`, `pyre/commands/stos/`
+
+**Invariants verified as holding:** only the source sub-view gets `warp_into_target_display=True` / `rigid_composite_source_align=True` (`compositetransformview.py:237-239`), the target layer is forced to static quads (`imagetransformview.py:192-205`), control-point drag genuinely patches instead of remeshing, and no CuPy array reaches an OpenGL call unconverted.
+
+| ID | Chunk | Severity | Type | Location | Concern | Evidence | Status |
+|----|-------|----------|------|----------|---------|----------|--------|
+| C10-B001 | 10 | **P0** | bug | `commands/stos/translaterigidcommand.py:80`, used at `225` | Rigid drag cancel cannot undo the gesture: `_original_points` stores a **reference** to the live transform model, not a copy, and `Translate` mutates that same object in place — so right-click/cancel silently commits the misalignment | `self._original_points = transform_controller.TransformModel`; cancel reassigns the already-mutated model. Field is even annotated `NDArray[np.floating]` — **verified by hand** | confirmed |
+| C10-B002 | 10 | P2 | bug | `commands/stos/translaterigidcommand.py:112-127` | Drag origin is re-derived **after** the transform mutates, so the screen→world mapping shifts mid-event and Source-panel drag tracking is not 1:1 | `get_world_positions` at 112, `Translate` at 123, `get_world_positions` again at 126 | open |
+| C10-B003 | 10 | P2 | debt | `views/gltiles.py:162` and `931` | Duplicate `_tile_bounding_rect` definition shadows the first, leaving three dead helpers that would raise if called; line 212 also does `np.concatenate(np.array(...), 2)` with a bogus positional axis | no callers of either helper | open |
+| C10-B004 | 10 | P2 | bug | `views/transformcontrollerview.py:224` | Staleness check compares XY-swapped GL buffer contents against YX controller points, so the early-out never fires and the whole control-point buffer re-uploads on every change | `PointView.points` setter applies `swap_columns_to_XY` (`pointview.py:142`) | open |
+| C10-B005 | 10 | P2 | bug | `views/gltiles.py:245-266` | Half-texel handling offsets the tile texture by +0.5 px relative to geometry and makes the shared 4096 seam sample texel 4095 on one side and texel 0 on the other — a full-texel discontinuity | `(points_yx - BottomLeft + 0.5)/size` clamped to `[half_texel, 1-half_texel]` | open |
+| C10-B006 | 10 | P2 | bug | `gl_engine/context_aware_vao.py:294-306` | Per-context VAO leak: deletes are skipped when the context is not current but the dict is cleared unconditionally; the dict also pins `QOpenGLContext` objects, and `__del__` runs `cleanup()` under an arbitrary context | `clear()` outside the `if current_context == context` guard | open |
+| C10-B007 | 10 | P2 | bug | `gl_engine/gl_buffer.py:117,219`; `framebuffer.py:126`; `shader_base.py:48,71,124` | GL objects are deleted from `__del__` with no guaranteed current context, so deletes land in whatever context is current or are swallowed; tile churn in `update_all_tile_buffers` relies on this | `glDeleteBuffers` inside `except Exception: pass` | open |
+| C10-B008 | 10 | P2 | debt | `gl_engine/shaders/shader_base.py:89-95`; `texture_shader.py:106-123` | One module-level program plus cached attrib/uniform locations shared by every STOS panel — correct only if all `QOpenGLWidget` contexts share, unlike the explicitly per-context VAO handling elsewhere | `ContextAwareVAOHelper` keeps VAOs per context; `compositetransformview.py:414-418` re-inits "in this context" | open |
+| C10-B009 | 10 | P2 | bug | `controllers/transformcontroller.py:1580,1586,1619` | Rotation/scale pivots downcast to float32 while the comparable path at 1649 uses float64; at slice coordinates in the tens of thousands the pivot rounds by ~4e-3 px and accumulates over repeated scroll notches | `dtype=np.float32` vs `dtype=np.float64` | open |
+| C10-B010 | 10 | P2 | bug | `commands/stos/translatecontrolpointcommand.py:157` | Control-point drag repaints only the driving panel, so peer STOS windows stay stale until mouse-up — unlike the rigid path | rigid calls `repaint_peer_stos_gl_panels` at 130-131 | open |
+| C10-B011 | 10 | P2 | bug | `views/compositetransformview.py:241` | Sub-views capture `_repaint_callback` by value at creation (it is `None` in `__init__`), so budgeted/lazy mesh continuation frames are never requested for the source FBO | consumer is `imagetransformview.py:290-293` | open |
+| C10-B012 | 10 | P3 | bug | `gl_engine/shaders/texture_shader.py:52-61` | The interactive native-shift block is not gated on `use_rigid_path`, so a stale nonzero shift uniform also displaces mesh/grid tiles; the `> 0.001` test silently drops sub-milli-pixel shifts | lines 62 and 67 are gated, this one is not | open |
+| C10-B013 | 10 | P3 | bug | `views/gltiles.py:500-519` | Tile-edge samples merged with lattice coordinates by exact `np.unique`, so a control-point line within float noise of a 4096 boundary yields near-duplicate rows and zero-area triangles at the seam | downstream called with `require_valid_topology=False` (1013-1015) | open |
+| C10-P001 | 10 | P1 | perf | `views/gltiles.py:347-353` | Per-triangle Python loop validates Delaunay orientation on every cached-simplices vertex rebuild — interpreted O(triangles) work per tile per event, on the UI thread; fully vectorizable | `for tri in simplices: areas.append(...)` in `_triangle_orientations` | open |
+| C10-P002 | 10 | P2 | perf | `views/gltiles.py:424-448` | Lawson repair rebuilds the entire edge→triangle dict after **every single** flip (loop `break`s), up to 128 full O(triangles) rebuilds per tile | `while changed and flips < max_flips` | open |
+| C10-P003 | 10 | P2 | perf | `views/composite_display.py:404-417` | Full Nx4 control-point set pulled to host and copied on every composite draw — the host-array rule calls this out explicitly ("do not convert whole `TargetPoints` per mouse move") | `_as_numpy_f64(...).copy()` | open |
+| C10-P004 | 10 | P2 | perf | `views/transformcontrollerview.py:320-328` | Composite display-row override does two full control-point buffer uploads plus two selection-texture writes per frame | override + `finally` restore, each hitting the `GLBuffer.data` setter | open |
+| C10-P005 | 10 | P2 | perf | `views/gltiles.py:668,733` | Per-mouse-move patching copies each affected tile's whole Nx8 float32 vertex block and re-uploads the full buffer rather than the changed sub-range | `np.array(vertices, copy=True)` in both patch functions | open |
+| C10-P006 | 10 | P3 | perf | `views/imagetransformview.py:712-713` | Module import executed inside the innermost per-tile draw loop every frame (also violates the imports-at-top standard) | `from pyre.image_contrast import ...` inside the `for ix/for iy` loops | open |
+
+**Notes:** Visual-only findings needing screenshot/plot triage under `NORNIR_HEADLESS=1` rather than pytest: C10-B005 (one-pixel seam line at 4096 boundaries plus a global half-pixel magenta/green misregistration), C10-B013 (folded triangles when a lattice line coincides with a tile edge), C10-B012 (mesh tiles displaced by a stale rigid shift), C10-B011 (source FBO left partly empty — magenta simply missing), and C10-B008 (garbage or blank second/third STOS panel). C10-B001, B002, B004, B009, B010 are all assertable without a GL context by driving the command/controller with fakes, in the style of `tests/test_tile_incremental_refresh.py`. Encapsulation risk not tabled separately: `composite_display.py:88-105,201-210,332-343` reads **and writes** `TransformController._cached_composite_*` private state, so the freeze/cache lifecycle is split across two modules with no single enforcement point.
+
+---
+
+# Summary
+
+## Counts
+
+| Severity | Count |
+|----------|-------|
+| P0 (data loss / wrong science) | 10 |
+| P1 (silent wrong output) | 63 |
+| P2 (perf / ops pain) | 99 |
+| P3 (maintainability / debt) | 36 |
+| **Total** | **208** |
+
+By type: 116 `bug`, 59 `perf`, 15 `parity`, 18 `debt`.
+All 10 core chunks reviewed. 14 findings carry status `confirmed` — nine of those were re-read at the cited line during this pass, the rest were verified by the reviewing pass itself.
+
+## The 10 P0s
+
+| ID | Location | One line |
+|----|----------|----------|
+| C03-B001 | `local_distortion_correction.py:4175` | Pooled STOS path omits `peak_ratio`, silently disabling every false-peak reject gate — **fails open** |
+| C05-B001 | `nearest_neighbor.py:72-81` | Live sibling of the just-fixed `cdist` strided-view bug; CuVS reads packed garbage above 4096 points |
+| C07-B001 | `pyramidlevelhandler.py:70-77` | `GetScale()` never advances its loop variable — guaranteed build hang |
+| C07-B002 | `channelnode.py:78-84` | `ChannelNode.Scale` always returns `None`; scale metadata invisible to every consumer |
+| C07-B003 | `mosaicbasenode.py:48-57` | Checksum getter writes `attrib` without marking dirty — computed checksum silently discarded |
+| C08-B001 | `block.py:3414-3422` | NaN compose failure hard-aborts the SliceToVolume stage instead of skipping the hop |
+| C08-B002 | `stosfile.py:1168-1170` | Composition raises on its own output text, so one unmapped grid point kills the hop |
+| C09-B001 | `mrc.py:340` | MRC flips tile pixels but never the mosaic coordinates; `FlipList` ignored entirely |
+| C10-B001 | `translaterigidcommand.py:80` | Rigid drag cancel restores a live reference, so right-click never undoes the translate |
+| C00-P001 / C01-P001 | `checksum.py:64` | `FileChecksum` reads whole files into RAM (carried P0 from the overnight review) |
+
+## Top 5 correctness risks
+
+1. **Gates that fail open.** C03-B001 and C07-B005 both make a check pass by construction (`peak_ratio=None` → not ambiguous; a `(bool, reason)` tuple → always truthy). These produce plausible-looking wrong science with no error, which is the worst failure mode in the repo.
+2. **The Flip/Flop contract is unwritten and three importers disagree.** C09-B001, C09-B004, C09-B006: idoc alone pairs "flop the image" with "negate Y in the mosaic". MRC does half of it, PMG does the other half, DM4 does neither. This is the concrete case for morning design theme 5.
+3. **Strided views reaching CuVS.** C05-B001 is the same class as the bug fixed last week; `cp.asarray` normalizes dtype but not strides, and every control-point caller passes an `(N,4)[:, 2:4]` view.
+4. **Save-on-read and dirty-flag escape hatches in the volume XML.** C07-B006 makes `findall` write VolumeData.xml during a read, C07-B007/B008 add nodes as a side effect of a getter, and C07-B003/B009 mutate without marking dirty. Together these mean a read-only traversal can alter metadata while a real change can be lost.
+5. **NaN treated as fatal where the design says fall back.** C08-B001/B002/B007 abort whole stages on unmapped points that the RBF fallback exists to fill — and C08-B003's substring classifier can trigger that abort on an unrelated error containing "info".
+
+## Top 5 performance wins
+
+1. **`get_runtime_config(refresh=True)` per cell** (C03-P001) — clears the `lru_cache` and re-reads ~14 env vars twice per cell measurement. A per-pass snapshot removes tens of thousands of `os.environ` lookups per pass. Cheapest large win in the review.
+2. **Vectorize `_triangle_orientations` and bound the Lawson repair** (C10-P001, C10-P002) — interpreted per-triangle work on the UI thread during mouse-move, plus up to 128 full dict rebuilds per tile.
+3. **Bound in-flight tiles in the three ungated paths** (C04-P001, C08-P001, C09-P002) — `TilesToImageThreaded`, `MosaicToVolume`, and the MRC importer each queue one task per tile for a whole section. At the documented 2-3 GB/core envelope a 100-tile section is already ~3 GB of in-flight buffers.
+4. **Stream `FileChecksum` and stop materializing generators** (C01-P001, C07-P002, C09-P001) — chunked hashing plus removing three `list(generator)` calls that defeat incremental designs the code already has.
+5. **Stop the redundant recomputation in relaxation and `findall`** (C06-P001 ~3× tension work in an acknowledged bottleneck; C07-P001 triple XPath scan per call, with the middle loop discarding its result).
+
+Also worth a single sweep rather than point fixes: the per-cell and per-angle device→host syncs (C02-P003, C02-P006, C03-P002, C04-P004) and the float64 upcasts in batched paths (C02-P001, C03-P004).
+
+## Recommended fix order
+
+**Wave 1 — hangs and fail-open gates (small diffs, large blast radius).** C07-B001 (one-line loop variable), C07-B002 (`hasattr` guard), C03-B001 (one missing kwarg), C05-B001 (`ascontiguousarray`, mirroring `spatial_distance.py:94`), C10-B001 (copy instead of reference), C07-B005 (unpack the tuple). Each is a few lines; together they close five of the ten P0s. Add a >=4096-point regression test for C05-B001 modeled on `test_cupy_cdist_strided_view_matches_contiguous`.
+
+**Wave 2 — stop destroying or silently corrupting output.** C08-B001/B002/B007 (make output-side non-finite a per-slice skip, per the stated design intent) with C08-B003 (replace the substring classifier with a typed exception). C07-B003/B009 (dirty-flag escape hatches). C04-B001/B002 (`TransformStos` and the argument-dropping wrappers). C08-B004 (mosaic saved valid after a swallowed per-tile failure).
+
+**Wave 3 — the Flip/Flop contract.** Write the axis/origin contract as a shared helper plus one golden fixture test, then fix MRC, PMG, and DM4 against it (C09-B001, B002, B004, B006). Doing these individually risks trading one Y-shift for another, so the contract should land first.
+
+**Wave 4 — memory and throughput.** Wave-1-cheap perf items in the order above, with the in-flight gates (C04-P001, C08-P001, C09-P002) prioritized because they are the ones that fail outright on a large section rather than merely running slowly. Per the Serial-batched-primitives rule, any refine perf claim needs sign-off on a >=100-tile section.
+
+**Wave 5 — parity and debt.** Add the four twin-drift items (C05-B002, B005, B006, B012) to `docs/cpu_gpu_dual_class_parity.md`; fix the serial/batched validity-gate and dtype divergences (C02-B003, C02-P001); sweep the `print()` and no-op-`Warning` sites onto unified logging (C02-B012, C06-B012, C01-P005/P006).
+
+## Caveats
+
+- Findings are from static reading plus targeted verification, not from a full test run. Items marked `confirmed` were re-read directly at the cited line; items marked `open` are well-evidenced but unexecuted, and a few (notably the `UnboundLocalError` and `AxisError` classes in chunk 06) may sit on paths that are unreachable in current configurations. Each should be confirmed with a test before a fix lands.
+- Chunk 10 pytest coverage is not in CI, and five chunk-10 findings are visual-only; a green pytest run there is not evidence of correctness.
+- Optional chunk 11 (Docker, builddashboard, web) was not reviewed, per the plan's deferral of infra.
