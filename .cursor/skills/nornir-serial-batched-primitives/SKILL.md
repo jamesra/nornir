@@ -34,7 +34,7 @@ Maintain these tables in the **same commit** when adding, removing, or renaming 
 
 | Area | Test modules (glob / names) |
 |------|----------------------------|
-| Align / phase | `tests/test_*Align*.py`, `tests/test_*phase*.py`, `tests/test_find_peak_memory.py`, `tests/test_find_peak_inplace_ratio_parity.py`, `tests/test_peak_uniqueness.py` |
+| Align / phase | `tests/test_*Align*.py`, `tests/test_*phase*.py`, `tests/test_find_peak_memory.py`, `tests/test_find_peak_inplace_ratio_parity.py`, `tests/test_peak_uniqueness.py`, `tests/test_batched_low_content_gate.py` |
 | STOS / refine | `tests/test_*stos*.py` (incl. `test_stos_registration_debug.py`), `tests/test_*refine*.py` |
 | RBF / transform composition | `tests/test_rbf_singular_recovery.py`, `tests/transforms/test_addition.py`, `tests/transforms/test_rbf_precompute_and_duplicates.py` |
 | Arrange / masks | `tests/test_arrange.py`, `tests/test_overlapmasking.py` |
@@ -56,6 +56,8 @@ Maintain these tables in the **same commit** when adding, removing, or renaming 
 | `tests/transforms` has 18 pre-existing failures | `test_AlignmentRecord`, `test_linear_nd_cupy_fallback`, `test_metrics`, `test_points_to_linear_fit`. Same count with and without local changes; compare against a stashed baseline rather than expecting green |
 | GPU (`_GPUComponent`) RBF recovery is untested | `_is_singular_matrix_error` is shared by both mirrors, but the CuPy branch needs a CUDA host to exercise |
 | `TestBasicTileAlignment` flakes in combined runs | Running `-k "Align or phase or peak or overlapmask"` rotates one or two extra failures per run (`test_Alignments`, `test_MismatchSizeAlignments`, `test_best_angle_ranking_parity`), with and without local changes. The same modules run alone are stable. Judge a diff by running the file alone, or by comparing failure *sets* across repeated runs on both trees — a single combined run is not a reliable signal |
+| Batched cell gates must mirror `is_alignable_cell`, not just span | The batched gate checked only nonzero span and nonzero max, while serial also enforces a `NORNIR_REFINE_LOW_CONTENT_STD_MIN` std floor. Since each cell is normalized by its own span, a cell with std 3e-5 was amplified to full range and returned weight ~1.77 where serial returned 0. The batched call site in `local_distortion_correction` gates on overlap *coverage* only, so nothing upstream compensates. When adding a serial cell-validity rule, mirror it in `batched_find_offset` and assert on the reject/accept *decision*, not just on healthy-cell values |
+| Contrast gates can use the range bound instead of a full reduction | For `n` samples with range `span`, std >= span / sqrt(2n). Real cells span most of their range, so comparing the already-computed span against `threshold * sqrt(2n)` normally clears the batch and the std reduction is skipped. A naive masked std cost 21% on `batched_find_offset`; the bound made it a wash. Any similar gate should reuse statistics the function already computes |
 | `find_peak` uniqueness must be measured pre-threshold | `allow_in_place=True` used to apply the cutoff to the caller's surface, which erased the competing peaks the ratio depends on and returned the "nothing competes" sentinel. `batched_find_peak` never thresholds and was already correct. Any future thresholding change must keep the surface readable for `masked_peak_ratio`, and parity must be asserted on `peak_ratio`, not just offset and strength |
 
 ## Same-commit sync
