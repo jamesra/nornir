@@ -74,6 +74,18 @@ Many headless paths **save figures to PNG** instead of showing a window. Success
 
 **Agent workflow:** (1) Clear **`_plot_artifacts`** under the active test output root **once** before the session when `TEST_OUTPUT_DIR` or `TESTOUTPUTPATH` is set (see above). (2) Run tests. (3) List or glob artifact paths; read images and correlate `tag=` / paths with code under test. (4) Move or copy reviewed images into **`pass/`** or **`fail/`** using test + title + visual judgment. (5) For the final verdict, **non-empty `fail/` overrides a green pytest** (see “Agent rule” above).
 
+## A session that leaks child processes now fails
+
+`nornir-imageregistration/conftest.py` closes pools at session end, then kills and reports any surviving descendant of the pytest process, failing the run if it finds one. Leaked pool workers used to outlive pytest, accumulate across runs and contend for the GPU — worse than a plain resource leak, because the contention is invisible and yields plausible but wrong timings (one measurement on review #213 was off by two orders of magnitude). See review #217.
+
+Reading the output:
+
+- The count is **OS processes, not logical workers**. A venv `Scripts/python.exe` is a launcher that spawns the real interpreter, so one leaked child appears twice.
+- `POOL TEARDOWN: pool shutdown did not finish within 60s` means teardown itself hung, not that anything leaked — `wait_completion` busy-spins while a task is registered active (#221). The hook bounds it on a daemon thread so it reports rather than wedging the session.
+- `NORNIR_ALLOW_LEAKED_WORKERS=1` downgrades it to a printed warning. Use it when a leak is expected, not to silence a surprise.
+
+**Before blaming a leak on the library:** on Windows, `multiprocessing` uses spawn, so a script run directly (`python myscript.py`) that creates a pool outside an `if __name__ == '__main__':` guard has every worker re-execute the script and build its own pool — a recursive explosion that produces exactly the "dozens of orphaned interpreters under one parent" signature. This is the most likely cause of a sudden process pile-up and it is a bug in the script, not in `nornir_pools`. A wrapper using `runpy.run_path(..., run_name='__main__')` is *safe* even unguarded, because runpy replaces `sys.modules['__main__']` with the guarded target before any pool is created.
+
 ## Quick command pattern
 
 ```bash
