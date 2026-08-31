@@ -24,6 +24,7 @@ Default virtual environment: `D:\src\git\nornir\venv\pyre314` (see **Virtual-Env
 | [Virtual-Env.mdc](.cursor/rules/Virtual-Env.mdc) | Default venv path |
 | [Design-choice-confirmation.mdc](.cursor/rules/Design-choice-confirmation.mdc) | Pause for material design risks; non-negotiable `must not` / `do not` |
 | [Unified-Logging-Convention.mdc](.cursor/rules/Unified-Logging-Convention.mdc) | `SetupLogging`, `NORNIR_LOG_ROOT`, multiprocess queue logging |
+| [Monorepo-submodule-changes.mdc](.cursor/rules/Monorepo-submodule-changes.mdc) | Commit in submodule, then bump umbrella pointer; scratch files out of the repo root |
 
 ### Glob-scoped
 
@@ -38,6 +39,8 @@ Default virtual environment: `D:\src\git\nornir\venv\pyre314` (see **Virtual-Env
 | [nornir-docker-conventions.mdc](.cursor/rules/nornir-docker-conventions.mdc) | `nornir-docker/**`, compose, Dockerfiles, `.devcontainer` | Submodule assets, secrets, Compose bridge |
 | [Serial-batched-primitives.mdc](.cursor/rules/Serial-batched-primitives.mdc) | phase/batched registration paths | Verification matrix; ≥100-tile perf sign-off |
 | [Pyre-STOS-rigid-transform-UI.mdc](.cursor/rules/Pyre-STOS-rigid-transform-UI.mdc) | pyre rigid transform UI paths | Read paired skill before panel/sync changes |
+| [Review-driven-bugfixing.mdc](.cursor/rules/Review-driven-bugfixing.mdc) | bug-review master list, `issue-handoff` | Findings are hypotheses; reproduce or measure before fixing |
+| [Stable-path-output-parity.mdc](.cursor/rules/Stable-path-output-parity.mdc) | importers, image I/O, coordinates, transforms | Compare outputs before/after on long-stable paths |
 
 ---
 
@@ -57,6 +60,7 @@ Full catalog: [`.cursor/skills/README.md`](.cursor/skills/README.md).
 | [nornir-documentation](.cursor/skills/nornir-documentation/SKILL.md) | Build/deploy Sphinx monodoc |
 | [nornir-debug-profiling](.cursor/skills/nornir-debug-profiling/SKILL.md) | PhaseProfiler, slowness and queue profiling |
 | [nornir-headless-unit-tests](.cursor/skills/nornir-headless-unit-tests/SKILL.md) | `NORNIR_HEADLESS`, plot artifact triage |
+| [nornir-review-issue-fixing](.cursor/skills/nornir-review-issue-fixing/SKILL.md) | Working the bug-review queue end to end |
 | [nornir-serial-batched-primitives](.cursor/skills/nornir-serial-batched-primitives/SKILL.md) | Serial/batched registration verification |
 | [pyre-stos-rigid-transform-ui](.cursor/skills/pyre-stos-rigid-transform-ui/SKILL.md) | Pyre STOS rigid UI semantics |
 

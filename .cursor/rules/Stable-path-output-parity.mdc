@@ -1,0 +1,35 @@
+---
+description: Import, image loading, and coordinate paths are long-stable — compare outputs before and after any change
+globs: nornir-buildmanager/nornir_buildmanager/importers/**/*.py,nornir-buildmanager/nornir_buildmanager/operations/**/*.py,nornir-imageregistration/nornir_imageregistration/core/**/*.py,nornir-imageregistration/nornir_imageregistration/files/**/*.py,nornir-imageregistration/nornir_imageregistration/spatial/**/*.py,nornir-imageregistration/nornir_imageregistration/transforms/**/*.py,nornir-imageregistration/nornir_imageregistration/assemble*.py,nornir-imageregistration/nornir_imageregistration/mosaic*.py,nornir-imageregistration/nornir_imageregistration/tile*.py,dm4/**/*.py
+alwaysApply: false
+---
+
+## Long-stable paths need output comparison
+
+Import, image loading, coordinate handling, and the heavily used `nornir-buildmanager` paths have
+been **stable in production for years**. A regression here is silently wrong science across a
+whole volume, and the owner reports that import problems surface quickly and visibly.
+
+Treat a review finding against these paths as **weaker evidence than the code's track record**:
+a long-stable path that "obviously" mishandles coordinates usually encodes a real convention —
+stage coordinates and camera readout order legitimately differ from image array order.
+
+### Required before changing these paths
+
+- **Compare outputs before and after** on real data, not only unit fixtures. Checksums or
+  pixel-exact comparison where the change is meant to be behaviour-preserving; state which.
+- **Add a unit test** for the fix. See
+  [`.cursor/skills/nornir-review-issue-fixing/SKILL.md`](../skills/nornir-review-issue-fixing/SKILL.md).
+- **Do not** "fix" an apparent axis, origin, or flip inconsistency without evidence from a real
+  file that the output is wrong. There is no single written axis/origin contract yet
+  (review [#174](https://github.com/jamesra/nornir-review/issues/174)), so a local reading is not
+  enough to establish intent.
+- **Do not regress performance**; these paths run per tile and per section.
+
+### Test data
+
+Real inputs beat synthesized ones for this class of change. Small real files live under
+`TESTINPUTPATH` (`/nornir-testdata` in the dev container; see the
+[nornir-docker-devcontainer](../skills/nornir-docker-devcontainer/SKILL.md) skill). When a repro
+needs a production file, copy a **small** section into the test data tree rather than reading from
+the NAS volume in a test.

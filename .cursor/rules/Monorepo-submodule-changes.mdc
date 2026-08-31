@@ -1,0 +1,29 @@
+---
+description: Commit inside the submodule then bump the umbrella pointer; keep scratch files out of the repository root
+alwaysApply: true
+---
+
+## Monorepo change workflow
+
+Every `nornir-*` package (plus `dm4`) is a **git submodule**. A parent-repo commit does **not**
+include submodule file changes unless the pointer was updated.
+
+1. Commit the code change **inside the submodule**.
+2. Bump the **umbrella pointer** in a second commit.
+
+Umbrella message convention, naming the package and the issue:
+
+```text
+Update nornir-buildmanager: recopy notes on content change, not mtime alone (#245)
+```
+
+Verify with `git submodule status` — a `+` prefix means the checked-out commit differs from the
+recorded pointer, i.e. the bump is missing.
+
+## Scratch files
+
+- **Do not** create working notes, captured test output, or debug dumps in the **repository root**.
+- Investigation notes and issue write-ups go under **`.cursor/issue-handoff/`**.
+- Test artifacts and debug images belong under **`TESTOUTPUTPATH`** (or `TEST_OUTPUT_DIR`), not the
+  working tree.
+- Log files follow the unified logging convention (`NORNIR_LOG_ROOT`); do not add ad hoc log files.

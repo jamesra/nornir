@@ -14,6 +14,7 @@ Procedures for agents. Policy/guardrails live in [`.cursor/rules/`](../rules/). 
 | [nornir-documentation](nornir-documentation/SKILL.md) | Sphinx monodoc build/deploy | [Documentation-and-monodoc](../rules/Documentation-and-monodoc.mdc) |
 | [nornir-debug-profiling](nornir-debug-profiling/SKILL.md) | PhaseProfiler, performance investigation | [Unified-Logging-Convention](../rules/Unified-Logging-Convention.mdc) |
 | [nornir-headless-unit-tests](nornir-headless-unit-tests/SKILL.md) | `NORNIR_HEADLESS`, plot artifact triage | — |
+| [nornir-review-issue-fixing](nornir-review-issue-fixing/SKILL.md) | Working a bug-review finding end to end: verify, test, commit, close | [Review-driven-bugfixing](../rules/Review-driven-bugfixing.mdc), [Stable-path-output-parity](../rules/Stable-path-output-parity.mdc) |
 | [nornir-serial-batched-primitives](nornir-serial-batched-primitives/SKILL.md) | Serial/batched registration verification | [Serial-batched-primitives](../rules/Serial-batched-primitives.mdc) |
 | [pyre-stos-rigid-transform-ui](pyre-stos-rigid-transform-ui/SKILL.md) | Pyre STOS rigid UI semantics | [Pyre-STOS-rigid-transform-UI](../rules/Pyre-STOS-rigid-transform-UI.mdc) |
 
