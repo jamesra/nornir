@@ -11,7 +11,7 @@ overnight are **not** re-listed; only open/carried items appear below.
 ## Legend
 
 - **Severity:** P0 (data loss / wrong science), P1 (silent wrong output), P2 (perf / ops pain), P3 (maintainability / debt)
-- **Type:** `bug` | `perf` | `parity` | `debt`
+- **Type:** `bug` | `perf` | `parity` | `debt` | `security`
 - **Status:** `open` | `confirmed` | `fixed` | `wontfix` | `deferred`
 
 ## Chunk status
@@ -26,7 +26,8 @@ overnight are **not** re-listed; only open/carried items appear below.
 - [x] 08-operations (buildmanager operations)
 - [x] 09-importers (importers + dm4)
 - [x] 10-pyre (Pyre UI + GL)
-- [ ] 11-infra (Docker, builddashboard, web) — optional, deferred per plan
+- [x] 11-builddashboard (nornir-builddashboard: store, MQTT subscriber, FastAPI app, static UI)
+- [ ] 12-infra (Docker, nornir-web, volumecontroller/volumemodel) — optional, still deferred per plan
 
 See the **Summary** at the end of this file for P0/P1 counts, top risks, and recommended fix order.
 
@@ -108,7 +109,7 @@ Paths: `phasecorrelation.py`, `batched_phase_correlation.py`, `stos_brute.py`, `
 | C02-P002 | 02 | P2 | perf | `stos_brute.py:1678-1679` | DoG+FFT magnitude spectrum computed 4× per log-polar registration when 2 would do | radial pair args identical to angle pair | open | [#93](https://github.com/jamesra/nornir-review/issues/93) |
 | C02-P003 | 02 | P2 | perf | `stos_brute.py:690` | Per-angle device→host sync in the angle sweep (`int(xp_out.sum(...))`) | called once per angle from `ScoreManyAnglesGpu` | open | [#94](https://github.com/jamesra/nornir-review/issues/94) |
 | C02-P004 | 02 | P2 | perf | `stos_brute.py:1311-1314,586-599` | Scale refinement re-zooms source + recomputes full `ImageStats` per score; ternary loop does 14×2 scores → ~40 pad/rotate/FFT cycles | `_SCALE_REFINE_TERNARY_ITERATIONS = 14` | open | [#95](https://github.com/jamesra/nornir-review/issues/95) |
-| C02-P005 | 02 | P2 | perf | `hann_window_cache.py` + `stos_brute.py:1772` | Hann window cache is host-only, so the window re-uploads to device every log-polar call | `_coerce_to_source_module` does fresh `xp.asarray` | open | [#96](https://github.com/jamesra/nornir-review/issues/96) |
+| C02-P005 | 02 | P2 | perf | `hann_window_cache.py` + `stos_brute.py:1772` | Hann window cache is host-only, so the window re-uploads to device every log-polar call | `_coerce_to_source_module` does fresh `xp.asarray` | wontfix (`1f2e6d5`) — unreachable: `xp` is always numpy (host boundary at entry + module-preserving padding), so the coerce returns the identical object |  [#96](https://github.com/jamesra/nornir-review/issues/96) |
 | C02-P006 | 02 | P3 | perf | `phasecorrelation.py:464,482` | `count_nonzero(overlap_mask)` evaluated and host-synced twice for the same mask | lines 464 and 482 | open | [#180](https://github.com/jamesra/nornir-review/issues/180) |
 | C02-P007 | 02 | P3 | debt | `phasecorrelation.py:563-567` | Sub-pixel offset computed in float32, discarding float64 centroid precision on large frames | float32 cast of `center_of_mass` | open | [#181](https://github.com/jamesra/nornir-review/issues/181) |
 
@@ -166,7 +167,7 @@ Paths: `assemble.py`, `assemble_tiles.py`, `tileset.py`, `tileset_functions.py`,
 | C04-P001 | 04 | P1 | perf | `assemble_tiles.py:560-573` | `TilesToImageThreaded` submits all work at once and holds each warped tile until in-order composite → in-flight memory O(tiles), not O(workers) | serial path has `_PREFETCH_DEPTH`, parallel has `CheckTaskInterval`; threaded has no gate | open | [#37](https://github.com/jamesra/nornir-review/issues/37) |
 | C04-P002 | 04 | P1 | perf | `assemble.py:994-1019` | Tiled `TransformImage` sets `return_shared_memory=False`, pickling every 2048² warped tile back through the pool pipe | the matching `unlink_shared_memory` at 1019 silently no-ops on an ndarray | open | [#38](https://github.com/jamesra/nornir-review/issues/38) |
 | C04-P003 | 04 | P1 | perf | `assemble.py:964-972,1025-1033` | `enforce_background_cval` re-runs a whole-section inverse transform then copies the whole section after the tiled warp already finished | `GetROICoords` over full canvas + `output.copy()` | open | [#39](https://github.com/jamesra/nornir-review/issues/39) |
-| C04-P004 | 04 | P2 | perf | `assemble.py:484,538-544` | Three full-array reductions plus host syncs per warp per tile, inconsistent with the kept A1/A7 lazy-stats decisions | `bool(xp.any(xp.isnan(...)))`, min/max, two `float()` | open | [#110](https://github.com/jamesra/nornir-review/issues/110) |
+| C04-P004 | 04 | P2 | perf | `assemble.py:484,538-544` | Three full-array reductions plus host syncs per warp per tile, inconsistent with the kept A1/A7 lazy-stats decisions | `bool(xp.any(xp.isnan(...)))`, min/max, two `float()` | fixed (`fad42c3`) — NaN scan deferred; 10-23% faster CuPy distance-plane warp. Clip cannot be gated on order (border blends toward cval) | [#110](https://github.com/jamesra/nornir-review/issues/110) |
 | C04-P005 | 04 | P2 | perf | `assemble.py:583-588` | `return_valid_mask` allocates a full bool mask plus a second full output via `xp.where` instead of in-place cval assignment | peak 2× output + mask | open | [#111](https://github.com/jamesra/nornir-review/issues/111) |
 | C04-P006 | 04 | P2 | parity | `assemble_tiles.py:376,540` vs `649` | Output dtype comes from tile 0 in serial/threaded but `default_image_dtype()` in parallel — same mosaic assembles to different dtypes by entry point | also loads a full tile just to read a dtype | open | [#112](https://github.com/jamesra/nornir-review/issues/112) |
 | C04-P007 | 04 | P3 | perf | `tileset_functions.py:314` | Each pyramid quadrant decoded then fully re-copied via `tobytes()`, tripling transient memory, four concurrent | `Image.frombytes(..., img.tobytes())` | open | [#189](https://github.com/jamesra/nornir-review/issues/189) |
@@ -372,6 +373,101 @@ Paths: `pyre/gl_engine/`, `pyre/views/`, `pyre/controllers/transformcontroller.p
 
 ---
 
+## Chunk 11 — Build dashboard (nornir-builddashboard)
+
+Paths: `nornir-builddashboard/nornir_dashboard` (`store.py` 583, `mqtt_subscriber.py` 526,
+`main.py` 347, `config.py` 78, `ws_broadcast.py` 43), `nornir_dashboard/static/app.js` 1319,
+`Dockerfile`. Reviewed as one chunk (~2.5 kLOC of Python) split into five sub-areas:
+SQLite store, MQTT ingest/projection, FastAPI app + async lifecycle, config, and the static UI.
+
+Unlike chunks 01-10 this package sits entirely off the science path — it observes builds and
+never writes volume data — so there are **no P0 findings here**. The severity ceiling is P1
+for silently dropped telemetry, an unauthenticated destructive endpoint, and the write
+amplification that makes the dashboard the bottleneck during a log flood.
+
+Existing tests: 45, of which 44 pass here (see C11-D004). Fourteen findings below were
+confirmed by executing the code in this container, not by reading alone.
+
+| ID | Chunk | Severity | Type | Location | Concern | Evidence | Status | Issue |
+|----|-------|----------|------|----------|---------|----------|--------| --- |
+| C11-B001 | 11 | P1 | bug | `mqtt_subscriber.py:465-475` | `_refresh_top_level_progress` sorts tracks on publisher-supplied `depth`; one track with `"0"` (string) beside `_update_progress`'s hardcoded `100` (int) raises `TypeError` mid-`_project_event`, so the pending `current_stage`/`section`/`element` write at 378-379 never runs, the event is never persisted, and nothing is broadcast — all swallowed by the blanket `except` in `_on_message:166` | **executed:** `TypeError: '<' not supported between instances of 'str' and 'int'` from `sorted(tracks.items(), key=sort_key)` | fixed | - |
+| C11-B002 | 11 | P1 | bug | `store.py:194-198`, caller `mqtt_subscriber.py:200-202` | `update_run_fields` filters out `v is not None`, so no column can ever be set back to NULL. The stale-revival path explicitly passes `{"status": "running", "end_ts": None}` intending to clear the end time; the `None` is dropped and the revived run keeps its old `end_ts`, so the UI shows a `running` build that already ended and computes a wrong runtime | **executed:** after complete → revive, row is `status='running', end_ts=123.0` | fixed | - |
+| C11-B003 | 11 | P1 | bug | `mqtt_subscriber.py:189` | `ts = float(payload.get("ts") or ...)` is unguarded and runs *before* any store write, so one malformed timestamp discards the entire message — no `last_seen`, no `error_count` increment, no event row, no broadcast. An `error` line with a bad `ts` is invisible in both the log pane and the sidebar counter | **executed:** `log/error` with `ts="not-a-number"` produced 0 SQL statements, 0 broadcasts, 0 stored events | fixed | - |
+| C11-B004 | 11 | P1 | bug | `main.py:334` | `app = create_app()` at module scope opens SQLite and `os.makedirs` **at import time**, so merely importing the package creates `nornir-dashboard.db` in the current directory; `run()` then calls `load_config()` a second time, and a `config` passed to `create_app` by any other caller is ignored by the console script | stray `/workspace/nornir-dashboard.db` and `nornir-builddashboard/nornir-dashboard.db` both exist (gitignored via `*.db`) | fixed | - |
+| C11-B005 | 11 | P1 | bug | `mqtt_subscriber.py:144-147` | `clear_retained` publishes at QoS 0 and ignores the returned `MQTTMessageInfo`, so the retained-clear is dropped silently when the broker link is down — and it clears only the `meta` leaf. Deleted and stale runs are then revived as `running` from broker retain on reconnect, which is exactly what `_stale_sweeper`'s docstring claims this prevents | no `wait_for_publish`/`rc` check; `_stale_sweeper:137-139` states the intent | fixed* | - |
+| C11-B006 | 11 | P2 | bug | `main.py:122-129`, `142-171` | Both sweepers are `async def` but call synchronous SQLite directly on the event loop while holding the store lock; retention issues 2 statements + a commit **per expired run** inline, so a large sweep stalls every WebSocket client for its duration. The REST handlers are correctly plain `def` (FastAPI threadpool), which makes the sweepers the outlier | no `asyncio.to_thread`; `_run_retention_sweep:110-114` loops `_delete_run_and_notify` | fixed | - |
+| C11-B007 | 11 | P2 | bug | `config.py:71-73` | `retention_sweep_interval` is read with no positivity guard while `stale_sweep_interval` two lines up uses `_positive_or_default`; `NORNIR_DASHBOARD_RETENTION_SWEEP_INTERVAL=0` turns `_retention_sweeper` into `await asyncio.sleep(0)` — a tight loop hammering SQLite at 100% CPU | asymmetry with `config.py:62-67` | fixed | - |
+| C11-B008 | 11 | P2 | bug | `main.py:228-230` | `/api/runs?limit=` is passed to SQL unvalidated; SQLite treats `LIMIT -1` as unlimited, so `?limit=-1` dumps the whole `runs` table. The events endpoint clamps via `clamp_events_limit`, this one does not | **executed:** `list_runs(limit=-1)` returned all rows, `limit=2` returned 2 | fixed | - |
+| C11-B009 | 11 | P2 | bug | `store.py:56-67` | `parse_types_param` returns `None` (= all types) for an empty string but `[]` (= match nothing) when every requested key is unknown, and `_types_sql([])` emits `0=1`. A typo'd or renamed UI filter key silently yields an empty log view instead of falling back to all | **executed:** `parse_types_param("bogus") == []`, `parse_types_param("") is None` | fixed | - |
+| C11-B010 | 11 | P2 | bug | `mqtt_subscriber.py:254` with `store.py:70-95` | `_classify` maps any unrecognized topic leaf to `kind='other'` and `_should_persist_event` stores it, but `_types_sql` has no branch for `other` — those rows are invisible under every UI filter and excluded from any filtered export, while still consuming the `prune_events` budget that protects real errors | **executed:** leaf `telemetry/gpu` stored as `kind='other'`; the 6-type clause contains no `other` predicate | fixed | - |
+| C11-B011 | 11 | P2 | bug | `main.py:310-321` | The WebSocket handler unregisters only in `except WebSocketDisconnect` / `except Exception`; `asyncio.CancelledError` is a `BaseException`, so on server shutdown or task cancellation the socket is never removed from `_clients` and leaks into subsequent broadcasts. Belongs in a `finally` | both handlers are `except` clauses | fixed | - |
+| C11-B012 | 11 | P2 | bug | `store.py:192-213` | `update_run_fields` never checks `rowcount`, so an UPDATE against a run the sweeper just deleted is a silent no-op. Combined with retention/stale deletes running concurrently with the MQTT thread, in-flight projections vanish with no log line | **executed:** update on an unknown `run_id` raised nothing | fixed | - |
+| C11-B013 | 11 | P2 | bug | `mqtt_subscriber.py:128-137` | `stop()` clears `_started` and sets `_stop_event` but never joins `_connect_thread`; the window between a successful `connect()` (112) and `loop_start()` (113) is unguarded, so a connect in flight can start a paho network thread *after* shutdown. Daemon threads mean this leaks per `create_app` rather than blocking exit | no `join`; `loop_stop`/`disconnect` may run before `loop_start` | fixed | - |
+| C11-B014 | 11 | P2 | bug | `mqtt_subscriber.py:408-456`, `381-406` vs `store.py:293-310`, `339-394` | `_merge_progress_track`/`_merge_pool_track` do a read-decode-mutate-reserialize-write cycle on the tracks blob with no transaction spanning it, so the MQTT thread races `clear_run_progress` / `mark_stale_runs` on the loop: a merge that read before the clear rewrites the cleared tracks back | `get_progress_tracks` then `update_run_fields` are separate lock acquisitions | fixed | - |
+| C11-B015 | 11 | P2 | bug | `mqtt_subscriber.py:339-356` | `stage_failed` updates `current_stage` but neither sets the run status to `failed` nor increments `error_count`, so a failed stage keeps the run rendering as `running` until an unrelated `meta` message happens to correct it | `event_type in ("stage_start", "stage_end", "stage_failed")` share one branch with no status write | fixed* | - |
+| C11-B016 | 11 | P3 | bug | `config.py:45-73` | Every `int()`/`float()` env read is unguarded, so a malformed `NORNIR_MQTT_PORT` or `NORNIR_DASHBOARD_RETENTION_DAYS` kills startup with a bare traceback. Only the two stale values get validated, and only for positivity, not parseability | `_positive_or_default` receives an already-parsed float | fixed | - |
+| C11-B017 | 11 | P3 | bug | `main.py:323-326` vs `328-329` | `index()` returns `FileResponse(.../index.html)` unconditionally while the `/static` mount right below it is guarded by `os.path.isdir`; a packaging miss that drops `static/` yields a 500 on `/` rather than a clear startup failure | asymmetric guard | fixed | - |
+| C11-P001 | 11 | P1 | perf | `mqtt_subscriber.py:191-227` with `store.py` commit-per-call | Each MQTT message costs 3-4 separate transactions because every store method commits individually, and the connection runs at SQLite defaults (`journal_mode=delete`, `synchronous=FULL`) — so a single log line is 3 fsyncs. This is the dashboard's dominant cost under the `iterate_progress` floods the store's own comments cite; needs one transaction per message plus WAL + `synchronous=NORMAL` | **executed** statement counts per message: `log/info` = 2 INSERT, 1 UPDATE, 1 SELECT, **3 COMMIT**; `log/error` = **4 COMMIT**; `event:iterate_progress` = 1 INSERT, 3 UPDATE, 4 SELECT, **4 COMMIT** | fixed | - |
+| C11-P002 | 11 | P2 | perf | `mqtt_subscriber.py:192` | `update_run_fields(run_id, {"last_seen": now})` fires immediately after `ensure_run`, whose `ON CONFLICT(run_id) DO UPDATE SET last_seen=excluded.last_seen` (`store.py:186`) already wrote exactly that value — one wholly redundant UPDATE + commit on every single message | **executed:** confirmed in the per-message counts above | fixed | - |
+| C11-P003 | 11 | P2 | perf | `mqtt_subscriber.py:197-202` | The stale-revival check calls full `get_run` on every non-terminal message purely to read one column, and `_decode_run_row` `json.loads` both `progress_tracks` and `pool_tracks` on the way out. Should be `SELECT status WHERE run_id=?` | 23-column row + 2 JSON parses per message | fixed | - |
+| C11-P004 | 11 | P2 | perf | `mqtt_subscriber.py:408-456` | Progress merging decodes the entire tracks blob, copies the dict, and reserializes and rewrites the whole row on every progress event — and `_refresh_top_level_progress` re-reads it straight afterwards. Track count is unbounded within a stage, so cost grows with distinct labels | **executed:** one `iterate_progress` message = 4 SELECTs, 3 UPDATEs | fixed | - |
+| C11-P005 | 11 | P2 | perf | `main.py:70-79` | `_send_to_clients` awaits `client.send_json` serially with no timeout, so a single stalled browser blocks every other client's frames and the drain loop behind it — classic head-of-line blocking. Needs per-client queues or `asyncio.gather` with a send timeout | `for client in list(self._clients): await client.send_json(message)` | fixed | - |
+| C11-P006 | 11 | P2 | perf | `store.py:452-455` | The `q` filter is `lower(COALESCE(payload,'')) LIKE '%...%'`, a full scan of `events` with no FTS index, and `iter_events_for_export` repeats it for every export batch. Only `idx_events_run(run_id, id)` exists | no FTS5 table; LIKE cannot use the index | verified* | - |
+| C11-P007 | 11 | P3 | perf | `main.py:48`, `ws_broadcast.py:15-29` | `asyncio.Queue()` has no `maxsize` and `coalesce_broadcast_messages` merges without a cap, so a flood while the loop is busy grows the queue unboundedly and then emits one enormous `event_batch` frame | no bound in either place | fixed | - |
+| C11-P008 | 11 | P3 | perf | `store.py:322-337`, `360-367` | Both sweep queries filter on `COALESCE(last_seen, first_seen, 0)` with no index on `runs`, so each sweep is a full table scan. Harmless at a few hundred runs, but the retention window is 30 days by default | only the events index is created | fixed | - |
+| C11-S001 | 11 | P1 | security | `main.py:237-243`, `config.py:51`, `Dockerfile:9` | There is no authentication or authorization on any endpoint, `DELETE /api/runs/{run_id}` permanently destroys a run's history **and** publishes a retained MQTT clear, and the default bind is `0.0.0.0` in both the config default and the image `ENV`. Any host that can reach the port can delete build history and mutate broker retained state | no dependency/middleware performs auth anywhere in `create_app` | fixed | - |
+| C11-S002 | 11 | P2 | security | `Dockerfile` | No `USER` directive, so the network-exposed web service runs as root inside the container; `/data` is also created root-owned, which breaks a bind mount owned by another uid | image ends at `CMD` with no user drop | fixed | - |
+| C11-D001 | 11 | P3 | debt | `store.py:107`, `119`, `413-419` | `_events_since_prune` is keyed by `run_id` and never cleaned by `delete_run`, the stale-stub delete, or retention, so the dict grows for the process lifetime | **executed:** key `'gone'` still present after `delete_run('gone')` | fixed | - |
+| C11-D002 | 11 | P3 | debt | `config.py:53-55` | `NORNIR_DASHBOARD_MAX_EVENTS` defaults to `0`, which disables `prune_events` entirely — the flood protection the store is built around (and whose `_PRUNE_EVERY` batching exists to make cheap) is off unless explicitly configured, leaving 30-day retention as the only bound on table growth | `max_events_per_run <= 0` returns early in `prune_events:524` | mitigated* | - |
+| C11-D003 | 11 | P3 | debt | `static/app.js:1162-1168`, `737` | `escapeHtml` does not escape `'`; every current interpolation happens to sit in a double-quoted attribute or a text node, so this is latent rather than live, but one single-quoted attribute added later becomes stored XSS from build log text. `fmtTime(event.ts)` at 737 is also the one unescaped interpolation among its escaped siblings | helper replaces only `& < > "` | fixed | - |
+| C11-D004 | 11 | P3 | debt | package-wide | `fastapi`/`uvicorn` are not installed in the Nornir devcontainer, so `tests/test_retention.py` cannot even be collected there (44 of 45 tests run) — this package has effectively no test signal in the standard environment, and C11-B004 means the import that fails also would have created a DB file | `ModuleNotFoundError: No module named 'fastapi'` at collection | fixed* | - |
+| C11-D005 | 11 | P3 | debt | `main.py:341`, `config.py:6-9` | The dashboard uses `logging.basicConfig` and module loggers rather than `nornir_shared.misc.SetupLogging` / `NORNIR_LOG_ROOT`, so it is the one Nornir service outside the unified logging convention. The tradeoff is real — the Dockerfile deliberately avoids depending on the monorepo to keep the image small — so this needs an explicit decision rather than a silent deviation | Unified-Logging-Convention rule vs `Dockerfile:2-3` | fixed | - |
+| C11-D006 | 11 | P3 | debt | `Dockerfile:20-21` | `pip install .` with unpinned `fastapi >= 0.110` / `uvicorn >= 0.29` / `paho-mqtt >= 2.1.0` means two builds of the same commit can ship different dependency trees, and there is no `HEALTHCHECK` for Compose to gate on | no constraints file, unlike `constraints-headless.txt` elsewhere in the repo | fixed | - |
+
+**Notes:** The static UI was reviewed for injection sinks specifically: `app.js` routes untrusted
+run and log text through `escapeHtml` at every `innerHTML` site (264, 407-435, 498, 736), and the
+numeric interpolations use `toFixed`, so there is **no live XSS** — C11-D003 is about the helper
+being one edit away from failing, not a current hole. The sidebar does assume
+`progress_fraction` is numeric (`pct.toFixed(1)`); because `update_run_fields` writes
+`payload["fraction"]` unvalidated and SQLite stores a non-numeric string as TEXT in a REAL
+column, a malformed publisher value would reach `toFixed` as a string and throw during render.
+That chain is unverified end to end and is folded into C11-B016's validation gap rather than
+tabled separately. C11-B001, B002, B003, B008, B009, B010, B012 and P001-P004 are all
+assertable in the existing pytest style without a broker or a browser — `tests/test_mqtt_subscriber.py`
+already drives `_handle_message` directly, which is how the confirmations above were produced.
+
+**Resolution (all 33 chunk 11 findings addressed; dashboard suite 152 passing).** New coverage
+lives in `tests/test_config.py`, `tests/test_store_chunk11.py`,
+`tests/test_mqtt_subscriber_chunk11.py`, `tests/test_app_chunk11.py`, and
+`tests/test_logging_setup.py`. Five rows resolved differently than the finding text proposed,
+marked `*` above:
+
+* **C11-B005** — only the `meta` leaf is published with `retain=True` by
+  `nornir_shared.mqtt_telemetry`, so a meta-only clear is correct; the real defects (QoS 0 and the
+  ignored `MQTTMessageInfo`) are fixed, and `clear_retained` now returns success.
+* **C11-B015** — `stage_failed` now sets `status='failed'`, but deliberately does **not** increment
+  `error_count`: `PipelineManager` logs the same failure through `logger.error` immediately before
+  publishing the event, which already increments the counter.
+* **C11-D002** — the `0` default is kept because `tests/test_events_query.py::TestMaxEventsDefault`
+  encodes "unlimited by default" as a contract. Negative values now normalize to `0`, and startup
+  logs which bound (retention or nothing) actually applies. **Open question:** should the default
+  become a finite bound?
+* **C11-P006** — no FTS5 table was added. The search predicate always carries `run_id = ?`, so
+  `EXPLAIN QUERY PLAN` shows `idx_events_run` narrowing the scan to one run rather than the whole
+  table (asserted in `TestEventSearchStaysRunScoped`). The finding's "full scan of `events`" is
+  therefore overstated; FTS5 would double storage for a per-run scan. **Open question:** revisit if
+  a single run exceeds ~1M events.
+* **C11-D004** — `fastapi`/`uvicorn` still are not in the devcontainer image; the tests now skip
+  cleanly instead of failing collection, and a `[test]` extra pins what is needed.
+
+`C11-S001` gained an opt-in token (`NORNIR_DASHBOARD_TOKEN`) on `/api/*` and `/ws`, a loopback
+default bind, and `NORNIR_DASHBOARD_ALLOW_DELETE`; `/`, `/static/*`, and the new `/api/health`
+stay ungated so the page can load and Docker can probe. `C11-D005` is resolved by delegating to
+`nornir_shared.misc.SetupLogging` when `NORNIR_LOG_ROOT` is set and the package is importable,
+falling back to stdout in the standalone image — so the convention applies wherever it can.
+
+---
+
 # Summary
 
 ## Counts
@@ -379,13 +475,15 @@ Paths: `pyre/gl_engine/`, `pyre/views/`, `pyre/controllers/transformcontroller.p
 | Severity | Count |
 |----------|-------|
 | P0 (data loss / wrong science) | 10 |
-| P1 (silent wrong output) | 63 |
-| P2 (perf / ops pain) | 99 |
-| P3 (maintainability / debt) | 36 |
-| **Total** | **208** |
+| P1 (silent wrong output) | 70 |
+| P2 (perf / ops pain) | 115 |
+| P3 (maintainability / debt) | 46 |
+| **Total** | **241** |
 
-By type: 116 `bug`, 59 `perf`, 15 `parity`, 18 `debt`.
-All 10 core chunks reviewed. 14 findings carry status `confirmed` — nine of those were re-read at the cited line during this pass, the rest were verified by the reviewing pass itself.
+By type: 133 `bug`, 67 `perf`, 15 `parity`, 24 `debt`, 2 `security`.
+All 10 core chunks reviewed, plus chunk 11 (builddashboard) added 2026-08-29. 28 findings carry
+status `confirmed` — nine were re-read at the cited line, five were verified by the chunk 01-10
+passes themselves, and the 14 chunk-11 items were confirmed by executing the code.
 
 ## The 10 P0s
 
@@ -432,8 +530,11 @@ Also worth a single sweep rather than point fixes: the per-cell and per-angle de
 
 **Wave 5 — parity and debt.** Add the four twin-drift items (C05-B002, B005, B006, B012) to `docs/cpu_gpu_dual_class_parity.md`; fix the serial/batched validity-gate and dtype divergences (C02-B003, C02-P001); sweep the `print()` and no-op-`Warning` sites onto unified logging (C02-B012, C06-B012, C01-P005/P006).
 
+**Wave 6 — dashboard (independent of waves 1-5; nothing here touches the science path).** Order within the chunk: C11-S001 first (an unauthenticated `DELETE` on `0.0.0.0` is the only finding an outsider can trigger), then the three silent-telemetry-loss bugs C11-B001/B002/B003 — each is a few lines and each is already reproducible via `_handle_message` in the existing test style. Then C11-P001/P002/P003 as one commit: a single transaction per message plus WAL, dropping the redundant `last_seen` UPDATE and narrowing the stale check to one column, which together remove roughly three quarters of the per-message SQL. Fixing C11-B002 (the `None`-drop) requires deciding whether `update_run_fields` should distinguish "not supplied" from "set to NULL"; a sentinel is the smaller change, but every caller passing `payload.get(...)` then needs review, so land it with tests rather than as a drive-by.
+
 ## Caveats
 
 - Findings are from static reading plus targeted verification, not from a full test run. Items marked `confirmed` were re-read directly at the cited line; items marked `open` are well-evidenced but unexecuted, and a few (notably the `UnboundLocalError` and `AxisError` classes in chunk 06) may sit on paths that are unreachable in current configurations. Each should be confirmed with a test before a fix lands.
 - Chunk 10 pytest coverage is not in CI, and five chunk-10 findings are visual-only; a green pytest run there is not evidence of correctness.
-- Optional chunk 11 (Docker, builddashboard, web) was not reviewed, per the plan's deferral of infra.
+- Chunk 11 (builddashboard) was reviewed on 2026-08-29 after the original pass. It is the only chunk whose findings were confirmed by execution rather than reading, which is why its `confirmed` ratio is much higher than chunks 01-10 — that reflects reviewing method, not relative code quality.
+- The remaining optional infra (Docker images, `nornir-web`, `nornir-volumecontroller`/`nornir-volumemodel`) is still unreviewed, per the plan's deferral of infra.
