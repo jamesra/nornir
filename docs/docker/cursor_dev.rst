@@ -15,7 +15,13 @@ Workspace strategy
 
 **cursor-dev (default)** bind-mounts the **monorepo root** (parent of ``nornir-docker/``) at ``/workspace`` using ``${NORNIR_WORKSPACE_HOST:-..}``, so the container sees the same sources as your host checkout. On start, ``cursor-dev-entry.sh`` runs ``git fetch`` only; it does **not** switch branches unless you set ``NORNIR_SYNC_REMOTE=1`` (then it checks out ``NORNIR_CLONE_BRANCH`` and ``git pull --ff-only``).
 
-**cursor-dev-clone** mounts a **named Docker volume** (``cursor-dev-work``) at ``/workspace``. On first start, ``cursor-dev-entry.sh`` clones with ``NORNIR_CLONE_URL`` / ``NORNIR_CLONE_BRANCH`` (defaults ``https://github.com/jamesra/nornir.git`` / ``dev``); on later starts it refreshes that branch (clone strategy). Use this for an isolated tree or when you do not want to bind-mount the host repo.
+On **container recreate** (not reattach), submodule handling for the bind-mounted service is:
+
+- **Default:** initialize missing submodules only; existing checkouts stay on their branches.
+- **``NORNIR_SUBMODULE_UPDATE=1``:** full ``git submodule update --init --recursive`` (match umbrella-recorded SHAs). Use after bumping umbrella pointers (see ``.cursor/rules/Monorepo-submodule-changes.mdc``).
+- **Reattach** via Dev Containers ``postAttachCommand`` runs editable installs only; it does **not** reset submodules.
+
+**cursor-dev-clone** mounts a **named Docker volume** (``cursor-dev-work``) at ``/workspace``. On first start, ``cursor-dev-entry.sh`` clones with ``NORNIR_CLONE_URL`` / ``NORNIR_CLONE_BRANCH`` (defaults ``https://github.com/jamesra/nornir.git`` / ``dev``); on later starts it refreshes that branch (clone strategy) and runs a full submodule update. Use this for an isolated tree or when you do not want to bind-mount the host repo.
 
 **Dev Containers:** default ``.devcontainer/devcontainer.json`` uses service **cursor-dev**. To open a dev container backed by **cursor-dev-clone**, use **Dev Containers: Reopen in Container** (or reopen with configuration) and pick **Nornir (cursor-dev clone)** (``.devcontainer/cursor-dev-clone/devcontainer.json``). The editor workspace folder is still the path you opened on the host; only the container's ``/workspace`` differs between bind and clone modes.
 

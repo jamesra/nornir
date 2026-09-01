@@ -24,7 +24,7 @@ Default virtual environment: `D:\src\git\nornir\venv\pyre314` (see **Virtual-Env
 | [Virtual-Env.mdc](.cursor/rules/Virtual-Env.mdc) | Default venv path |
 | [Design-choice-confirmation.mdc](.cursor/rules/Design-choice-confirmation.mdc) | Pause for material design risks; non-negotiable `must not` / `do not` |
 | [Unified-Logging-Convention.mdc](.cursor/rules/Unified-Logging-Convention.mdc) | `SetupLogging`, `NORNIR_LOG_ROOT`, multiprocess queue logging |
-| [Monorepo-submodule-changes.mdc](.cursor/rules/Monorepo-submodule-changes.mdc) | Commit in submodule, then bump umbrella pointer; scratch files out of the repo root |
+| [Monorepo-submodule-changes.mdc](.cursor/rules/Monorepo-submodule-changes.mdc) | Commit in submodule, bump umbrella pointer; mounted devcontainer preserves submodule branches on recreate |
 
 ### Glob-scoped
 

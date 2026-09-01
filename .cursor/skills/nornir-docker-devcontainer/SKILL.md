@@ -74,6 +74,7 @@ Authoritative files:
 | `NORNIR_CLONE_BRANCH` | `dev` | Branch for clone / optional sync (case-sensitive git branch name) |
 | `NORNIR_WORKSPACE_STRATEGY` | `mounted` (default service) / `clone` (**cursor-dev-clone**) | `mounted`: bind-mounted checkout — fetch only unless `NORNIR_SYNC_REMOTE=1`. `clone`: appliance-style refresh to clone branch. |
 | `NORNIR_SYNC_REMOTE` | unset (`0` effective) | Set to `1` on **cursor-dev** to checkout `NORNIR_CLONE_BRANCH` and `git pull --ff-only` on each start |
+| `NORNIR_SUBMODULE_UPDATE` | unset (`0` effective) | Set to `1` on **cursor-dev** (mounted) to run full `git submodule update --init --recursive` on recreate. Default: init missing submodules only; preserve existing checkouts. Warns on `+` in `git submodule status`. See **Monorepo-submodule-changes** rule — always bump umbrella pointers after submodule commits. |
 | `NORNIR_WORKSPACE_HOST` | `..` (default) | Host bind source for **cursor-dev**; relative to `nornir-docker/` compose file dir (parent = monorepo root) |
 
 Compose sets `TESTINPUTPATH` / `TESTOUTPUTPATH` on **cursor-dev**; keep PyCharm run configs aligned with the same values.
@@ -114,12 +115,12 @@ On container start, **`cursor-dev-entry.sh`** runs before your shell:
 
 1. If `/workspace` is empty: shallow `git clone` from `NORNIR_CLONE_URL` / `NORNIR_CLONE_BRANCH` (first-time empty bind only).
 2. If `/workspace` is already a git repo: `git fetch`; **only** if `NORNIR_SYNC_REMOTE=1`: checkout clone branch and `git pull --ff-only`.
-3. Best-effort `git submodule update --init --recursive`.
+3. Submodule sync via **`submodule-sync.sh`**: **default** init missing submodules only (preserves host checkout branches); warns when a submodule is ahead of the umbrella pointer (`+` in `git submodule status`). Set **`NORNIR_SUBMODULE_UPDATE=1`** for full `git submodule update --init --recursive` after pointer bumps.
 4. **`install-monorepo-editables.sh`**: `pip install -e --no-deps` for `nornir-shared`, `nornir-pools`, `nornir-imageregistration`, `dm4`, `nornir-buildmanager` (``--no-deps`` avoids git sibling deps overwriting local editables).
 
-**Dev Containers:** `.devcontainer/*/devcontainer.json` sets `postAttachCommand` to rerun the same editable install when the editor attaches (covers persistent containers that skip container entry).
+**Dev Containers:** `.devcontainer/*/devcontainer.json` sets `postAttachCommand` to rerun the same editable install when the editor attaches (covers persistent containers that skip container entry). Reattach does **not** run submodule update.
 
-**Service `cursor-dev-clone` (`NORNIR_WORKSPACE_STRATEGY=clone`):** clone when empty; when `.git` exists, fetch/checkout/pull to `NORNIR_CLONE_BRANCH`. Optional `NORNIR_CLONE_REFRESH=1` wipes `/workspace` before clone (parity with cursor worker). Then submodules (best effort) and the same editable installs.
+**Service `cursor-dev-clone` (`NORNIR_WORKSPACE_STRATEGY=clone`):** clone when empty; when `.git` exists, fetch/checkout/pull to `NORNIR_CLONE_BRANCH`. Optional `NORNIR_CLONE_REFRESH=1` wipes `/workspace` before clone (parity with cursor worker). Then **full** submodule update and the same editable installs.
 
 **Submodules:** shallow clone may omit full submodule trees; use `NORNIR_CLONE_DEPTH=0` or `full` for a full clone if needed. Some submodule URLs are SSH (`git@github.com:...`); HTTPS-only environments need URL rewrites or SSH keys inside the container.
 

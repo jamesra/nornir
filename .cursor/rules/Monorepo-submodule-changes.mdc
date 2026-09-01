@@ -1,5 +1,5 @@
 ---
-description: Commit inside the submodule then bump the umbrella pointer; keep scratch files out of the repository root
+description: Commit inside the submodule then bump the umbrella pointer; container recreate must not reset submodule branches
 alwaysApply: true
 ---
 
@@ -19,6 +19,41 @@ Update nornir-buildmanager: recopy notes on content change, not mtime alone (#24
 
 Verify with `git submodule status` — a `+` prefix means the checked-out commit differs from the
 recorded pointer, i.e. the bump is missing.
+
+### Always bump the umbrella pointer after submodule commits
+
+Treat the pointer bump as **part of the same change**, not an optional follow-up. Without it:
+
+- Other clones and CI see the old submodule SHA.
+- A **container recreate** on a bind-mounted checkout can look like work vanished: the entry
+  script used to run `git submodule update`, which detached each submodule at the **recorded**
+  pointer even when local branches were ahead.
+
+After any submodule commit, before pushing or rebuilding the dev container:
+
+```bash
+git submodule status          # no '+' lines when pointers match
+git add nornir-<package>      # stage the pointer bump
+git commit -m "Update nornir-<package>: <why>"
+```
+
+If you must recreate the container before bumping, restore branches with
+`git -C nornir-<package> checkout dev` (or your working branch). Commits are on the branch;
+only `HEAD` was detached.
+
+### Dev container submodule sync (bind-mounted workspace)
+
+On **container recreate**, `cursor-dev-entry.sh` (mounted / default `cursor-dev` service):
+
+- **Default:** `git submodule init` for missing submodules only; **does not** move existing
+  checkouts. Warns when `git submodule status` shows `+` (checkout ahead of recorded pointer).
+- **`NORNIR_SUBMODULE_UPDATE=1`:** full `git submodule update --init --recursive` — checkouts
+  match umbrella-recorded SHAs. Use after pointer bumps or when you intentionally want the
+  tree reset to recorded commits.
+- **`postAttachCommand`** (`NORNIR_CURSOR_DEV_SETUP_ONLY=1`) skips all git work; reattach alone
+  does not reset submodules.
+
+**Clone mode** (`cursor-dev-clone`) always runs full submodule update (appliance-style refresh).
 
 ## Scratch files
 
