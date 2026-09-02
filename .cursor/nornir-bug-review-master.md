@@ -57,8 +57,8 @@ re-filing the same concern.
 Two findings from outside the original review were filed while fixing these and are tracked only
 on the issue tracker: [#258](https://github.com/jamesra/nornir-review/issues/258) (fixed —
 `SliceToSliceRigidRegistration` raised `TypeError` on every call) and
-[#259](https://github.com/jamesra/nornir-review/issues/259) (open — log-polar recovers the
-690→691 angle 2.88 degrees off the reference).
+[#259](https://github.com/jamesra/nornir-review/issues/259) (fixed `b5e6476` — log-polar finalize
+skipped/rejected the narrow refine on soft translation peaks; 690→691 error 2.88°→0.77°).
 
 ---
 
