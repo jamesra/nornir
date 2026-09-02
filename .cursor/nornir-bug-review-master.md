@@ -60,6 +60,10 @@ on the issue tracker: [#258](https://github.com/jamesra/nornir-review/issues/258
 [#259](https://github.com/jamesra/nornir-review/issues/259) (fixed `b5e6476` — log-polar finalize
 skipped/rejected the narrow refine on soft translation peaks; 690→691 error 2.88°→0.77°).
 
+Skipped this pass (still open): **#10** (deferred P1 parity), **#88** / **#95** (`status:blocked`,
+need ≥100-tile re-tune / sign-off). WIP in `local_distortion_correction.py` / `refine_shared/*`
+left untouched; open refine P2s that touch those files deferred until that WIP lands.
+
 ---
 
 ## Chunk 00 — Seeded from prior review
@@ -291,7 +295,7 @@ Paths: `pipelinemanager.py`, `build.py`, `volumemanager/*`, `validation/*`
 | C07-B014 | 07 | P2 | bug | `validation/transforms.py:19,55` | Bare `except:` around `float(...)` swallows `KeyboardInterrupt`/`SystemExit`; the comment shows `except ValueError` was intended | two sites | fixed (`2fd9bc2`) | [#136](https://github.com/jamesra/nornir-review/issues/136) |
 | C07-B015 | 07 | P2 | bug | `volumemanager/xcontainerelementwrapper.py:255-258` | Broad `except Exception: continue` in parallel link loading leaves the unresolved `*_Link` stub in the tree; the single-link path re-raises instead | divergent handling at 197-200 | fixed (`7e28132`) | [#137](https://github.com/jamesra/nornir-review/issues/137) |
 | C07-B016 | 07 | P2 | bug | `volumemanager/xcontainerelementwrapper.py:224-233` | Loop variable `fullpath` shadows the function parameter, so every error message in the except blocks reports an arbitrary child path | messages at 248, 252, 257 | fixed (`357267b`; test `031b2ff`) | [#138](https://github.com/jamesra/nornir-review/issues/138) |
-| C07-B017 | 07 | P2 | bug | `pipelinemanager.py:640-642` | `_WriteStageTimings` reads `StageTimings.json` with an unguarded `json.load`; a truncated file from a killed run raises inside `Execute`'s `finally`, masking the original exception | call site is `finally:` at 614 | open | [#139](https://github.com/jamesra/nornir-review/issues/139) |
+| C07-B017 | 07 | P2 | bug | `pipelinemanager.py:640-642` | `_WriteStageTimings` reads `StageTimings.json` with an unguarded `json.load`; a truncated file from a killed run raises inside `Execute`'s `finally`, masking the original exception | call site is `finally:` at 614 | fixed (`aff86cc`) | [#139](https://github.com/jamesra/nornir-review/issues/139) |
 | C07-B018 | 07 | P3 | debt | `volumemanager/volumemanager.py:85-90` | `__SortNodes__` reaches into `element._children`, which does not exist on the C-accelerated `ElementTree.Element` | line 87 | open | [#198](https://github.com/jamesra/nornir-review/issues/198) |
 | C07-P001 | 07 | P1 | perf | `volumemanager/xelementwrapper.py:883-918` | `findall` runs the same XPath scan **three** times per call and the middle loop discards its result; combined with C07-B006, every property-style enumeration is a triple scan plus a possible disk write | 883, 890-902, 904 | fixed (`3376d19`) | [#57](https://github.com/jamesra/nornir-review/issues/57) |
 | C07-P002 | 07 | P2 | perf | `pipelinemanager.py:866-868` | `ProcessIterateNode` materializes every iterate candidate into a list before processing any, defeating the streaming contract; each resolution may force linked VolumeData.xml loads | only `len()` needs the list | open | [#140](https://github.com/jamesra/nornir-review/issues/140) |
