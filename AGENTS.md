@@ -58,6 +58,7 @@ Full catalog: [`.cursor/skills/README.md`](.cursor/skills/README.md).
 | [nornir-docker-devcontainer](.cursor/skills/nornir-docker-devcontainer/SKILL.md) | cursor-dev / Dev Containers setup |
 | [nornir-docker-images-ci](.cursor/skills/nornir-docker-images-ci/SKILL.md) | Image matrix, OCI/BOM, Docker CI |
 | [nornir-documentation](.cursor/skills/nornir-documentation/SKILL.md) | Build/deploy Sphinx monodoc |
+| [nornir-bump-version](.cursor/skills/nornir-bump-version/SKILL.md) | Package vs monorepo version bumps; Pyre installer |
 | [nornir-debug-profiling](.cursor/skills/nornir-debug-profiling/SKILL.md) | PhaseProfiler, slowness and queue profiling |
 | [nornir-headless-unit-tests](.cursor/skills/nornir-headless-unit-tests/SKILL.md) | `NORNIR_HEADLESS`, plot artifact triage |
 | [nornir-review-issue-fixing](.cursor/skills/nornir-review-issue-fixing/SKILL.md) | Working the bug-review queue end to end |

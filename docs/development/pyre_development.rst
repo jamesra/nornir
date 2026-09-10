@@ -142,6 +142,7 @@ Output:
 
 * Frozen bundle: ``dist/pyre/pyre.exe`` (one-folder layout)
 * Installer: ``dist/installer/Pyre-<version>-Setup.exe``
+  (version from ``nornir-pyre/pyproject.toml`` via ``build-installer.ps1``)
 
 ``build-freeze.ps1`` generates ``release/pyre-windows-constraints.txt`` (local
 ``file://`` URLs from ``release/package-versions.yaml``), installs CPU-only

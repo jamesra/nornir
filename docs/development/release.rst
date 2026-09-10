@@ -112,5 +112,10 @@ Pyre ships a native Windows installer (``Pyre-<version>-Setup.exe``), not a Dock
 On ``v*`` tags, ``.github/workflows/pyre-windows-release.yml`` builds the frozen bundle and
 attaches the installer to the GitHub Release.
 
+The installer filename and ``AppVersion`` come from ``nornir-pyre/pyproject.toml``
+(via ``packaging/windows/build-installer.ps1``), not from the monorepo root ``VERSION``
+file. Keep ``release/package-versions.yaml``'s ``pyre`` entry in sync with that
+``pyproject.toml`` (``setup.py`` reads the same file and must not hardcode a version).
+
 Maintainers: see the **Windows packaging and release** section in :doc:`pyre_development`.
 End users: :doc:`../packages/pyre_install`.
