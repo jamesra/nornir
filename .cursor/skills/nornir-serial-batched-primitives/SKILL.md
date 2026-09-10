@@ -35,7 +35,7 @@ Maintain these tables in the **same commit** when adding, removing, or renaming 
 | Area | Test modules (glob / names) |
 |------|----------------------------|
 | Align / phase | `tests/test_*Align*.py`, `tests/test_*phase*.py`, `tests/test_find_peak_memory.py`, `tests/test_find_peak_inplace_ratio_parity.py`, `tests/test_peak_uniqueness.py`, `tests/test_batched_low_content_gate.py`, `tests/test_padding_noise_reproducible.py`, `tests/test_batched_centroid_window_wraps.py`, `tests/test_correlation_peak_ratio_characterization.py`, `tests/test_logpolar_scale_seed_saturation.py`, `tests/test_smooth_fft_frame_size.py`, `tests/test_hann_window_stays_host.py`, `tests/test_logpolar_narrow_refine_gate.py` |
-| STOS / refine | `tests/test_*stos*.py` (incl. `test_stos_registration_debug.py`), `tests/test_*refine*.py`, `tests/test_SliceToSliceBrute_budget.py`, `tests/test_brute_decimated_ranking.py`, `tests/test_brute_coarse_grid_search.py` |
+| STOS / refine | `tests/test_*stos*.py` (incl. `test_stos_registration_debug.py`), `tests/test_*refine*.py`, `tests/test_best_effort_refine.py`, `tests/test_SliceToSliceBrute_budget.py`, `tests/test_brute_decimated_ranking.py`, `tests/test_brute_coarse_grid_search.py` |
 | RBF / transform composition | `tests/test_rbf_singular_recovery.py`, `tests/transforms/test_addition.py`, `tests/transforms/test_rbf_precompute_and_duplicates.py` |
 | Arrange / masks | `tests/test_arrange.py`, `tests/test_overlapmasking.py` |
 
