@@ -29,7 +29,7 @@
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
             "args": [],
-            "redirectOutput": true,
+            "redirectOutput": false,
             "justMyCode": false,
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/nornir-pyre;${workspaceFolder}/nornir-imageregistration;${workspaceFolder}/nornir-pools;${workspaceFolder}/nornir-shared;${workspaceFolder}/nornir-buildmanager",
@@ -53,7 +53,7 @@
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
             "args": ["-stos", "${input:pyreStosPath}"],
-            "redirectOutput": true,
+            "redirectOutput": false,
             "justMyCode": false,
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/nornir-pyre;${workspaceFolder}/nornir-imageregistration;${workspaceFolder}/nornir-pools;${workspaceFolder}/nornir-shared;${workspaceFolder}/nornir-buildmanager",
@@ -76,7 +76,7 @@
             "pythonArgs": ["-Xfrozen_modules=off"],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
-            "redirectOutput": true,
+            "redirectOutput": false,
             "justMyCode": false,
             "args": ["-stos", "${input:pyreStosPath}"],
             "env": {
