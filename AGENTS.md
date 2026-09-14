@@ -38,6 +38,7 @@ Default virtual environment: `D:\src\git\nornir\venv\pyre314` (see **Virtual-Env
 | [powershell-scripts.mdc](.cursor/rules/powershell-scripts.mdc) | `**/*.ps1` | Comment-based help on generated scripts |
 | [nornir-docker-conventions.mdc](.cursor/rules/nornir-docker-conventions.mdc) | `nornir-docker/**`, compose, Dockerfiles, `.devcontainer` | Submodule assets, secrets, Compose bridge |
 | [Serial-batched-primitives.mdc](.cursor/rules/Serial-batched-primitives.mdc) | phase/batched registration paths | Verification matrix; ≥100-tile perf sign-off |
+| [Refine-grid-trust-questions.mdc](.cursor/rules/Refine-grid-trust-questions.mdc) | refine-grid (`local_distortion_correction`, `refine_shared`) | Only trusted cells shape the field; name the trust question before retuning gates |
 | [Pyre-STOS-rigid-transform-UI.mdc](.cursor/rules/Pyre-STOS-rigid-transform-UI.mdc) | pyre rigid transform UI paths | Read paired skill before panel/sync changes |
 | [Review-driven-bugfixing.mdc](.cursor/rules/Review-driven-bugfixing.mdc) | bug-review master list, `issue-handoff` | Findings are hypotheses; reproduce or measure before fixing |
 | [Stable-path-output-parity.mdc](.cursor/rules/Stable-path-output-parity.mdc) | importers, image I/O, coordinates, transforms | Compare outputs before/after on long-stable paths |
@@ -60,9 +61,11 @@ Full catalog: [`.cursor/skills/README.md`](.cursor/skills/README.md).
 | [nornir-documentation](.cursor/skills/nornir-documentation/SKILL.md) | Build/deploy Sphinx monodoc |
 | [nornir-bump-version](.cursor/skills/nornir-bump-version/SKILL.md) | Package vs monorepo version bumps; Pyre installer |
 | [nornir-debug-profiling](.cursor/skills/nornir-debug-profiling/SKILL.md) | PhaseProfiler, slowness and queue profiling |
+| [pyre-registration-performance](.cursor/skills/pyre-registration-performance/SKILL.md) | After Pyre registration edits: check profiler; ≤1 s/control point |
 | [nornir-headless-unit-tests](.cursor/skills/nornir-headless-unit-tests/SKILL.md) | `NORNIR_HEADLESS`, plot artifact triage |
 | [nornir-review-issue-fixing](.cursor/skills/nornir-review-issue-fixing/SKILL.md) | Working the bug-review queue end to end |
 | [nornir-serial-batched-primitives](.cursor/skills/nornir-serial-batched-primitives/SKILL.md) | Serial/batched registration verification |
+| [refine-grid-trust-review](.cursor/skills/refine-grid-trust-review/SKILL.md) | Trust-question review of refine-grid gates and mesh membership |
 | [pyre-stos-rigid-transform-ui](.cursor/skills/pyre-stos-rigid-transform-ui/SKILL.md) | Pyre STOS rigid UI semantics |
 
 ---

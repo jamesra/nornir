@@ -14,9 +14,11 @@ Procedures for agents. Policy/guardrails live in [`.cursor/rules/`](../rules/). 
 | [nornir-documentation](nornir-documentation/SKILL.md) | Sphinx monodoc build/deploy | [Documentation-and-monodoc](../rules/Documentation-and-monodoc.mdc) |
 | [nornir-bump-version](nornir-bump-version/SKILL.md) | Package vs monorepo version bumps; Pyre installer source | [Monorepo-submodule-changes](../rules/Monorepo-submodule-changes.mdc) |
 | [nornir-debug-profiling](nornir-debug-profiling/SKILL.md) | PhaseProfiler, performance investigation | [Unified-Logging-Convention](../rules/Unified-Logging-Convention.mdc) |
+| [pyre-registration-performance](pyre-registration-performance/SKILL.md) | After Pyre registration changes: check profiler; ≤1 s/control point | [Unified-Logging-Convention](../rules/Unified-Logging-Convention.mdc) |
 | [nornir-headless-unit-tests](nornir-headless-unit-tests/SKILL.md) | `NORNIR_HEADLESS`, plot artifact triage | — |
 | [nornir-review-issue-fixing](nornir-review-issue-fixing/SKILL.md) | Working a bug-review finding end to end: verify, test, commit, close | [Review-driven-bugfixing](../rules/Review-driven-bugfixing.mdc), [Stable-path-output-parity](../rules/Stable-path-output-parity.mdc) |
 | [nornir-serial-batched-primitives](nornir-serial-batched-primitives/SKILL.md) | Serial/batched registration verification | [Serial-batched-primitives](../rules/Serial-batched-primitives.mdc) |
+| [refine-grid-trust-review](refine-grid-trust-review/SKILL.md) | Trust-question review of refine-grid gates and mesh membership | [Refine-grid-trust-questions](../rules/Refine-grid-trust-questions.mdc) |
 | [pyre-stos-rigid-transform-ui](pyre-stos-rigid-transform-ui/SKILL.md) | Pyre STOS rigid UI semantics | [Pyre-STOS-rigid-transform-UI](../rules/Pyre-STOS-rigid-transform-UI.mdc) |
 
 ## Docker skill split

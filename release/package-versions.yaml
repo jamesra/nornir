@@ -15,11 +15,11 @@ packages:
     docker: true
   nornir_imageregistration:
     path: nornir-imageregistration
-    version: "1.6.5"
+    version: "1.6.6"
     docker: true
   nornir_buildmanager:
     path: nornir-buildmanager
-    version: "1.6.6"
+    version: "1.6.7"
     docker: true
   dm4:
     path: dm4
@@ -27,5 +27,5 @@ packages:
     docker: true
   pyre:
     path: nornir-pyre
-    version: "1.7.5"
+    version: "1.7.6"
     docker: false

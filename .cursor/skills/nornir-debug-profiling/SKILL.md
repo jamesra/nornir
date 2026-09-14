@@ -49,13 +49,18 @@ configure_phase_profiler(
 ### Quick setup (environment variables)
 
 ```text
-NORNIR_PHASE_PROFILE_LOG=d:\src\git\nornir\debug.log
-NORNIR_PHASE_PROFILE_PSTATS=d:\src\git\nornir\debug.pstats
+NORNIR_LOG_ROOT=d:\logs\nornir
+NORNIR_PHASE_PROFILE_LOG=1
+# or a basename / relative name → lands in NORNIR_LOG_ROOT/<date>/
+# NORNIR_PHASE_PROFILE_LOG=agent-phases.ndjson
+# Absolute path still allowed for an explicit agent override:
+# NORNIR_PHASE_PROFILE_LOG=d:\src\git\nornir\debug.log
+NORNIR_PHASE_PROFILE_PSTATS=1
 NORNIR_PHASE_PROFILE_SESSION=my-session
 NORNIR_PHASE_PROFILE_RUN_ID=pre-fix
 ```
 
-Then `configure_phase_profiler(PhaseProfiler())` — paths come from env.
+Then `configure_phase_profiler(PhaseProfiler())` — paths come from env (session layout when `NORNIR_LOG_ROOT` is set and the log path is relative or a sentinel).
 
 ### Instrument a code path
 
@@ -84,6 +89,10 @@ Module helpers (`log_event`, `phase_timer`, `start_cprofile`, `stop_cprofile`, `
 ### Pyre session shim pattern
 
 For a focused investigation, keep a thin package config (example: `nornir-pyre/pyre/debug_shift_space_profile.py`) that only calls `configure_phase_profiler` with session-specific paths. Instrumentation imports the shim, not scattered paths.
+
+**Pyre registration jobs (Refine w/ Grid, rotate/translate, …):** `pyre.phase_profile` configures PhaseProfiler after `SetupLogging` when `NORNIR_LOG_ROOT` is set. cProfile runs **only** inside `RegistrationJobRunner` workers (`profile_registration_job`), not during Qt UI message processing. Opt out with `NORNIR_PHASE_PROFILE_JOBS=0`. Outputs land next to the session log as `nornir-phase-profile-<session>.ndjson` / `.pstats`.
+
+After changing registration code Pyre invokes, follow [pyre-registration-performance](../pyre-registration-performance/SKILL.md) (≤1 s per control-point registration; always read profiler output after a Pyre run).
 
 **Restart the GUI app** after adding or changing profiling hooks — Pyre does not hot-reload instrumented modules.
 
