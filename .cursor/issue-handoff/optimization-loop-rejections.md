@@ -17,3 +17,16 @@
 - Do not retry based only on transform-call counts. Any future reconsideration
   needs isolated transform microprofiling that explains why the removed call
   improves end-to-end wall time despite this result.
+
+## Join XML string fragments
+
+- Date: 2026-09-16
+- Package: `nornir-buildmanager`
+- Candidate: Replace the loop in `XElementWrapper.__str__` with `str.join`.
+- Benchmark: Median of five conversions of wrappers containing 1,000, 5,000,
+  and 10,000 child elements.
+- Baseline at 10,000 children: 0.020853 seconds.
+- Candidate at 10,000 children: 0.021210 seconds.
+- Result: Rejected and reverted. The candidate was 1.7% slower.
+- Do not retry without evidence that `ElementTree.tostringlist` emits enough
+  fragments for concatenation to dominate serialization.
