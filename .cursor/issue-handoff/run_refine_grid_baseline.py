@@ -11,9 +11,12 @@ Trusted mesh is the production path.
 from __future__ import annotations
 
 import json
+import hashlib
 import os
+import subprocess
 import sys
 import time
+from dataclasses import asdict
 from pathlib import Path
 
 os.environ.setdefault("NORNIR_HEADLESS", "1")
@@ -25,11 +28,19 @@ import nornir_imageregistration
 from nornir_imageregistration.files.stosfile import StosFile
 from nornir_imageregistration.local_distortion_correction import RefineStosFile
 from nornir_imageregistration.refine_shared.peak_ratio_gates import PEAK_RATIO_MIN
+from nornir_imageregistration.refine_shared.phase_timer import get_phase_timer
 from nornir_imageregistration.transforms.factory import LoadTransform
 from nornir_shared.misc import SetupLogging
 
+try:
+    from nornir_imageregistration.stos_quality import compute_cell_zncc, compute_pair_zncc
+except ImportError:
+    compute_cell_zncc = None
+    compute_pair_zncc = None
+
 GRID16 = Path("/storage4/RC2/TEM/Grid16")
 PAIRS: list[tuple[str, str, str]] = [
+    ("605-606", "performance-baseline", "automatic-strict"),
     ("1215-1214", "challenging-band", "manual"),
     ("240-241", "challenging-coherent-residual", "manual"),
     ("241-242", "challenging-identity-bubble", "automatic"),
@@ -48,6 +59,8 @@ def _stos_path(pair: str, source: str) -> Path:
     name = f"{pair}{STEM_SUFFIX}"
     if source == "manual":
         path = GRID16 / "Manual" / name
+    elif source == "automatic-strict":
+        path = GRID16 / "Automatic" / name
     elif source == "automatic":
         path = GRID16 / "Automatic" / name
         if not path.is_file():
@@ -57,6 +70,72 @@ def _stos_path(pair: str, source: str) -> Path:
     if not path.is_file():
         raise FileNotFoundError(path)
     return path
+
+
+def _sha256(path: Path) -> str:
+    """Return the SHA-256 checksum of a file without loading it whole."""
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def _code_metadata() -> dict:
+    """Record the imported package path and exact Git state."""
+    package_root = Path(nornir_imageregistration.__file__).resolve().parent.parent
+
+    def git(*args: str) -> str:
+        result = subprocess.run(
+            ["git", "-C", str(package_root), *args],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return result.stdout.strip()
+
+    try:
+        sha = git("rev-parse", "HEAD")
+        status = git("status", "--short")
+        diff = subprocess.run(
+            ["git", "-C", str(package_root), "diff", "--binary", "HEAD"],
+            check=True,
+            capture_output=True,
+        ).stdout
+    except (OSError, subprocess.CalledProcessError):
+        return {"package_root": str(package_root), "git_available": False}
+    return {
+        "package_root": str(package_root),
+        "git_available": True,
+        "git_sha": sha,
+        "git_dirty": bool(status),
+        "git_status": status.splitlines(),
+        "git_diff_sha256": hashlib.sha256(diff).hexdigest() if diff else None,
+    }
+
+
+def _score_output(output_path: Path, pair_dir: Path) -> dict | None:
+    """Persist full-pair and fixed-lattice cell quality for one output."""
+    if compute_cell_zncc is None or compute_pair_zncc is None:
+        return None
+    pair_result = compute_pair_zncc(str(output_path))
+    cell_result = compute_cell_zncc(
+        str(output_path),
+        cell_size=CELL_SIZE,
+        grid_spacing=GRID_SPACING,
+    )
+    cell_payload = asdict(cell_result)
+    cells_path = pair_dir / "cell_zncc.json"
+    cells_path.write_text(json.dumps(cell_payload, indent=2) + "\n", encoding="utf-8")
+    return {
+        "pair_zncc": asdict(pair_result),
+        "cell_zncc": {
+            key: value
+            for key, value in cell_payload.items()
+            if key != "cells"
+        },
+        "cell_scores_path": str(cells_path),
+    }
 
 
 def _summarize_npz(diag_dir: Path) -> list[dict]:
@@ -128,6 +207,10 @@ def main() -> int:
         "grid_spacing": GRID_SPACING,
         "num_iterations": NUM_ITERATIONS,
         "peak_ratio_min": PEAK_RATIO_MIN,
+        "code": _code_metadata(),
+        "run_kind": os.environ.get("NORNIR_REFINE_BENCHMARK_RUN_KIND", "unspecified"),
+        "repetition": int(os.environ.get("NORNIR_REFINE_BENCHMARK_REPETITION", "0")),
+        "finalized_recheck_mode": os.environ.get("NORNIR_REFINE_FINALIZED_RECHECK_MODE", "all"),
         "pairs": [],
     }
     selected_pairs = {
@@ -152,6 +235,7 @@ def main() -> int:
             "role": role,
             "input_kind": source,
             "input_path": str(input_path),
+            "input_sha256": _sha256(input_path),
             "output_path": str(output_path),
         }
         try:
@@ -166,12 +250,20 @@ def main() -> int:
             )
             elapsed = time.perf_counter() - started
             diag_dir = pair_dir / "refine_diagnostics" / output_path.stem
+            timer = get_phase_timer()
+            score = _score_output(output_path, pair_dir)
             record.update({
                 "ok": True,
                 "elapsed_s": elapsed,
+                "output_sha256": _sha256(output_path),
                 "quality_flag": (pair_dir / f"{pair}_refined.quality_flag").is_file(),
                 "passes": _summarize_npz(diag_dir),
+                "pass_performance": list(getattr(timer, "pass_summaries", [])),
+                "phase_totals_s": dict(timer.totals),
+                "phase_section_counts": dict(timer.counts),
+                "phase_work_counts": dict(getattr(timer, "work_counts", {})),
                 "control_point_delta": _control_point_delta(input_path, output_path),
+                "quality": score,
             })
             print(f"    done {elapsed:.1f}s quality_flag={record['quality_flag']}", flush=True)
         except Exception as exc:

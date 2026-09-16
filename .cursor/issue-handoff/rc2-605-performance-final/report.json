@@ -1,0 +1,711 @@
+{
+  "cell_size": 256,
+  "comparisons": {
+    "current-to-optimized": {
+      "cell_deltas_csv": "/workspace/.cursor/issue-handoff/rc2-605-performance-final/current-to-optimized-cell-deltas.csv",
+      "delta_max": 0.0,
+      "delta_median": 0.0,
+      "delta_min": 0.0,
+      "delta_p05": 0.0,
+      "delta_p95": 0.0,
+      "distribution_png": "/workspace/.cursor/issue-handoff/rc2-605-performance-final/current-to-optimized-distribution.png",
+      "excluded_count": 270,
+      "heatmap_png": "/workspace/.cursor/issue-handoff/rc2-605-performance-final/current-to-optimized-heatmap.png",
+      "improved_count": 0,
+      "improved_fraction": 0.0,
+      "paired_count": 1136,
+      "tolerance": 0.0001,
+      "unchanged_count": 1136,
+      "unchanged_fraction": 1.0,
+      "worse_count": 0,
+      "worse_fraction": 0.0
+    },
+    "pre-to-current": {
+      "cell_deltas_csv": "/workspace/.cursor/issue-handoff/rc2-605-performance-final/pre-to-current-cell-deltas.csv",
+      "delta_max": 0.06230163729624699,
+      "delta_median": 0.00015876601559974834,
+      "delta_min": -0.10063420141259338,
+      "delta_p05": -0.012561632788054874,
+      "delta_p95": 0.0179602845776477,
+      "distribution_png": "/workspace/.cursor/issue-handoff/rc2-605-performance-final/pre-to-current-distribution.png",
+      "excluded_count": 270,
+      "heatmap_png": "/workspace/.cursor/issue-handoff/rc2-605-performance-final/pre-to-current-heatmap.png",
+      "improved_count": 575,
+      "improved_fraction": 0.5061619718309859,
+      "paired_count": 1136,
+      "tolerance": 0.0001,
+      "unchanged_count": 14,
+      "unchanged_fraction": 0.01232394366197183,
+      "worse_count": 547,
+      "worse_fraction": 0.48151408450704225
+    },
+    "production-to-pre": {
+      "cell_deltas_csv": "/workspace/.cursor/issue-handoff/rc2-605-performance-final/production-to-pre-cell-deltas.csv",
+      "delta_max": 0.06643247593438079,
+      "delta_median": -0.0009319411992805837,
+      "delta_min": -0.06749576849014333,
+      "delta_p05": -0.018151652176402425,
+      "delta_p95": 0.012144828275848063,
+      "distribution_png": "/workspace/.cursor/issue-handoff/rc2-605-performance-final/production-to-pre-distribution.png",
+      "excluded_count": 270,
+      "heatmap_png": "/workspace/.cursor/issue-handoff/rc2-605-performance-final/production-to-pre-heatmap.png",
+      "improved_count": 510,
+      "improved_fraction": 0.448943661971831,
+      "paired_count": 1136,
+      "tolerance": 0.0001,
+      "unchanged_count": 12,
+      "unchanged_fraction": 0.01056338028169014,
+      "worse_count": 614,
+      "worse_fraction": 0.5404929577464789
+    }
+  },
+  "grid_spacing": 192,
+  "pair": "605-606",
+  "variants": {
+    "current": {
+      "label": "current",
+      "median_cell_zncc": {
+        "finite_count": 1136,
+        "max": 0.7578918095950514,
+        "median": 0.4153178600103288,
+        "min": 0.22969127817859003
+      },
+      "pair_zncc": {
+        "max": 0.44447887100852834,
+        "median": 0.44447887100852834,
+        "min": 0.44447887100852834
+      },
+      "run_count": 3,
+      "runs": [
+        {
+          "cell_finite_count": 1136,
+          "cell_max_zncc": 0.7578918095950514,
+          "cell_median_zncc": 0.4153178600103288,
+          "cell_min_zncc": 0.22969127817859003,
+          "code": {
+            "git_available": true,
+            "git_diff_sha256": null,
+            "git_dirty": false,
+            "git_sha": "fca8e08786638ab601f50a94efff94650c3b815b",
+            "git_status": [],
+            "package_root": "/tmp/nornir-imageregistration-fca8e087"
+          },
+          "elapsed_s": 46.58854924800107,
+          "manifest": "/tmp/nornir-test-output/rc2-605-performance/refine_grid_baseline_current-measured-1/manifest.json",
+          "pair_zncc": 0.44447887100852834,
+          "pass_performance": [],
+          "phase_totals_s": {
+            "approx_rigid": 17.75609331706073,
+            "cell_extract": 8.007305692939553,
+            "classify": 0.00615888403262943,
+            "diagnostics_tables": 0.07132750796154141,
+            "fft": 0.819327863981016,
+            "finalize": 1.9172641850309446,
+            "grid_build": 0.487587362062186,
+            "host_sync": 0.010802394826896489,
+            "low_content_gate": 0.14762123598484322,
+            "record_assemble": 0.01775102608371526,
+            "zncc_secondary": 0.9135352480807342
+          },
+          "phase_work_counts": {}
+        },
+        {
+          "cell_finite_count": 1136,
+          "cell_max_zncc": 0.7578918095950514,
+          "cell_median_zncc": 0.4153178600103288,
+          "cell_min_zncc": 0.22969127817859003,
+          "code": {
+            "git_available": true,
+            "git_diff_sha256": null,
+            "git_dirty": false,
+            "git_sha": "fca8e08786638ab601f50a94efff94650c3b815b",
+            "git_status": [],
+            "package_root": "/tmp/nornir-imageregistration-fca8e087"
+          },
+          "elapsed_s": 57.37125416600611,
+          "manifest": "/tmp/nornir-test-output/rc2-605-performance/refine_grid_baseline_current-measured-2/manifest.json",
+          "pair_zncc": 0.44447887100852834,
+          "pass_performance": [],
+          "phase_totals_s": {
+            "approx_rigid": 18.56882865302032,
+            "cell_extract": 11.216674437047914,
+            "classify": 0.00647190393647179,
+            "diagnostics_tables": 0.0714981080382131,
+            "fft": 0.9136087339720689,
+            "finalize": 4.4413844519876875,
+            "grid_build": 0.5114511599531397,
+            "host_sync": 0.006029970070812851,
+            "low_content_gate": 0.14869200711837038,
+            "record_assemble": 0.016528674925211817,
+            "zncc_secondary": 1.0013273638905957
+          },
+          "phase_work_counts": {}
+        },
+        {
+          "cell_finite_count": 1136,
+          "cell_max_zncc": 0.7578918095950514,
+          "cell_median_zncc": 0.4153178600103288,
+          "cell_min_zncc": 0.22969127817859003,
+          "code": {
+            "git_available": true,
+            "git_diff_sha256": null,
+            "git_dirty": false,
+            "git_sha": "fca8e08786638ab601f50a94efff94650c3b815b",
+            "git_status": [],
+            "package_root": "/tmp/nornir-imageregistration-fca8e087"
+          },
+          "elapsed_s": 50.06176251498982,
+          "manifest": "/tmp/nornir-test-output/rc2-605-performance/refine_grid_baseline_current-measured-3/manifest.json",
+          "pair_zncc": 0.44447887100852834,
+          "pass_performance": [],
+          "phase_totals_s": {
+            "approx_rigid": 17.95064715790795,
+            "cell_extract": 6.974755160103086,
+            "classify": 0.006173518020659685,
+            "diagnostics_tables": 0.0750846880255267,
+            "fft": 0.8462083069607615,
+            "finalize": 6.63284159405157,
+            "grid_build": 0.5043434419785626,
+            "host_sync": 0.006066637928597629,
+            "low_content_gate": 0.14420759899076074,
+            "record_assemble": 0.01421454397495836,
+            "zncc_secondary": 1.0020853940513916
+          },
+          "phase_work_counts": {}
+        }
+      ],
+      "runtime_s": {
+        "max": 57.37125416600611,
+        "median": 50.06176251498982,
+        "min": 46.58854924800107
+      }
+    },
+    "optimized": {
+      "label": "optimized",
+      "median_cell_zncc": {
+        "finite_count": 1136,
+        "max": 0.7578918095950514,
+        "median": 0.4153178600103288,
+        "min": 0.22969127817859003
+      },
+      "pair_zncc": {
+        "max": 0.44447887100852834,
+        "median": 0.44447887100852834,
+        "min": 0.44447887100852834
+      },
+      "run_count": 3,
+      "runs": [
+        {
+          "cell_finite_count": 1136,
+          "cell_max_zncc": 0.7578918095950514,
+          "cell_median_zncc": 0.4153178600103288,
+          "cell_min_zncc": 0.22969127817859003,
+          "code": {
+            "git_available": true,
+            "git_diff_sha256": "7198db8a894ac1b03caefda6ea04c5cd652f36d8b3e7d2ab4b1facb6e48b97da",
+            "git_dirty": true,
+            "git_sha": "fca8e08786638ab601f50a94efff94650c3b815b",
+            "git_status": [
+              "M nornir_imageregistration/local_distortion_correction.py",
+              " M nornir_imageregistration/refine_shared/measure_schedule.py",
+              " M nornir_imageregistration/refine_shared/phase_timer.py",
+              " M nornir_imageregistration/refine_shared/runtime_config.py",
+              " M nornir_imageregistration/stos_quality.py",
+              " M tests/test_measure_schedule.py",
+              " M tests/test_refine_dual_candidate_rois.py",
+              " M tests/test_refine_phase_timer.py",
+              " M tests/test_refine_shared.py",
+              " M tests/test_stos_quality.py",
+              "?? nornir_imageregistration/refine_shared/finalized_recheck.py",
+              "?? tests/test_finalized_recheck.py"
+            ],
+            "package_root": "/tmp/nornir-imageregistration-optimized"
+          },
+          "elapsed_s": 91.43921198701719,
+          "manifest": "/tmp/nornir-test-output/rc2-605-performance/refine_grid_baseline_final-local-measured-1/manifest.json",
+          "pair_zncc": 0.44447887100852834,
+          "pass_performance": [
+            {
+              "accepted_improvement_count": 0,
+              "aligned_count": 1122,
+              "finalize_s": 0.8446665399824269,
+              "local_skip_count": 0,
+              "locked_count": 1098,
+              "main_measurement_s": 7.932695820985828,
+              "pass": 1,
+              "proposed_local_skip_accepted_improvement_count": 0,
+              "proposed_local_skip_count": 0,
+              "provisional_count": 0,
+              "rechecked_count": 0,
+              "shadow_local_records": [],
+              "todo_count": 1122,
+              "wall_s": 12.36997950397199
+            },
+            {
+              "accepted_improvement_count": 972,
+              "aligned_count": 22,
+              "finalize_s": 0.9439484010217711,
+              "local_skip_count": 0,
+              "locked_count": 1117,
+              "main_measurement_s": 8.053945612045936,
+              "pass": 2,
+              "proposed_local_skip_accepted_improvement_count": 0,
+              "proposed_local_skip_count": 0,
+              "provisional_count": 0,
+              "rechecked_count": 1098,
+              "shadow_local_records": [],
+              "todo_count": 24,
+              "wall_s": 16.503386900993064
+            },
+            {
+              "accepted_improvement_count": 624,
+              "aligned_count": 2,
+              "finalize_s": 4.405990841041785,
+              "local_skip_count": 2,
+              "locked_count": 1117,
+              "main_measurement_s": 12.537062306015287,
+              "pass": 3,
+              "proposed_local_skip_accepted_improvement_count": 0,
+              "proposed_local_skip_count": 2,
+              "provisional_count": 0,
+              "rechecked_count": 1115,
+              "shadow_local_records": [],
+              "todo_count": 4,
+              "wall_s": 29.121135738969315
+            },
+            {
+              "accepted_improvement_count": 1014,
+              "aligned_count": 1,
+              "finalize_s": 3.6994233789737336,
+              "local_skip_count": 0,
+              "locked_count": 1117,
+              "main_measurement_s": 11.871096900955308,
+              "pass": 4,
+              "proposed_local_skip_accepted_improvement_count": 0,
+              "proposed_local_skip_count": 0,
+              "provisional_count": 0,
+              "rechecked_count": 1117,
+              "shadow_local_records": [],
+              "todo_count": 3,
+              "wall_s": 30.23574973299401
+            }
+          ],
+          "phase_totals_s": {
+            "approx_rigid": 21.696856276947074,
+            "cell_extract": 11.991363434062805,
+            "classify": 0.007222234969958663,
+            "diagnostics_tables": 0.07891251402907073,
+            "fft": 1.0549339950666763,
+            "finalize": 9.893939385947306,
+            "finalized_recheck": 22.638566722976975,
+            "grid_build": 0.5654704669723287,
+            "host_sync": 0.006589897035155445,
+            "low_content_gate": 0.17502073291689157,
+            "main_measurement": 40.39480064000236,
+            "mesh_build_1": 0.005954451044090092,
+            "mesh_build_2": 0.0003185449750162661,
+            "record_assemble": 0.01420257892459631,
+            "zncc_secondary": 1.0241925310110673
+          },
+          "phase_work_counts": {
+            "accepted_finalized_improvements": 2610,
+            "finalized_rechecked_cells": 3330,
+            "local_skipped_cells": 2,
+            "proposed_local_skip_accepted_improvements": 0,
+            "proposed_local_skips": 2
+          }
+        },
+        {
+          "cell_finite_count": 1136,
+          "cell_max_zncc": 0.7578918095950514,
+          "cell_median_zncc": 0.4153178600103288,
+          "cell_min_zncc": 0.22969127817859003,
+          "code": {
+            "git_available": true,
+            "git_diff_sha256": "7198db8a894ac1b03caefda6ea04c5cd652f36d8b3e7d2ab4b1facb6e48b97da",
+            "git_dirty": true,
+            "git_sha": "fca8e08786638ab601f50a94efff94650c3b815b",
+            "git_status": [
+              "M nornir_imageregistration/local_distortion_correction.py",
+              " M nornir_imageregistration/refine_shared/measure_schedule.py",
+              " M nornir_imageregistration/refine_shared/phase_timer.py",
+              " M nornir_imageregistration/refine_shared/runtime_config.py",
+              " M nornir_imageregistration/stos_quality.py",
+              " M tests/test_measure_schedule.py",
+              " M tests/test_refine_dual_candidate_rois.py",
+              " M tests/test_refine_phase_timer.py",
+              " M tests/test_refine_shared.py",
+              " M tests/test_stos_quality.py",
+              "?? nornir_imageregistration/refine_shared/finalized_recheck.py",
+              "?? tests/test_finalized_recheck.py"
+            ],
+            "package_root": "/tmp/nornir-imageregistration-optimized"
+          },
+          "elapsed_s": 73.0200934910099,
+          "manifest": "/tmp/nornir-test-output/rc2-605-performance/refine_grid_baseline_final-local-measured-2/manifest.json",
+          "pair_zncc": 0.44447887100852834,
+          "pass_performance": [
+            {
+              "accepted_improvement_count": 0,
+              "aligned_count": 1122,
+              "finalize_s": 0.878534558985848,
+              "local_skip_count": 0,
+              "locked_count": 1098,
+              "main_measurement_s": 7.724495056958403,
+              "pass": 1,
+              "proposed_local_skip_accepted_improvement_count": 0,
+              "proposed_local_skip_count": 0,
+              "provisional_count": 0,
+              "rechecked_count": 0,
+              "shadow_local_records": [],
+              "todo_count": 1122,
+              "wall_s": 13.479494380997494
+            },
+            {
+              "accepted_improvement_count": 972,
+              "aligned_count": 22,
+              "finalize_s": 2.5738232349976897,
+              "local_skip_count": 0,
+              "locked_count": 1117,
+              "main_measurement_s": 4.646688822016586,
+              "pass": 2,
+              "proposed_local_skip_accepted_improvement_count": 0,
+              "proposed_local_skip_count": 0,
+              "provisional_count": 0,
+              "rechecked_count": 1098,
+              "shadow_local_records": [],
+              "todo_count": 24,
+              "wall_s": 14.827373953012284
+            },
+            {
+              "accepted_improvement_count": 624,
+              "aligned_count": 2,
+              "finalize_s": 0.6665542920236476,
+              "local_skip_count": 2,
+              "locked_count": 1117,
+              "main_measurement_s": 13.511442149989307,
+              "pass": 3,
+              "proposed_local_skip_accepted_improvement_count": 0,
+              "proposed_local_skip_count": 2,
+              "provisional_count": 0,
+              "rechecked_count": 1115,
+              "shadow_local_records": [],
+              "todo_count": 4,
+              "wall_s": 22.611725004040636
+            },
+            {
+              "accepted_improvement_count": 1014,
+              "aligned_count": 1,
+              "finalize_s": 0.6956116700312123,
+              "local_skip_count": 0,
+              "locked_count": 1117,
+              "main_measurement_s": 9.963402238034178,
+              "pass": 4,
+              "proposed_local_skip_accepted_improvement_count": 0,
+              "proposed_local_skip_count": 0,
+              "provisional_count": 0,
+              "rechecked_count": 1117,
+              "shadow_local_records": [],
+              "todo_count": 3,
+              "wall_s": 18.963980123982765
+            }
+          ],
+          "phase_totals_s": {
+            "approx_rigid": 21.528937233961187,
+            "cell_extract": 10.104575689940248,
+            "classify": 0.0070156099973246455,
+            "diagnostics_tables": 0.07189791998825967,
+            "fft": 1.0261099719791673,
+            "finalize": 4.814438955974765,
+            "finalized_recheck": 22.703675202967133,
+            "grid_build": 0.5838066450087354,
+            "host_sync": 0.005861983052454889,
+            "low_content_gate": 0.17661443207180128,
+            "main_measurement": 35.846028266998474,
+            "mesh_build_1": 0.0052445660112425685,
+            "mesh_build_2": 0.0003240780206397176,
+            "record_assemble": 0.014276136935222894,
+            "zncc_secondary": 1.0579910700325854
+          },
+          "phase_work_counts": {
+            "accepted_finalized_improvements": 2610,
+            "finalized_rechecked_cells": 3330,
+            "local_skipped_cells": 2,
+            "proposed_local_skip_accepted_improvements": 0,
+            "proposed_local_skips": 2
+          }
+        },
+        {
+          "cell_finite_count": 1136,
+          "cell_max_zncc": 0.7578918095950514,
+          "cell_median_zncc": 0.4153178600103288,
+          "cell_min_zncc": 0.22969127817859003,
+          "code": {
+            "git_available": true,
+            "git_diff_sha256": "7198db8a894ac1b03caefda6ea04c5cd652f36d8b3e7d2ab4b1facb6e48b97da",
+            "git_dirty": true,
+            "git_sha": "fca8e08786638ab601f50a94efff94650c3b815b",
+            "git_status": [
+              "M nornir_imageregistration/local_distortion_correction.py",
+              " M nornir_imageregistration/refine_shared/measure_schedule.py",
+              " M nornir_imageregistration/refine_shared/phase_timer.py",
+              " M nornir_imageregistration/refine_shared/runtime_config.py",
+              " M nornir_imageregistration/stos_quality.py",
+              " M tests/test_measure_schedule.py",
+              " M tests/test_refine_dual_candidate_rois.py",
+              " M tests/test_refine_phase_timer.py",
+              " M tests/test_refine_shared.py",
+              " M tests/test_stos_quality.py",
+              "?? nornir_imageregistration/refine_shared/finalized_recheck.py",
+              "?? tests/test_finalized_recheck.py"
+            ],
+            "package_root": "/tmp/nornir-imageregistration-optimized"
+          },
+          "elapsed_s": 63.38474107498769,
+          "manifest": "/tmp/nornir-test-output/rc2-605-performance/refine_grid_baseline_final-local-measured-3/manifest.json",
+          "pair_zncc": 0.44447887100852834,
+          "pass_performance": [
+            {
+              "accepted_improvement_count": 0,
+              "aligned_count": 1122,
+              "finalize_s": 0.8464049369795248,
+              "local_skip_count": 0,
+              "locked_count": 1098,
+              "main_measurement_s": 7.026389527018182,
+              "pass": 1,
+              "proposed_local_skip_accepted_improvement_count": 0,
+              "proposed_local_skip_count": 0,
+              "provisional_count": 0,
+              "rechecked_count": 0,
+              "shadow_local_records": [],
+              "todo_count": 1122,
+              "wall_s": 8.088717263017315
+            },
+            {
+              "accepted_improvement_count": 972,
+              "aligned_count": 22,
+              "finalize_s": 2.4540082789608277,
+              "local_skip_count": 0,
+              "locked_count": 1117,
+              "main_measurement_s": 3.3577976639498957,
+              "pass": 2,
+              "proposed_local_skip_accepted_improvement_count": 0,
+              "proposed_local_skip_count": 0,
+              "provisional_count": 0,
+              "rechecked_count": 1098,
+              "shadow_local_records": [],
+              "todo_count": 24,
+              "wall_s": 13.199886317015626
+            },
+            {
+              "accepted_improvement_count": 624,
+              "aligned_count": 2,
+              "finalize_s": 5.236175117024686,
+              "local_skip_count": 2,
+              "locked_count": 1117,
+              "main_measurement_s": 7.814565306995064,
+              "pass": 3,
+              "proposed_local_skip_accepted_improvement_count": 0,
+              "proposed_local_skip_count": 2,
+              "provisional_count": 0,
+              "rechecked_count": 1115,
+              "shadow_local_records": [],
+              "todo_count": 4,
+              "wall_s": 22.171622834983282
+            },
+            {
+              "accepted_improvement_count": 1014,
+              "aligned_count": 1,
+              "finalize_s": 0.40654769801767543,
+              "local_skip_count": 0,
+              "locked_count": 1117,
+              "main_measurement_s": 8.057315003999975,
+              "pass": 4,
+              "proposed_local_skip_accepted_improvement_count": 0,
+              "proposed_local_skip_count": 0,
+              "provisional_count": 0,
+              "rechecked_count": 1117,
+              "shadow_local_records": [],
+              "todo_count": 3,
+              "wall_s": 16.923629721975885
+            }
+          ],
+          "phase_totals_s": {
+            "approx_rigid": 19.52453334000893,
+            "cell_extract": 10.440895083069336,
+            "classify": 0.0073983759502880275,
+            "diagnostics_tables": 0.06830280501162633,
+            "fft": 0.9472558659617789,
+            "finalize": 8.943061246944126,
+            "finalized_recheck": 21.14097138401121,
+            "grid_build": 0.5395761190447956,
+            "host_sync": 0.006397031946107745,
+            "low_content_gate": 0.16087238094769418,
+            "main_measurement": 26.256067501963116,
+            "mesh_build_1": 0.005646648001857102,
+            "mesh_build_2": 0.00024779600789770484,
+            "record_assemble": 0.01339579198975116,
+            "zncc_secondary": 1.0079943889868446
+          },
+          "phase_work_counts": {
+            "accepted_finalized_improvements": 2610,
+            "finalized_rechecked_cells": 3330,
+            "local_skipped_cells": 2,
+            "proposed_local_skip_accepted_improvements": 0,
+            "proposed_local_skips": 2
+          }
+        }
+      ],
+      "runtime_s": {
+        "max": 91.43921198701719,
+        "median": 73.0200934910099,
+        "min": 63.38474107498769
+      }
+    },
+    "pre": {
+      "label": "pre",
+      "median_cell_zncc": {
+        "finite_count": 1136,
+        "max": 0.7582589246770847,
+        "median": 0.4154715235267544,
+        "min": 0.21389372262082318
+      },
+      "pair_zncc": {
+        "max": 0.4442398419499457,
+        "median": 0.4442398419499457,
+        "min": 0.4442398419499457
+      },
+      "run_count": 3,
+      "runs": [
+        {
+          "cell_finite_count": 1136,
+          "cell_max_zncc": 0.7582589246770847,
+          "cell_median_zncc": 0.4154715235267544,
+          "cell_min_zncc": 0.21389372262082318,
+          "code": {
+            "git_available": true,
+            "git_diff_sha256": null,
+            "git_dirty": false,
+            "git_sha": "ee3646a2ca6ff6f3977768289639e9df76bfeb1d",
+            "git_status": [],
+            "package_root": "/tmp/nornir-imageregistration-ee3646a2"
+          },
+          "elapsed_s": 40.24646781798219,
+          "manifest": "/tmp/nornir-test-output/rc2-605-performance/refine_grid_baseline_pre-measured-1/manifest.json",
+          "pair_zncc": 0.4442398419499457,
+          "pass_performance": [],
+          "phase_totals_s": {
+            "approx_rigid": 18.62708740704693,
+            "cell_extract": 6.2640445560682565,
+            "classify": 0.01330055296421051,
+            "diagnostics_tables": 0.04579875903436914,
+            "fft": 0.6279235659749247,
+            "finalize": 1.6315276259556413,
+            "grid_build": 1.4800260910997167,
+            "host_sync": 0.0058804291766136885,
+            "low_content_gate": 0.1679456440033391,
+            "record_assemble": 0.013200754998251796,
+            "zncc_secondary": 0.8293482789304107
+          },
+          "phase_work_counts": {}
+        },
+        {
+          "cell_finite_count": 1136,
+          "cell_max_zncc": 0.7582589246770847,
+          "cell_median_zncc": 0.4154715235267544,
+          "cell_min_zncc": 0.21389372262082318,
+          "code": {
+            "git_available": true,
+            "git_diff_sha256": null,
+            "git_dirty": false,
+            "git_sha": "ee3646a2ca6ff6f3977768289639e9df76bfeb1d",
+            "git_status": [],
+            "package_root": "/tmp/nornir-imageregistration-ee3646a2"
+          },
+          "elapsed_s": 32.753421186993364,
+          "manifest": "/tmp/nornir-test-output/rc2-605-performance/refine_grid_baseline_pre-measured-2/manifest.json",
+          "pair_zncc": 0.4442398419499457,
+          "pass_performance": [],
+          "phase_totals_s": {
+            "approx_rigid": 18.48910237493692,
+            "cell_extract": 6.172004088934045,
+            "classify": 0.014308646030258387,
+            "diagnostics_tables": 0.047521108004730195,
+            "fft": 0.5854976599803194,
+            "finalize": 1.1941872269962914,
+            "grid_build": 1.3014893599320203,
+            "host_sync": 0.005985509080346674,
+            "low_content_gate": 0.16967718495288864,
+            "record_assemble": 0.01373662002151832,
+            "zncc_secondary": 0.8276756659615785
+          },
+          "phase_work_counts": {}
+        },
+        {
+          "cell_finite_count": 1136,
+          "cell_max_zncc": 0.7582589246770847,
+          "cell_median_zncc": 0.4154715235267544,
+          "cell_min_zncc": 0.21389372262082318,
+          "code": {
+            "git_available": true,
+            "git_diff_sha256": null,
+            "git_dirty": false,
+            "git_sha": "ee3646a2ca6ff6f3977768289639e9df76bfeb1d",
+            "git_status": [],
+            "package_root": "/tmp/nornir-imageregistration-ee3646a2"
+          },
+          "elapsed_s": 68.25999088602839,
+          "manifest": "/tmp/nornir-test-output/rc2-605-performance/refine_grid_baseline_pre-measured-3/manifest.json",
+          "pair_zncc": 0.4442398419499457,
+          "pass_performance": [],
+          "phase_totals_s": {
+            "approx_rigid": 21.8991180100129,
+            "cell_extract": 7.050888262165245,
+            "classify": 0.01432619703700766,
+            "diagnostics_tables": 0.05221853207331151,
+            "fft": 0.6402811719453894,
+            "finalize": 11.740437201980967,
+            "grid_build": 8.947692515037488,
+            "host_sync": 0.005550802976358682,
+            "low_content_gate": 0.18920150899793953,
+            "record_assemble": 0.013862543972209096,
+            "zncc_secondary": 0.89386354299495
+          },
+          "phase_work_counts": {}
+        }
+      ],
+      "runtime_s": {
+        "max": 68.25999088602839,
+        "median": 40.24646781798219,
+        "min": 32.753421186993364
+      }
+    },
+    "production": {
+      "cell_zncc": {
+        "cell_size": [
+          256,
+          256
+        ],
+        "downsample": 3.5498046875,
+        "finite_count": 1136,
+        "grid_spacing": [
+          192,
+          192
+        ],
+        "max_zncc": 0.7575203213400807,
+        "median_zncc": 0.4156580436437615,
+        "min_zncc": 0.19880934308152937,
+        "scored_at": "2026-09-16T04:58:58.442622+00:00",
+        "stos_checksum": "bb811c8b23b18ab7b61ed116934e695e"
+      },
+      "pair_zncc": {
+        "downsample": 3.5498046875,
+        "max_side": 2048,
+        "pair_zncc": 0.44562226086785056,
+        "scored_at": "2026-09-16T04:58:53.384062+00:00",
+        "stos_checksum": "bb811c8b23b18ab7b61ed116934e695e",
+        "stos_mtime_ns": 1787113363425705400
+      }
+    }
+  }
+}

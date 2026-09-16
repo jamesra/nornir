@@ -1,0 +1,19 @@
+{
+  "cell_deltas_csv": "/workspace/.cursor/issue-handoff/rc2-605-performance-final/pre-to-current-cell-deltas.csv",
+  "delta_max": 0.06230163729624699,
+  "delta_median": 0.00015876601559974834,
+  "delta_min": -0.10063420141259338,
+  "delta_p05": -0.012561632788054874,
+  "delta_p95": 0.0179602845776477,
+  "distribution_png": "/workspace/.cursor/issue-handoff/rc2-605-performance-final/pre-to-current-distribution.png",
+  "excluded_count": 270,
+  "heatmap_png": "/workspace/.cursor/issue-handoff/rc2-605-performance-final/pre-to-current-heatmap.png",
+  "improved_count": 575,
+  "improved_fraction": 0.5061619718309859,
+  "paired_count": 1136,
+  "tolerance": 0.0001,
+  "unchanged_count": 14,
+  "unchanged_fraction": 0.01232394366197183,
+  "worse_count": 547,
+  "worse_fraction": 0.48151408450704225
+}
