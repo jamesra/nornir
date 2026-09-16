@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Current-code refine-grid baseline for trusted-mesh A/B testing.
+"""Refine-grid fixture runner for trusted-mesh regression testing.
 
 Runs RefineStosFile (same path as the STOS debug harness / pipeline) on the
 plan fixture pairs with Grid16 production settings (cell 256, spacing 192,
 10 iterations). Writes refined STOS + PASS_DIAGNOSTICS under TESTOUTPUTPATH
 so the volume tree is not modified.
 
-Trusted-mesh stays off (default path).
+Trusted mesh is the production path.
 """
 from __future__ import annotations
 
@@ -114,19 +114,16 @@ def _control_point_delta(input_stos: Path, output_stos: Path) -> dict:
 
 def main() -> int:
     SetupLogging(LogToFile=True)
-    trusted_mesh = os.environ.get(
-        "NORNIR_REFINE_TRUSTED_MESH", "").strip().lower() in {
-            "1", "true", "yes", "on"}
     variant = os.environ.get(
         "NORNIR_REFINE_BASELINE_VARIANT",
-        "trusted_mesh" if trusted_mesh else "current",
+        "trusted_mesh",
     )
     out_root = Path(os.environ.get("TESTOUTPUTPATH", "/tmp/nornir-test-output"))
     out_root = out_root / f"refine_grid_baseline_{variant}"
     out_root.mkdir(parents=True, exist_ok=True)
     manifest = {
         "created": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "trusted_mesh": trusted_mesh,
+        "trusted_mesh": True,
         "cell_size": CELL_SIZE,
         "grid_spacing": GRID_SPACING,
         "num_iterations": NUM_ITERATIONS,

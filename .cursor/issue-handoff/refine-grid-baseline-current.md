@@ -65,3 +65,9 @@ lock/unique fractions were 0.999/0.999 and 0.996/0.998 respectively, so removing
 the proxy branches and final nudge did not lower the healthy acceptance metrics.
 Artifacts are in
 `/tmp/nornir-test-output/refine_grid_baseline_retired_validation/`.
+
+Post-audit validation after preserving coherent no-lock cluster seeds used the
+same two pairs. Final lock/unique fractions were 0.999/0.999 for 241-242 and
+0.996/0.998 for healthy 183-184 (rounded to three decimals), matching the
+post-retirement acceptance metrics. Artifacts are in
+`/tmp/nornir-test-output/refine_grid_baseline_post_audit_cluster_seed/`.
