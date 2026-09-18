@@ -27,5 +27,5 @@ packages:
     docker: true
   pyre:
     path: nornir-pyre
-    version: "1.7.6"
+    version: "1.7.7"
     docker: false
