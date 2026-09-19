@@ -10,6 +10,7 @@ The ``nornir-docker`` directory provides container images for running the **head
    nd_build
    remote_deployment
    dashboard
+   annotation_gallery
    cursor_dev
    cursor_worker
    windows_cursor_layout
