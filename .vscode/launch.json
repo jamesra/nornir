@@ -898,6 +898,92 @@
             }
         },
         {
+            "name": "ExportAnnotationCrops (OData)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "nornir_buildmanager",
+            "python": "${command:python.interpreterPath}",
+            "pythonArgs": ["-Xfrozen_modules=off"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": false,
+            "redirectOutput": true,
+            "args": [
+                "-debug", "-computational_library", "numpy",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
+                "ExportAnnotationCrops",
+                "-OData", "https://websvc.codepharm.net/${input:nornirVolumeName}/OData",
+                "-Output", "${input:nornirVolumesRoot}/${input:nornirVolumeName}/AnnotationCrops",
+                "-Channels", "TEM",
+                "-Filters", "Leveled", 
+                "-Workers", "16",
+                "-MaskWorkers", "8",
+                "-MaxTexture", "1024"
+            ],
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
+        },
+        {
+            "name": "ExportAnnotationCrops (OData) run",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "nornir_buildmanager",
+            "python": "${command:python.interpreterPath}",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "subProcess": true,
+            "justMyCode": true,
+            "args": [
+                "-computational_library", "numpy",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
+                "ExportAnnotationCrops",
+                "-OData", "https://websvc.codepharm.net/${input:nornirVolumeName}/OData",
+                "-Output", "${input:nornirVolumesRoot}/${input:nornirVolumeName}/AnnotationCrops",
+                "-Channels", "TEM",
+                "-Filters", "Leveled",
+                "-MaxTexture", "1024"
+            ],
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
+        },
+        {
+            "name": "RC2: RepairAnnotationOverlays",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "nornir_buildmanager",
+            "python": "${command:python.interpreterPath}",
+            "pythonArgs": ["-Xfrozen_modules=off"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": false,
+            "redirectOutput": true,
+            "args": [
+                "-debug", "-computational_library", "numpy",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
+                "RepairAnnotationOverlays",
+                "-Output", "${input:nornirVolumesRoot}/${input:nornirVolumeName}/AnnotationCrops"
+            ],
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
+        },
+        {
             "name": "TEM Align: Insert Grid16 Manual Alignments",
             "type": "debugpy",
             "request": "launch",
