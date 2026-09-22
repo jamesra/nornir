@@ -947,7 +947,9 @@
                 "-Output", "${input:nornirVolumesRoot}/${input:nornirVolumeName}/AnnotationCrops",
                 "-Channels", "TEM",
                 "-Filters", "Leveled",
-                "-MaxTexture", "1024"
+                "-MaxTexture", "1024",
+                "-Workers", "16",
+                "-MaskWorkers", "8"
             ],
             "env": {
                 "NORNIR_HEADLESS": "1",

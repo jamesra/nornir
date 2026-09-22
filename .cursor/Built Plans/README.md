@@ -25,6 +25,7 @@ Each linked plan file retains its original frontmatter, overview, and implementa
 | [stos_explorer_delete_auto_b60fb47c.plan.md](stos_explorer_delete_auto_b60fb47c.plan.md) | `pyre/ui/windows/stosfilebrowser.py`; `tests/test_stos_file_browser_delete.py` |
 | [stos_file_source_selector_e597a2eb.plan.md](stos_file_source_selector_e597a2eb.plan.md) | `pyre/stos_manual_paths.py`, `pyre/ui/widgets/stos_file_source_selector.py`, `pyre/settings/app.py`; `tests/test_stos_file_source_browser.py` |
 | [warp_and_transfer_optimization_08b8512c.plan.md](warp_and_transfer_optimization_08b8512c.plan.md) | Prewarp GPU cost reduction (coverage warp elimination, validity mask derivation) |
+| [shared_image_dtype_ad28b2be.plan.md](shared_image_dtype_ad28b2be.plan.md) | Keep-as-is: shared Pyre alignment images stay native dtype (`host_image_payload`, `BuildAlignmentROIs`); ROI `ScoreOneAngle` may still cast float16 |
 
 ## Plans still open (not archived)
 
