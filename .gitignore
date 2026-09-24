@@ -97,3 +97,7 @@ C:\\Temp\\*.png
 # Scratch/one-off scripts
 _tmp_*.py
 tmp_check_progress.sh
+
+# Test data corpus (large; not part of the monorepo)
+nornir-testdata/
+nornir-testdata.zip
