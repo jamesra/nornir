@@ -30,9 +30,13 @@ Continuous integration
 The workflow **``.github/workflows/docs.yml``** in this monorepo:
 
 * Runs on pushes to ``main`` / ``master`` (and on pull requests for a **build-only** check).
+  Manual **workflow_dispatch** on those branches also builds and deploys.
+* Checks out **git submodules** (required for editable ``nornir-*`` installs).
 * Installs ``docs/requirements.txt`` and the same editable packages as above.
 * Runs ``sphinx-build -b html docs docs/_build/html``.
-* On **push** to the default branch, deploys the contents of ``docs/_build/html`` to the external repository **``nornir/nornir.github.io``** (option A: push built HTML).
+* On **push** or **workflow_dispatch** to the default branch, deploys the contents of
+  ``docs/_build/html`` to the external repository **``nornir/nornir.github.io``**
+  (option A: push built HTML).
 
 See the workflow file for the exact triggers and action versions.
 

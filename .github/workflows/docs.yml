@@ -25,6 +25,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Editable installs need the package trees, not empty submodule placeholders.
+          submodules: recursive
 
       - uses: actions/setup-python@v5
         with:
@@ -50,8 +53,8 @@ jobs:
 
       - name: Upload HTML artifact
         if: >-
-          github.event_name == 'push'
-          && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+          (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+          && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         uses: actions/upload-artifact@v4
         with:
           name: html-docs
@@ -60,8 +63,8 @@ jobs:
   deploy:
     needs: build
     if: >-
-      github.event_name == 'push'
-      && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+      && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     permissions:
       contents: write
