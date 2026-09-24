@@ -38,6 +38,81 @@ To refresh images later without re-running initialize::
 
 Dashboard UI: http://127.0.0.1:8087 — see :doc:`dashboard`.
 
+Environment variables
+---------------------
+
+Host variables and the shared run-env file configure layout, GHCR, NAS mounts, and
+MQTT. ``start-nornir-build.ps1`` loads
+``<ROOT>\Run\nornir-net-mounts\.run.nornir-net-mounts.env`` when present (template:
+``nornir-docker/example.nornir-net-mounts.run.env``). Dashboard-only keys live in
+``Run\nornir-dashboard\dashboard.run.env`` (see :doc:`dashboard`).
+
+**Host / run-env (set before launch or in ``.run.nornir-net-mounts.env``)**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 32 68
+
+   * - Variable
+     - Expected value
+   * - ``NORNIR_DOCKER_USER_ROOT``
+     - Machine-local Docker root for Builds / Run / mounted-configs. Default
+       ``C:\Docker`` (often ``D:\Docker``). Set as a user or system env var.
+   * - ``NORNIR_GHCR_OWNER``
+     - GHCR namespace for pull/push (``docker-pull.ps1``, initialize). Default
+       ``jamesra``. Example: ``nornir`` for org packages.
+   * - ``NORNIR_NET_MOUNTS_DIR_HOST``
+     - Host directory that contains ``nas-mounts.tsv``. Optional when the default
+       ``<ROOT>\Run\nornir-net-mounts\net-mounts`` is correct. Use a Windows path,
+       WSL UNC (``\\wsl.localhost\<Distro>\...``), or ``/mnt/c/...`` from a WSL shell.
+   * - ``NORNIR_NET_CREDS_DIR_HOST``
+     - Host directory of per-share ``*.cred`` files mounted read-only at
+       ``/run/secrets/net-creds``. Must be set together with
+       ``NORNIR_NET_MOUNTS_DIR_HOST`` when overriding defaults.
+   * - ``NORNIR_MQTT_HOST``
+     - MQTT broker hostname as seen from the build container. Appliance default
+       ``host.docker.internal`` (co-located dashboard). Leave unset to get that
+       default from ``start-nornir-build.ps1``.
+   * - ``NORNIR_MQTT_PORT``
+     - MQTT port. Default ``1883``.
+   * - ``NORNIR_MQTT_ENABLE``
+     - ``1`` to enable MQTT telemetry publishers in Nornir tools; omit or unset to
+       leave publishing off unless the process enables it another way.
+   * - ``NORNIR_DOCKER_GPU``
+     - ``1`` when ``Test-NornirGpu.ps1`` (or ``-Gpu``) succeeds; selects
+       ``nornir:cupy`` if ``-Image`` is omitted. Set by the launcher; usually do not
+       set by hand.
+   * - ``NORNIR_DOCKER_NOFILE_SOFT`` / ``NORNIR_DOCKER_NOFILE_HARD``
+     - Soft/hard ``nofile`` ulimits for ``docker run``. Default ``65536`` /
+       ``65536``. Raise only if tile I/O still hits ``EMFILE``.
+   * - ``NORNIR_DOCKER_EXTRA_ARGS``
+     - Optional extra ``docker run`` tokens (space-separated) appended by the
+       launcher helpers.
+
+**Inside the appliance container**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 32 68
+
+   * - Variable
+     - Expected value
+   * - ``NORNIR_NET_MOUNTS``
+     - ``1`` when path-B CIFS is enabled (set by ``start-nornir-build.ps1``).
+       ``echo "$NORNIR_NET_MOUNTS"`` should print ``1``.
+   * - ``NORNIR_NET_MOUNTS_MANIFEST``
+     - Path to the mount table inside the container. Default
+       ``/etc/nornir-net-mounts/nas-mounts.tsv`` (from the host mounts dir).
+   * - ``NORNIR_NET_CREDS_SRC``
+     - Read-only credentials dir. Default ``/run/secrets/net-creds``.
+   * - ``NORNIR_MQTT_HOST`` / ``NORNIR_MQTT_PORT``
+     - Passed through from the host so ``nornir-build`` can publish to the
+       co-located dashboard.
+   * - ``NORNIR_LOG_ROOT``
+     - Optional root for persistent Nornir session logs (unified logging
+       convention). Not required for mounts; set if you want file logs under a
+       known host-visible path.
+
 Open file limits
 ----------------
 
@@ -46,13 +121,22 @@ Production, cursor-dev, and cursor-worker containers ship with ``nofile`` **6553
 Roles (do not collapse)
 -----------------------
 
-============= ========================================= ======================================
-Role          Image / stack                             Launcher
-============= ========================================= ======================================
-Programmer    ``cursor-dev`` / ``nornir:dev-cursor-base`` ``run-cursor-dev.ps1``
-Cursor AI     ``nornir:cursor-worker``                   ``start-cursor-worker.ps1``
-Build appliance ``nornir:cupy`` or ``nornir:prod``       ``start-nornir-build.ps1``
-============= ========================================= ======================================
+.. list-table::
+   :header-rows: 1
+   :widths: 22 40 38
+
+   * - Role
+     - Image / stack
+     - Launcher
+   * - Programmer
+     - ``cursor-dev`` / ``nornir:dev-cursor-base``
+     - ``run-cursor-dev.ps1``
+   * - Cursor AI
+     - ``nornir:cursor-worker``
+     - ``start-cursor-worker.ps1``
+   * - Build appliance
+     - ``nornir:cupy`` or ``nornir:prod``
+     - ``start-nornir-build.ps1``
 
 ``nornir:dev-cursor-base`` is a shared base layer, not the AI image. Use
 ``-Image nornir:dev-cursor-base -Clone`` on the appliance only when you need live

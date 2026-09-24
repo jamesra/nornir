@@ -79,6 +79,7 @@ jobs:
         with:
           personal_token: ${{ secrets.NORNIR_GITHUB_IO_DEPLOY_TOKEN }}
           external_repository: nornir/nornir.github.io
-          publish_branch: main
+          # GitHub Pages for this repo is configured on master, not main.
+          publish_branch: master
           publish_dir: ./html
           enable_jekyll: false

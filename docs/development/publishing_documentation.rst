@@ -36,7 +36,7 @@ The workflow **``.github/workflows/docs.yml``** in this monorepo:
 * Runs ``sphinx-build -b html docs docs/_build/html``.
 * On **push** or **workflow_dispatch** to the default branch, deploys the contents of
   ``docs/_build/html`` to the external repository **``nornir/nornir.github.io``**
-  (option A: push built HTML).
+  on branch **``master``** (the branch GitHub Pages serves; option A: push built HTML).
 
 See the workflow file for the exact triggers and action versions.
 
@@ -47,7 +47,7 @@ Pushing from this repo into **another** repository requires a token or deploy ke
 
 * **Secret (placeholder name):** ``NORNIR_GITHUB_IO_DEPLOY_TOKEN`` — a fine-grained or classic PAT with ``contents: write`` on ``nornir/nornir.github.io``, stored in this monorepo’s **Settings → Secrets and variables → Actions**.
 
-**Do not** commit real tokens into the repository. If the secret is missing, the build job may still succeed while the deploy step fails—add the secret or disable the deploy step for forks.
+Without that secret, the HTML **build** can succeed while **Publish to nornir.github.io** fails with ``not found deploy key or tokens``.
 
 Version banner
 --------------
