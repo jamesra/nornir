@@ -33,7 +33,7 @@ Packages baked into ``nornir:dev``, ``nornir:prod``, and ``nornir:cupy`` (from t
 ``nornir_shared``, ``nornir_pools``, ``nornir_imageregistration``, ``dm4``, ``nornir_buildmanager``.
 ``nornir:cursor-worker`` and ``nornir:dev-cursor-base`` do **not** bake those; they install editables from ``/workspace`` at container start.
 
-The annotation overlay gallery (``nornir-annotation-gallery``) is a **Compose stack**, not one of the five ``docker-build.ps1`` tags. It is a stdlib-only image under ``nornir-docker/annotation-gallery/`` and must not install ``nornir-buildmanager``. See :doc:`annotation_gallery`.
+The annotation overlay gallery is a **Compose service on the SAM2 trainer stack**, not one of the five ``docker-build.ps1`` tags. The image is stdlib-only and must not install ``nornir-buildmanager``. See :doc:`annotation_gallery`.
 
 Monorepo version and package map
 ---------------------------------

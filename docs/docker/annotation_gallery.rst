@@ -1,59 +1,40 @@
 Annotation overlay gallery
 ==========================
 
-Slim HTTP + SPA for per-volume ``AnnotationCrops`` PNG + 1-bit mask review.
-The **gallery image does not install Nornir** (no ``nornir-buildmanager``,
-imageregistration, CuPy, or torch). Export, SAM2 scoring, and weekly refresh
-run on ``nornir:prod`` / cursor-dev against the same registry.
+Slim HTTP + SPA for per-volume ``AnnotationCrops`` review. The image does
+**not** install Nornir. It lives in the SAM2 trainer repo
+(``Sam2SegmentationTrainer/annotation-gallery``) and runs as a second service
+on that project's Compose file, beside ``cursor-dev``.
 
-Start::
+The gallery and the trainer share ``SAM2_LOCAL_DATA_HOST`` mounted at
+``/data-local``. ``GALLERY_VOLUME_DIR`` is ``SAM2_DATA_ROOT``
+(``/data-local/current``). Children of that directory are volume roots
+(``RC1``, ``RC2``, …); each contains ``AnnotationCrops``.
 
-  .\nornir-docker\start-annotation-gallery.ps1
-  docker compose -f nornir-docker/compose.annotation-gallery.yaml up -d --build
+Start from the trainer repo (same ``docker/.env`` and net-mounts override as
+the trainer)::
 
-Then open http://127.0.0.1:8090
+  docker compose -f docker/compose.cursor-dev.yaml up -d --build annotation-gallery
 
-Run env template: ``nornir-docker/example.annotation-gallery.run.env`` →
-``<NORNIR_DOCKER_USER_ROOT>\Run\nornir-annotation-gallery\annotation-gallery.run.env``.
+Pages:
 
-Registry
---------
+* http://127.0.0.1:8080
+* https://127.0.0.1:8443 when both PEM files are present
 
-``GALLERY_VOLUME_DIR`` (in-container ``/gallery-volumes``) is a folder of
-**volume-root** links. The child **name** is the Identity volume name; the
-child **target** is the volume root (``/storage4/RC2``), not ``AnnotationCrops``.
-The gallery reads ``{name}/AnnotationCrops/``. Identity never stores filesystem
-paths.
+Host cert paths belong in ``D:\Docker\Run\sam2-dev\.env`` (``SSL_CERT_PATH``,
+``SSL_KEY_PATH``). Compose mounts that directory at ``/certs``. If either PEM
+is missing, HTTP on port 80 still starts and HTTPS stays off.
 
-::
+Trash and restore write ``ignore.json`` and move the mask between ``masks/``
+and ``ignored/``. The trainer skips a sample whose raster is not in ``masks/``.
 
-  ln -s /storage4/RC2 /gallery-volumes/RC2
-
-Bind the registry **and** the storage root so those links resolve.
-``GALLERY_VOLUME_DIR_HOST`` and ``GALLERY_STORAGE_HOST`` are compose bind sources.
-
-Permissions
------------
-
-+------------------+---------------------------------------------+
-| Identity         | Gallery                                     |
-+==================+=============================================+
-| Read             | Volume listed; GET catalog/crops/masks     |
-+------------------+---------------------------------------------+
-| Review           | Trash / restore; POST ignore/restore        |
-+------------------+---------------------------------------------+
-| Neither          | Volume omitted                              |
-+------------------+---------------------------------------------+
-
-``GALLERY_IDENTITY_MODE=stub`` (default) uses ``GALLERY_STUB_ROLE=read|review``.
-``oidc`` talks to ``https://identity.codepharm.net:5001`` (auth) and
-``https://identity.codepharm.net:6001`` (API). App mapping is Read vs Review
-per volume; names are probed from Identity (``GALLERY_READ_PERMISSION`` /
-``GALLERY_REVIEW_PERMISSION``).
+The trainer Compose service uses stub identity with the review role so
+ignore/restore works on localhost. ``oidc`` still talks to Identity when
+``GALLERY_IDENTITY_MODE=oidc``.
 
 Weekly export
 -------------
 
 Do **not** spawn ``nornir-build`` from a gallery HTTP request. Use
-``nornir-docker/annotation-gallery/refresh-export.sh`` on ``nornir:prod`` cron
-with the same registry.
+``annotation-gallery/refresh-export.sh`` from the trainer repo on
+``nornir:prod`` cron.

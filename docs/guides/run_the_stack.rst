@@ -25,7 +25,7 @@ Image tags, GPU versus CPU images, and how to build them are in :doc:`../docker/
 Also:
 
 * :doc:`../docker/dashboard` — MQTT build dashboard on port 8087.
-* :doc:`../docker/annotation_gallery` — annotation crop review. That image does not install Nornir.
+* :doc:`../docker/annotation_gallery` — annotation crop review, a service on the SAM2 trainer Compose file. That image does not install Nornir.
 * :doc:`../docker/windows_cursor_layout` — ``D:\Docker`` layout for the Cursor worker. ``NORNIR_DOCKER_USER_ROOT`` defaults to ``C:\Docker`` and is often set to ``D:\Docker``; that page assumes ``D:\Docker``.
 
 Host checks (driver, WSL2, open-file limit) are in :doc:`../host_requirements`.
