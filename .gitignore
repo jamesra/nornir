@@ -81,6 +81,7 @@ RPC3/
 
 # Generated release constraints with local file:// paths
 release/pyre-windows-constraints.txt
+release/_pyre_release_notes.md
 
 # Scratch output and local bench scripts (not part of the monorepo package set)
 tmp/

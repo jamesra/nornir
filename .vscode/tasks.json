@@ -83,6 +83,41 @@
             "problemMatcher": []
         },
         {
+            "label": "pyre: publish Windows release",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/release/publish_pyre_windows_release.ps1"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "focus": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "pyre: build and publish Windows release",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "pyre: build Windows installer (full)",
+                "pyre: publish Windows release"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        },
+        {
             "label": "pyre: run frozen bundle (GUI)",
             "type": "process",
             "command": "${workspaceFolder}/nornir-pyre/packaging/windows/dist/pyre/pyre.exe",

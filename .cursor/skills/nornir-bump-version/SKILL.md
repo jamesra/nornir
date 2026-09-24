@@ -35,14 +35,34 @@ python release/verify_package_versions.py
 
 ### Pyre installer after a package bump
 
+1. Add a curated ``## X.Y.Z`` section to ``nornir-pyre/CHANGELOG.user.md`` (user-facing notes only).
+2. From the monorepo root:
+
 ```powershell
+python release/sync_pyre_user_changelog.py --write-docs
+```
+
+3. Build and publish (pick one):
+
+```powershell
+# Local (VS Code: "pyre: build and publish Windows release")
 cd nornir-pyre\packaging\windows
 .\build-freeze.ps1
 .\validate-frozen.ps1
 .\build-installer.ps1
+cd ..\..\..
+.\release\publish_pyre_windows_release.ps1
+
+# Or tag (triggers CI)
+git tag pyre-X.Y.Z
+git push origin pyre-X.Y.Z
 ```
 
 `build-installer.ps1` reads `nornir-pyre/pyproject.toml`. Override only when needed: `-Version x.y.z`.
+
+Docs always link **latest** via
+`https://github.com/jamesra/nornir/releases/latest/download/Pyre-Setup.exe`.
+Versioned installers remain on prior `pyre-*` releases.
 
 ## Cut a monorepo release
 

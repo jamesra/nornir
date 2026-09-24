@@ -1,12 +1,35 @@
+# Build the Pyre Windows installer, publish to GitHub Releases (pyre-<ver>),
+# attach curated user changelog notes, and refresh documentation.
+#
+# Tags:
+#   pyre-*  — dedicated Windows installer releases (preferred; marked latest)
+#   v*      — monorepo release tags; also publishes under pyre-<pyre-version>
+# workflow_dispatch — build/publish without pushing a tag first
+#
+# Assets on each pyre-<ver> release:
+#   Pyre-<ver>-Setup.exe  — versioned (history)
+#   Pyre-Setup.exe        — stable name for:
+#     https://github.com/jamesra/nornir/releases/latest/download/Pyre-Setup.exe
+#
+# Notes come from nornir-pyre/CHANGELOG.user.md (## <ver> section).
+
 name: Pyre Windows Release
 
 on:
   push:
     tags:
+      - "pyre-*"
       - "v*"
+  workflow_dispatch:
+    inputs:
+      skip_docs_trigger:
+        description: "Skip triggering the Documentation workflow after publish"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   build-installer:
@@ -16,6 +39,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -27,6 +51,15 @@ jobs:
 
       - name: Verify package versions
         run: python release/verify_package_versions.py
+
+      - name: Read Pyre version
+        id: ver
+        shell: pwsh
+        run: |
+          $v = python -c "from release.sync_pyre_user_changelog import read_pyre_version; print(read_pyre_version())"
+          "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "tag=pyre-$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          Write-Host "Pyre version=$v tag=pyre-$v"
 
       - name: Build PyInstaller bundle
         shell: pwsh
@@ -49,15 +82,46 @@ jobs:
           Set-ExecutionPolicy -Scope Process Bypass
           ./nornir-pyre/packaging/windows/build-installer.ps1
 
+      - name: Prepare assets and release notes
+        shell: pwsh
+        run: |
+          $ver = "${{ steps.ver.outputs.version }}"
+          $dir = "nornir-pyre/packaging/windows/dist/installer"
+          $versioned = Join-Path $dir "Pyre-$ver-Setup.exe"
+          if (-not (Test-Path $versioned)) { throw "Missing $versioned" }
+          Copy-Item -Force $versioned (Join-Path $dir "Pyre-Setup.exe")
+          python release/sync_pyre_user_changelog.py `
+            --version $ver `
+            --notes-file release/_pyre_release_notes.md `
+            --write-docs
+
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
         with:
           name: pyre-windows-installer
-          path: nornir-pyre/packaging/windows/dist/installer/Pyre-*.exe
+          path: |
+            nornir-pyre/packaging/windows/dist/installer/Pyre-*-Setup.exe
+            nornir-pyre/packaging/windows/dist/installer/Pyre-Setup.exe
 
-      - name: Attach to GitHub Release
+      - name: Publish GitHub Release (pyre-*)
         uses: softprops/action-gh-release@v2
         with:
-          files: nornir-pyre/packaging/windows/dist/installer/Pyre-*.exe
+          tag_name: ${{ steps.ver.outputs.tag }}
+          name: Pyre ${{ steps.ver.outputs.version }} Windows installer
+          body_path: release/_pyre_release_notes.md
+          files: |
+            nornir-pyre/packaging/windows/dist/installer/Pyre-${{ steps.ver.outputs.version }}-Setup.exe
+            nornir-pyre/packaging/windows/dist/installer/Pyre-Setup.exe
+          fail_on_unmatched_files: true
+          make_latest: true
+          generate_release_notes: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Trigger documentation deploy
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.skip_docs_trigger) }}
+        shell: pwsh
+        run: |
+          gh workflow run docs.yml --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
