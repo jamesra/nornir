@@ -10,6 +10,8 @@ Scripts and libraries for **constructing 3D volumes** from 2D image sets using t
 
 * :doc:`../api/nornir_buildmanager`
 
+The command sequence from import through VikingXML is :doc:`../guides/build_volume`. A grouped list of pipeline names is :doc:`../pipelines`.
+
 VolumeData dirty / save ownership
 ---------------------------------
 
@@ -27,14 +29,6 @@ Pipeline stages and volumemanager getters follow this contract:
 
 See the package ``README.md`` table of ``VolumeData.xml`` locations and
 ``tests/test_import_volumedata_save.py``.
-
-Common workflow
----------------
-
-1. Import data (for example ``ImportIDoc``, ``ImportDM4``, or ``ImportPMG``).
-2. Clean input tiles with ``Prune`` and produce image histograms.
-3. Register sections with ``Mosaic`` and downstream alignment pipelines.
-4. Export manifests with ``CreateVikingXML`` when ready for consumption.
 
 VikingXML Version 2
 -------------------

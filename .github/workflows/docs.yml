@@ -28,6 +28,8 @@ jobs:
         with:
           # Editable installs need the package trees, not empty submodule placeholders.
           submodules: recursive
+          # Pyre Windows installer under docs/_static/downloads is Git LFS.
+          lfs: true
 
       - uses: actions/setup-python@v5
         with:

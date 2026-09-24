@@ -56,8 +56,9 @@ MQTT. ``start-nornir-build.ps1`` loads
    * - Variable
      - Expected value
    * - ``NORNIR_DOCKER_USER_ROOT``
-     - Machine-local Docker root for Builds / Run / mounted-configs. Default
-       ``C:\Docker`` (often ``D:\Docker``). Set as a user or system env var.
+     - Machine-local Docker root for Builds / Run / mounted-configs. The default
+       is ``C:\Docker``; many lab machines set it to ``D:\Docker``. Examples on
+       each page say which path they assume. Set as a user or system env var.
    * - ``NORNIR_GHCR_OWNER``
      - GHCR namespace for pull/push (``docker-pull.ps1``, initialize). Default
        ``jamesra``. Example: ``nornir`` for org packages.
@@ -123,7 +124,7 @@ Roles (do not collapse)
 
 .. list-table::
    :header-rows: 1
-   :widths: 22 40 38
+   :widths: 22 48 30
 
    * - Role
      - Image / stack
@@ -134,8 +135,16 @@ Roles (do not collapse)
    * - Cursor AI
      - ``nornir:cursor-worker``
      - ``start-cursor-worker.ps1``
-   * - Build appliance
-     - ``nornir:cupy`` or ``nornir:prod``
+   * - Build appliance (GPU)
+     - ``nornir:cupy`` — for build machines with an NVIDIA GPU (``cupy-cuda13x``).
+       CUDA Toolkit **13.2** requires compute capability **7.5+** (Turing and
+       newer; Maxwell / Pascal / Volta are out of support). CuPy Delaunay
+       (``cupyx.scipy.spatial.Delaunay`` / GDel2D) does not document a higher
+       architecture floor than CuPy itself, so plan on **7.5+** for GPU mesh
+       and transform paths that use it.
+     - ``start-nornir-build.ps1``
+   * - Build appliance (CPU)
+     - ``nornir:prod`` — CPU-only systems (no GPU / no CuPy).
      - ``start-nornir-build.ps1``
 
 ``nornir:dev-cursor-base`` is a shared base layer, not the AI image. Use
@@ -143,7 +152,7 @@ Roles (do not collapse)
 git packages in ``/workspace``.
 
 Shared ``nornir-net-mounts`` (path B)
-------------------------------------
+-------------------------------------
 
 Layout::
 

@@ -27,31 +27,19 @@ Nornir is a work in progress. It supports importing images from transmission ele
 Related tools
 -------------
 
-Volume images frequently exceed reasonable sizes for single files. **Viking** is another Marc Lab tool for viewing and annotating huge datasets. Nornir output can be viewed with Viking when placed on a web server.
+Nornir builds the aligned volume and a VikingXML manifest. **Viking** views and annotates that volume. **SBFSEM-tools** analyzes Viking annotations in MATLAB. Build in Nornir, view and annotate in Viking, analyze in SBFSEM-tools.
 
-.. _Viking: https://connectomes.utah.edu/
+* `Viking <https://github.com/connectomes/Viking>`_
+* `SBFSEM-tools <https://github.com/neitzlab/SBFSEM-tools>`_
+
+See :doc:`guides/build_volume`.
 
 System notes
 ------------
 
-* 64-bit OS (development has focused on Windows).
-* Rough guideline: about 2 GB RAM per CPU core for heavy pipelines (workload-dependent).
+What a machine needs to run Pyre, a workstation pipeline, or Docker is in :doc:`host_requirements`. Production volumes (NAS, scratch disk, GPU class) are in :doc:`performance/envelope`.
 
-Terminology (short glossary)
-----------------------------
+Terminology
+-----------
 
-**Block** — plastic-embedded sample before sectioning.
-
-**Section / slice** — one thin physical slice from the block, typically tens of nanometres thick for TEM.
-
-**Mosaic** — a set of overlapping microscope images covering an area larger than one field of view.
-
-**Tile** — one image in a mosaic (with deliberate overlap between neighbors).
-
-**Slice-to-slice (STOS)** — transforms that align one section's image to an adjacent section.
-
-**Center section** — the section chosen as the origin of the volume coordinate system; other sections map toward it through composed transforms.
-
-**Slice-to-volume** — the composed mapping from a section's mosaic space into the unified volume space.
-
-For the same terms in the context of the full alignment walkthrough, see :doc:`overview_alignment_theory`.
+Terms used across the manual (block, section, mosaic, tile, channel, filter, prune, blob, STOS, grid, slice-to-volume) are defined in :doc:`concepts`.

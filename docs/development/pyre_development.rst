@@ -67,15 +67,16 @@ VS Code launch configurations live in ``.vscode/launch.json`` at the monorepo ro
 Settings and logs
 ~~~~~~~~~~~~~~~~~
 
-+---------------------------+-----------------------------------------------+
-| Dev build                 | Frozen Windows install                        |
-+===========================+===============================================+
-| ``pyre/settings.json``    | ``%APPDATA%\Nornir\Pyre\settings.json``     |
-| (package tree, dev)       | (user-writable)                               |
-+---------------------------+-----------------------------------------------+
-| ``NORNIR_LOG_ROOT`` env   | Defaults to                                   |
-| or cwd fallback           | ``%LOCALAPPDATA%\Nornir\Pyre\logs``           |
-+---------------------------+-----------------------------------------------+
+.. list-table::
+   :header-rows: 1
+   :widths: 50 50
+
+   * - Dev build
+     - Frozen Windows install
+   * - ``pyre/settings.json`` (package tree, dev)
+     - ``%APPDATA%\Nornir\Pyre\settings.json`` (user-writable)
+   * - ``NORNIR_LOG_ROOT`` env or cwd fallback
+     - Defaults to ``%LOCALAPPDATA%\Nornir\Pyre\logs``
 
 Set ``NORNIR_LOG_ROOT`` in development to follow the unified logging convention
 (:doc:`logging`).
@@ -105,9 +106,9 @@ UI development does not require CuPy. For GPU-backed registration:
 Windows packaging and release
 -----------------------------
 
-End users install ``Pyre-<version>-Setup.exe`` from GitHub Releases
-(:doc:`../packages/pyre_install`). Maintainers build it from
-``nornir-pyre/packaging/windows/``.
+End users download the Windows installer from this documentation site
+(|pyre-windows-installer-latest|; :doc:`../packages/pyre_install`) or from GitHub
+Releases. Maintainers build it from ``nornir-pyre/packaging/windows/``.
 
 Prerequisites
 ~~~~~~~~~~~~~
@@ -167,12 +168,24 @@ Debugging frozen builds
 CI and releases
 ~~~~~~~~~~~~~~~
 
-On push of a ``v*`` tag, ``.github/workflows/pyre-windows-release.yml``:
+``.github/workflows/pyre-windows-release.yml`` runs on ``pyre-*`` tags, ``v*`` tags, and
+manual **workflow_dispatch**:
 
 1. Verifies ``release/package-versions.yaml``
 2. Runs ``build-freeze.ps1`` and ``validate-frozen.ps1``
 3. Compiles Inno Setup
-4. Uploads ``Pyre-<version>-Setup.exe`` to the GitHub Release
+4. Publishes GitHub Release ``pyre-<version>`` with ``Pyre-<version>-Setup.exe`` **and**
+   ``Pyre-Setup.exe`` (stable latest name), release notes from
+   ``nornir-pyre/CHANGELOG.user.md``, and ``make_latest: true``
+5. Triggers the Documentation workflow so nornir.github.io picks up version text
+
+Local publish after a full installer build (VS Code task **pyre: publish Windows release**)::
+
+   .\release\publish_pyre_windows_release.ps1
+
+Before tagging, add a ``## <version>`` section to ``nornir-pyre/CHANGELOG.user.md`` and run
+``python release/sync_pyre_user_changelog.py --write-docs`` so :doc:`../packages/pyre_changelog`
+is current in git.
 
 See :doc:`release` for the full monorepo release checklist.
 

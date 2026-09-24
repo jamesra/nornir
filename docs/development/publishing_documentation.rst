@@ -12,11 +12,14 @@ Local build
 
     pip install -r docs/requirements.txt
     pip install -e nornir-shared
-    pip install -e nornir-pools
-    pip install -e nornir-imageregistration
-    pip install -e nornir-buildmanager
+    pip install -e nornir-pools --no-deps
+    pip install "six>=1.16" "numpy>=1.26" "matplotlib>=3.8"
+    pip install -e nornir-imageregistration --no-deps
+    pip install "scipy>=1.11" "Pillow>=10.2" "pydantic>=2.9.2" "scikit-image>=0.25.1" "hypothesis>=6.96"
+    pip install -e nornir-buildmanager --no-deps
+    pip install "validators>=0.23" "python-dotenv>=1.0.1"
 
-   If dependency resolution pulls remote Git URLs instead of your local trees, install the four packages in that order and adjust pins as needed for your branch.
+   ``--no-deps`` keeps git URL pins in ``pyproject.toml`` from replacing the local trees.
 
 #. Build HTML::
 

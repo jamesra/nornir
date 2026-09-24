@@ -7,10 +7,12 @@ To build a 3D volume using transmission electron microscopes we begin by taking 
 
 We assemble a mosaic image for each section cut from the block. Sometimes we call a section a **slice**. Each section is then registered to the adjacent sections to produce **slice-to-slice** (``.stos``) transformations. We decide which mosaic is the **center** of the volume. Transforms can then be added such that any point on a mosaic can be mapped through slice-to-slice transforms until the center is reached. This produces a mapping for each section to the volume. The **slice-to-volume** transforms can be used with Viking_ or, if the mosaic images are small enough, volume-aligned section images can be produced.
 
-.. _Viking: https://connectomes.utah.edu/
+.. _Viking: https://github.com/connectomes/Viking
 
 Mosaic registration
 -------------------
+
+Pipeline commands for this stage are ``ImportIDoc`` (or ``ImportDM4`` / ``ImportPMG``), ``Prune``, and ``Mosaic``. See :doc:`guides/build_volume`.
 
 Mosaic capture
 ^^^^^^^^^^^^^^
@@ -74,6 +76,8 @@ Taken as a whole, we can see the overall movement of the tiles to produce the fi
 Slice-to-slice registration
 ---------------------------
 
+Pipeline commands for this stage are ``CreateBlobFilter``, ``AlignSections``, and ``RefineSectionAlignment``. Interactive fixes use Pyre (:doc:`guides/pyre_use`).
+
 Once the mosaics are built for each section we begin aligning sections into a volume. The initial registration is done via brute force: the image is rotated by a small angle and a strength score is calculated for the resulting registration.
 
 .. figure:: _static/figures/JamesRA.029.png
@@ -114,8 +118,15 @@ As in the mosaics, the solution is to lay a grid of cells over the images and de
 Volume registration
 ^^^^^^^^^^^^^^^^^^^
 
+The pipeline command is ``SliceToVolume``, followed by ``Assemble`` and ``CreateVikingXML``.
+
 The final step is to map all sections to a single coordinate system. Nornir designates a section as the **center**. It passes the control points for each slice-to-slice registration through any intermediate transformations between the section and the center. The result is a mapping that warps a section directly to the volume in a single step.
 
 Figure 2 of the `Viking Viewer for Connectomics`_ paper demonstrates the concept. The modern implementation of Nornir uses radial basis functions to estimate the positions of control points that fall outside the boundaries of a mesh.
 
 .. _Viking Viewer for Connectomics: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3017751/
+
+View and analyze
+----------------
+
+Nornir's output is a VikingXML manifest and image pyramids. View and annotate the volume in `Viking <https://github.com/connectomes/Viking>`_. Analyze those annotations with `SBFSEM-tools <https://github.com/neitzlab/SBFSEM-tools>`_ (MATLAB). The command that writes the manifest is ``CreateVikingXML``; see :doc:`guides/build_volume`.

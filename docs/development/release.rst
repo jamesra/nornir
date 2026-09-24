@@ -103,14 +103,23 @@ published documentation banner automatically reflects the new version.
 
    :doc:`publishing_documentation` — how the docs CI workflow builds and deploys to ``nornir.github.io``.
    :doc:`../docker/images` — Docker image catalogue and build options.
-   :doc:`pyre_development` — Pyre Windows installer build (PyInstaller + Inno Setup); CI workflow ``pyre-windows-release.yml`` runs on ``v*`` tags.
+   :doc:`pyre_development` — Pyre Windows installer build (PyInstaller + Inno Setup); CI workflow ``pyre-windows-release.yml`` runs on ``pyre-*`` / ``v*`` tags and ``workflow_dispatch``.
 
 Pyre Windows installer
 ----------------------
 
 Pyre ships a native Windows installer (``Pyre-<version>-Setup.exe``), not a Docker image.
-On ``v*`` tags, ``.github/workflows/pyre-windows-release.yml`` builds the frozen bundle and
-attaches the installer to the GitHub Release.
+Docs always link the **latest** build as |pyre-windows-installer-latest|
+(:doc:`../packages/pyre_install`). Version history stays on ``pyre-*`` GitHub Releases.
+
+Release automation (``.github/workflows/pyre-windows-release.yml`` or
+``release/publish_pyre_windows_release.ps1``):
+
+1. Builds the frozen bundle and Inno Setup installer from ``nornir-pyre/pyproject.toml``.
+2. Publishes GitHub Release ``pyre-<version>`` with both ``Pyre-<version>-Setup.exe`` and
+   ``Pyre-Setup.exe``, marks it **latest**, and fills the release body from
+   ``nornir-pyre/CHANGELOG.user.md``.
+3. Regenerates :doc:`../packages/pyre_changelog` and triggers the Documentation workflow.
 
 The installer filename and ``AppVersion`` come from ``nornir-pyre/pyproject.toml``
 (via ``packaging/windows/build-installer.ps1``), not from the monorepo root ``VERSION``

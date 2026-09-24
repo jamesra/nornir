@@ -3,6 +3,9 @@ Image catalogue
 
 All images are built from the monorepo root (context ``.``).
 
+Pyre (the interactive PyQt / OpenGL UI) is **not** included in any Docker image.
+Install it on Windows with |pyre-windows-installer-latest| — see :doc:`../packages/pyre_install`.
+
 .. list-table::
    :header-rows: 1
    :widths: 25 30 45
