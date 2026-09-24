@@ -1,3 +1,12 @@
 {
-  "setup": "source /workspace/venv/pyre314/bin/activate && export TESTINPUTPATH=/workspace/nornir-testdata && export TESTOUTPUTPATH=/tmp/nornir-test-output && mkdir -p \"$TESTOUTPUTPATH\""
+  "name": "Nornir dev",
+  "build": {
+    "context": ".",
+    "dockerfile": "nornir-docker/dev/Dockerfile"
+  },
+  "env": {
+    "TESTINPUTPATH": "/nornir-testdata",
+    "TESTOUTPUTPATH": "/tmp/nornir-test-output",
+    "INPUT_NORNIR_DATA": "/data"
+  }
 }

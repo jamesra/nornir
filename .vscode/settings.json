@@ -1,0 +1,77 @@
+{
+    "python.terminal.activateEnvironment": true,
+    "terminal.integrated.profiles.windows": {
+        "Pyre314 PowerShell": {
+            "source": "PowerShell",
+            "args": [
+                "-NoExit",
+                "-Command",
+                "& '${workspaceFolder}\\venv\\pyre314\\Scripts\\Activate.ps1'"
+            ]
+        }
+    },
+    "terminal.integrated.defaultProfile.windows": "Pyre314 PowerShell",
+    "terminal.integrated.env.windows": {
+        "PYTHONPATH": "${workspaceFolder}/nornir-buildmanager;${workspaceFolder}/nornir-imageregistration;${workspaceFolder}/nornir-pools;${workspaceFolder}/nornir-shared;${workspaceFolder}/nornir-pyre;${env:PYTHONPATH}",
+        "TESTINPUTPATH": "D:\\nornir-testdata",
+        "TESTOUTPUTPATH": "C:\\Temp\\nornir"
+    },
+    "terminal.integrated.env.linux": {
+        "TESTINPUTPATH": "/nornir-testdata",
+        "TESTOUTPUTPATH": "/tmp/nornir-test-output"
+    },
+    "python.testing.pytestEnabled": true,
+    "python.testing.cwd": "${workspaceFolder}",
+    // Do not override import mode: root pytest.ini uses --import-mode=importlib for monorepo collection; prepend breaks Test Explorer discovery.
+    "python.testing.pytestArgs": [
+        "-s", "-vv"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.analysis.autoSearchPaths": true,
+    "python.analysis.include": [
+        "nornir-buildmanager/nornir_buildmanager",
+        "nornir-imageregistration/nornir_imageregistration",
+        "nornir-pyre/pyre",
+        "nornir-shared/nornir_shared",
+        "nornir-pools/nornir_pools",
+        "dm4/dm4"
+    ],
+    "python.analysis.extraPaths": [
+        "nornir-buildmanager",
+        "nornir-imageregistration",
+        "nornir-pools",
+        "nornir-shared",
+        "nornir-pyre",
+        "dm4"
+    ],
+    "python.analysis.autoFormatStrings": true,
+    "python.analysis.typeCheckingMode": "basic",
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "${workspaceFolder}",
+        "-p",
+        "test*.py"
+    ],
+    "python.envFile": "${workspaceFolder}/.env",
+    "cursorpyright.analysis.autoSearchPaths": true,
+    "cursorpyright.analysis.venvPath": "/opt",
+    "cursorpyright.analysis.venv": "venv",
+    "cursorpyright.analysis.include": [
+        "nornir-buildmanager/nornir_buildmanager",
+        "nornir-imageregistration/nornir_imageregistration",
+        "nornir-pyre/pyre",
+        "nornir-shared/nornir_shared",
+        "nornir-pools/nornir_pools",
+        "dm4/dm4"
+    ],
+    "cursorpyright.analysis.extraPaths": [
+        "nornir-buildmanager",
+        "nornir-imageregistration",
+        "nornir-pools",
+        "nornir-shared",
+        "nornir-pyre",
+        "dm4"
+    ],
+    "cursorpyright.analysis.typeCheckingMode": "basic"
+}

@@ -1,0 +1,50 @@
+---
+description: >-
+  Phase correlation and serial+batched registration math — grep callers, run
+  verification matrix, final perf on ≥100-tile sections; keep skill in sync
+  when scripts/tests change.
+globs: >
+  nornir-imageregistration/**/phasecorrelation.py,
+  nornir-imageregistration/**/batched_phase_correlation.py,
+  nornir-imageregistration/**/local_distortion_correction.py,
+  nornir-imageregistration/**/stos_brute.py,
+  nornir-imageregistration/**/arrange_mosaic.py,
+  nornir-imageregistration/scripts/microbench*.py,
+  nornir-imageregistration/scripts/compare*.py,
+  nornir-imageregistration/scripts/verify*.py,
+  nornir-imageregistration/scripts/audit*.py,
+  nornir-imageregistration/scripts/run_*investigation*.sh,
+  nornir-imageregistration/scripts/tabulate*.py,
+  nornir-imageregistration/tests/test_*Align*.py,
+  nornir-imageregistration/tests/test_*phase*.py,
+  nornir-imageregistration/tests/test_*stos*.py,
+  nornir-imageregistration/tests/test_*refine*.py,
+  nornir-imageregistration/tests/test_arrange.py,
+  nornir-imageregistration/tests/test_overlapmasking.py,
+  .cursor/skills/nornir-serial-batched-primitives/**
+alwaysApply: false
+---
+
+## Serial + batched primitives
+
+Before merging changes to phase correlation or serial+batched registration math, follow the
+`.cursor/skills/nornir-serial-batched-primitives/SKILL.md` skill: grep all callers, keep
+serial/batched mirrors aligned, and run the verification matrix for affected pathways.
+
+**Final performance sign-off** must use a **real section with ≥100 tiles** (default: RPC3 0195 per
+`.vscode/launch.json`), with downsample and refine parameters matching launch configs — not the
+grid refine input section fixture (4 tiles).
+
+### Keep the skill in sync
+
+If this change **adds, removes, or renames** a script or pytest module that benchmarks, profiles,
+compares, verifies, or gates phase correlation / serial+batched registration behavior, update
+`.cursor/skills/nornir-serial-batched-primitives/SKILL.md` in the **same commit**:
+
+- Script inventory tables (by pathway)
+- Verification matrix and recommended minimum sweep
+- Known-gaps section (add when creating new coverage; remove when a gap is filled)
+
+This rule and the skill are paired: the rule triggers review discipline; the skill holds the
+authoritative list of scripts and tests. Stale inventories cause missed perf regressions on
+untouched pathways.

@@ -1,0 +1,118 @@
+{
+  "label": "pre",
+  "median_cell_zncc": {
+    "finite_count": 1136,
+    "max": 0.7582589246770847,
+    "median": 0.4154715235267544,
+    "min": 0.21389372262082318
+  },
+  "pair_zncc": {
+    "max": 0.4442398419499457,
+    "median": 0.4442398419499457,
+    "min": 0.4442398419499457
+  },
+  "run_count": 3,
+  "runs": [
+    {
+      "cell_finite_count": 1136,
+      "cell_max_zncc": 0.7582589246770847,
+      "cell_median_zncc": 0.4154715235267544,
+      "cell_min_zncc": 0.21389372262082318,
+      "code": {
+        "git_available": true,
+        "git_diff_sha256": null,
+        "git_dirty": false,
+        "git_sha": "ee3646a2ca6ff6f3977768289639e9df76bfeb1d",
+        "git_status": [],
+        "package_root": "/tmp/nornir-imageregistration-ee3646a2"
+      },
+      "elapsed_s": 40.24646781798219,
+      "manifest": "/tmp/nornir-test-output/rc2-605-performance/refine_grid_baseline_pre-measured-1/manifest.json",
+      "pair_zncc": 0.4442398419499457,
+      "pass_performance": [],
+      "phase_totals_s": {
+        "approx_rigid": 18.62708740704693,
+        "cell_extract": 6.2640445560682565,
+        "classify": 0.01330055296421051,
+        "diagnostics_tables": 0.04579875903436914,
+        "fft": 0.6279235659749247,
+        "finalize": 1.6315276259556413,
+        "grid_build": 1.4800260910997167,
+        "host_sync": 0.0058804291766136885,
+        "low_content_gate": 0.1679456440033391,
+        "record_assemble": 0.013200754998251796,
+        "zncc_secondary": 0.8293482789304107
+      },
+      "phase_work_counts": {}
+    },
+    {
+      "cell_finite_count": 1136,
+      "cell_max_zncc": 0.7582589246770847,
+      "cell_median_zncc": 0.4154715235267544,
+      "cell_min_zncc": 0.21389372262082318,
+      "code": {
+        "git_available": true,
+        "git_diff_sha256": null,
+        "git_dirty": false,
+        "git_sha": "ee3646a2ca6ff6f3977768289639e9df76bfeb1d",
+        "git_status": [],
+        "package_root": "/tmp/nornir-imageregistration-ee3646a2"
+      },
+      "elapsed_s": 32.753421186993364,
+      "manifest": "/tmp/nornir-test-output/rc2-605-performance/refine_grid_baseline_pre-measured-2/manifest.json",
+      "pair_zncc": 0.4442398419499457,
+      "pass_performance": [],
+      "phase_totals_s": {
+        "approx_rigid": 18.48910237493692,
+        "cell_extract": 6.172004088934045,
+        "classify": 0.014308646030258387,
+        "diagnostics_tables": 0.047521108004730195,
+        "fft": 0.5854976599803194,
+        "finalize": 1.1941872269962914,
+        "grid_build": 1.3014893599320203,
+        "host_sync": 0.005985509080346674,
+        "low_content_gate": 0.16967718495288864,
+        "record_assemble": 0.01373662002151832,
+        "zncc_secondary": 0.8276756659615785
+      },
+      "phase_work_counts": {}
+    },
+    {
+      "cell_finite_count": 1136,
+      "cell_max_zncc": 0.7582589246770847,
+      "cell_median_zncc": 0.4154715235267544,
+      "cell_min_zncc": 0.21389372262082318,
+      "code": {
+        "git_available": true,
+        "git_diff_sha256": null,
+        "git_dirty": false,
+        "git_sha": "ee3646a2ca6ff6f3977768289639e9df76bfeb1d",
+        "git_status": [],
+        "package_root": "/tmp/nornir-imageregistration-ee3646a2"
+      },
+      "elapsed_s": 68.25999088602839,
+      "manifest": "/tmp/nornir-test-output/rc2-605-performance/refine_grid_baseline_pre-measured-3/manifest.json",
+      "pair_zncc": 0.4442398419499457,
+      "pass_performance": [],
+      "phase_totals_s": {
+        "approx_rigid": 21.8991180100129,
+        "cell_extract": 7.050888262165245,
+        "classify": 0.01432619703700766,
+        "diagnostics_tables": 0.05221853207331151,
+        "fft": 0.6402811719453894,
+        "finalize": 11.740437201980967,
+        "grid_build": 8.947692515037488,
+        "host_sync": 0.005550802976358682,
+        "low_content_gate": 0.18920150899793953,
+        "record_assemble": 0.013862543972209096,
+        "zncc_secondary": 0.89386354299495
+      },
+      "phase_work_counts": {}
+    }
+  ],
+  "runtime_s": {
+    "max": 68.25999088602839,
+    "median": 40.24646781798219,
+    "min": 32.753421186993364
+  }
+}

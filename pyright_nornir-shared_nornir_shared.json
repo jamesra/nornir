@@ -1,0 +1,3118 @@
+﻿{
+    "version": "1.1.408",
+    "time": "1773375245055",
+    "generalDiagnostics": [
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\__init__.py",
+            "severity": "warning",
+            "message": "\"argparse_helpers\" is specified in __all__ but is not present in module",
+            "range": {
+                "start": {
+                    "line": 23,
+                    "character": 11
+                },
+                "end": {
+                    "line": 23,
+                    "character": 29
+                }
+            },
+            "rule": "reportUnsupportedDunderAll"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\__init__.py",
+            "severity": "warning",
+            "message": "\"misc\" is specified in __all__ but is not present in module",
+            "range": {
+                "start": {
+                    "line": 23,
+                    "character": 89
+                },
+                "end": {
+                    "line": 23,
+                    "character": 95
+                }
+            },
+            "rule": "reportUnsupportedDunderAll"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\__init__.py",
+            "severity": "warning",
+            "message": "\"parallel\" is specified in __all__ but is not present in module",
+            "range": {
+                "start": {
+                    "line": 23,
+                    "character": 97
+                },
+                "end": {
+                    "line": 23,
+                    "character": 107
+                }
+            },
+            "rule": "reportUnsupportedDunderAll"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\__init__.py",
+            "severity": "warning",
+            "message": "\"processoutputinterceptor\" is specified in __all__ but is not present in module",
+            "range": {
+                "start": {
+                    "line": 24,
+                    "character": 11
+                },
+                "end": {
+                    "line": 24,
+                    "character": 37
+                }
+            },
+            "rule": "reportUnsupportedDunderAll"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\__init__.py",
+            "severity": "warning",
+            "message": "\"reflection\" is specified in __all__ but is not present in module",
+            "range": {
+                "start": {
+                    "line": 24,
+                    "character": 39
+                },
+                "end": {
+                    "line": 24,
+                    "character": 51
+                }
+            },
+            "rule": "reportUnsupportedDunderAll"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\__init__.py",
+            "severity": "error",
+            "message": "Expected class but received \"(iterable: Iterable[object], /) -> bool\"",
+            "range": {
+                "start": {
+                    "line": 54,
+                    "character": 55
+                },
+                "end": {
+                    "line": 54,
+                    "character": 58
+                }
+            },
+            "rule": "reportGeneralTypeIssues"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\argparse_helpers.py",
+            "severity": "error",
+            "message": "Type \"range\" is not assignable to return type \"list[int]\"\n┬á┬á\"range\" is not assignable to \"list[int]\"",
+            "range": {
+                "start": {
+                    "line": 28,
+                    "character": 11
+                },
+                "end": {
+                    "line": 28,
+                    "character": 18
+                }
+            },
+            "rule": "reportReturnType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\argparse_helpers.py",
+            "severity": "error",
+            "message": "Type \"None\" is not assignable to return type \"list[int]\"\n┬á┬á\"None\" is not assignable to \"list[int]\"",
+            "range": {
+                "start": {
+                    "line": 86,
+                    "character": 15
+                },
+                "end": {
+                    "line": 86,
+                    "character": 19
+                }
+            },
+            "rule": "reportReturnType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\argparse_helpers.py",
+            "severity": "error",
+            "message": "Type \"None\" is not assignable to return type \"list[int]\"\n┬á┬á\"None\" is not assignable to \"list[int]\"",
+            "range": {
+                "start": {
+                    "line": 100,
+                    "character": 15
+                },
+                "end": {
+                    "line": 100,
+                    "character": 19
+                }
+            },
+            "rule": "reportReturnType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\argparse_helpers.py",
+            "severity": "error",
+            "message": "Type \"None\" is not assignable to return type \"list[int]\"\n┬á┬á\"None\" is not assignable to \"list[int]\"",
+            "range": {
+                "start": {
+                    "line": 114,
+                    "character": 15
+                },
+                "end": {
+                    "line": 114,
+                    "character": 19
+                }
+            },
+            "rule": "reportReturnType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\argparse_helpers.py",
+            "severity": "error",
+            "message": "Type \"tuple[float, float]\" is not assignable to return type \"tuple[int]\"\n┬á┬á\"float\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 142,
+                    "character": 19
+                },
+                "end": {
+                    "line": 142,
+                    "character": 22
+                }
+            },
+            "rule": "reportReturnType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\argparse_helpers.py",
+            "severity": "error",
+            "message": "Type \"tuple[float, float]\" is not assignable to return type \"tuple[int]\"\n┬á┬á\"float\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 144,
+                    "character": 19
+                },
+                "end": {
+                    "line": 144,
+                    "character": 39
+                }
+            },
+            "rule": "reportReturnType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\argparse_helpers.py",
+            "severity": "error",
+            "message": "Type \"None\" is not assignable to return type \"list[float]\"\n┬á┬á\"None\" is not assignable to \"list[float]\"",
+            "range": {
+                "start": {
+                    "line": 160,
+                    "character": 15
+                },
+                "end": {
+                    "line": 160,
+                    "character": 19
+                }
+            },
+            "rule": "reportReturnType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\argparse_helpers.py",
+            "severity": "error",
+            "message": "Operator \"<=\" not supported for types \"float | None\" and \"float | None\"\n┬á┬áOperator \"<=\" not supported for types \"float\" and \"None\"\n┬á┬áOperator \"<=\" not supported for types \"None\" and \"float\"\n┬á┬áOperator \"<=\" not supported for types \"None\" and \"None\"",
+            "range": {
+                "start": {
+                    "line": 186,
+                    "character": 10
+                },
+                "end": {
+                    "line": 186,
+                    "character": 28
+                }
+            },
+            "rule": "reportOperatorIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\argparse_helpers.py",
+            "severity": "error",
+            "message": "Operator \"+=\" not supported for types \"float | None\" and \"float\"\n┬á┬áOperator \"+\" not supported for types \"None\" and \"float\"",
+            "range": {
+                "start": {
+                    "line": 188,
+                    "character": 8
+                },
+                "end": {
+                    "line": 188,
+                    "character": 28
+                }
+            },
+            "rule": "reportOperatorIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\console.py",
+            "severity": "error",
+            "message": "Import \"paho.mqtt.enums\" could not be resolved",
+            "range": {
+                "start": {
+                    "line": 17,
+                    "character": 11
+                },
+                "end": {
+                    "line": 17,
+                    "character": 26
+                }
+            },
+            "rule": "reportMissingImports"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\console.py",
+            "severity": "error",
+            "message": "Import \"paho.mqtt.client\" could not be resolved",
+            "range": {
+                "start": {
+                    "line": 18,
+                    "character": 11
+                },
+                "end": {
+                    "line": 18,
+                    "character": 27
+                }
+            },
+            "rule": "reportMissingImports"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\console.py",
+            "severity": "error",
+            "message": "Import \"pydevd\" could not be resolved",
+            "range": {
+                "start": {
+                    "line": 45,
+                    "character": 11
+                },
+                "end": {
+                    "line": 45,
+                    "character": 17
+                }
+            },
+            "rule": "reportMissingImports"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\console.py",
+            "severity": "error",
+            "message": "Expected class but received \"(iterable: Iterable[object], /) -> bool\"",
+            "range": {
+                "start": {
+                    "line": 155,
+                    "character": 33
+                },
+                "end": {
+                    "line": 155,
+                    "character": 36
+                }
+            },
+            "rule": "reportGeneralTypeIssues"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\console.py",
+            "severity": "error",
+            "message": "Expected class but received \"(iterable: Iterable[object], /) -> bool\"",
+            "range": {
+                "start": {
+                    "line": 174,
+                    "character": 54
+                },
+                "end": {
+                    "line": 174,
+                    "character": 57
+                }
+            },
+            "rule": "reportGeneralTypeIssues"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\console.py",
+            "severity": "error",
+            "message": "Expected class but received \"(iterable: Iterable[object], /) -> bool\"",
+            "range": {
+                "start": {
+                    "line": 196,
+                    "character": 36
+                },
+                "end": {
+                    "line": 196,
+                    "character": 39
+                }
+            },
+            "rule": "reportGeneralTypeIssues"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\consolewindow.py",
+            "severity": "error",
+            "message": "Import \"paho.mqtt.client\" could not be resolved",
+            "range": {
+                "start": {
+                    "line": 8,
+                    "character": 11
+                },
+                "end": {
+                    "line": 8,
+                    "character": 27
+                }
+            },
+            "rule": "reportMissingImports"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\consolewindow.py",
+            "severity": "error",
+            "message": "Expected class but received \"(iterable: Iterable[object], /) -> bool\"",
+            "range": {
+                "start": {
+                    "line": 51,
+                    "character": 43
+                },
+                "end": {
+                    "line": 51,
+                    "character": 46
+                }
+            },
+            "rule": "reportGeneralTypeIssues"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\consolewindow.py",
+            "severity": "error",
+            "message": "\"rc\" is not defined",
+            "range": {
+                "start": {
+                    "line": 64,
+                    "character": 71
+                },
+                "end": {
+                    "line": 64,
+                    "character": 73
+                }
+            },
+            "rule": "reportUndefinedVariable"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\consolewindow.py",
+            "severity": "error",
+            "message": "Expected class but received \"(iterable: Iterable[object], /) -> bool\"",
+            "range": {
+                "start": {
+                    "line": 66,
+                    "character": 58
+                },
+                "end": {
+                    "line": 66,
+                    "character": 61
+                }
+            },
+            "rule": "reportGeneralTypeIssues"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\consolewindow.py",
+            "severity": "error",
+            "message": "Expected class but received \"(iterable: Iterable[object], /) -> bool\"",
+            "range": {
+                "start": {
+                    "line": 86,
+                    "character": 40
+                },
+                "end": {
+                    "line": 86,
+                    "character": 43
+                }
+            },
+            "rule": "reportGeneralTypeIssues"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\consolewindow.py",
+            "severity": "error",
+            "message": "\"on_connect\" is not defined",
+            "range": {
+                "start": {
+                    "line": 92,
+                    "character": 43
+                },
+                "end": {
+                    "line": 92,
+                    "character": 53
+                }
+            },
+            "rule": "reportUndefinedVariable"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\curses_console.py",
+            "severity": "error",
+            "message": "\"getmaxyx\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 53,
+                    "character": 34
+                },
+                "end": {
+                    "line": 53,
+                    "character": 42
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\curses_console.py",
+            "severity": "error",
+            "message": "\"addstr\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 57,
+                    "character": 19
+                },
+                "end": {
+                    "line": 57,
+                    "character": 25
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\curses_console.py",
+            "severity": "error",
+            "message": "\"clrtoeol\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 58,
+                    "character": 19
+                },
+                "end": {
+                    "line": 58,
+                    "character": 27
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\curses_console.py",
+            "severity": "error",
+            "message": "\"move\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 59,
+                    "character": 19
+                },
+                "end": {
+                    "line": 59,
+                    "character": 23
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\curses_console.py",
+            "severity": "error",
+            "message": "\"refresh\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 60,
+                    "character": 19
+                },
+                "end": {
+                    "line": 60,
+                    "character": 26
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\emaillib.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"to_address_list\" for class \"EmailArgs\"\n┬á┬áAttribute \"to_address_list\" is unknown",
+            "range": {
+                "start": {
+                    "line": 97,
+                    "character": 37
+                },
+                "end": {
+                    "line": 97,
+                    "character": 52
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\emaillib.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"cc_address_list\" for class \"EmailArgs\"\n┬á┬áAttribute \"cc_address_list\" is unknown",
+            "range": {
+                "start": {
+                    "line": 97,
+                    "character": 60
+                },
+                "end": {
+                    "line": 97,
+                    "character": 75
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\emaillib.py",
+            "severity": "error",
+            "message": "Argument missing for parameter \"files\"",
+            "range": {
+                "start": {
+                    "line": 109,
+                    "character": 11
+                },
+                "end": {
+                    "line": 118,
+                    "character": 63
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "\"t\" is not defined",
+            "range": {
+                "start": {
+                    "line": 123,
+                    "character": 57
+                },
+                "end": {
+                    "line": 123,
+                    "character": 58
+                }
+            },
+            "rule": "reportUndefinedVariable"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "\"t\" is not defined",
+            "range": {
+                "start": {
+                    "line": 136,
+                    "character": 57
+                },
+                "end": {
+                    "line": 136,
+                    "character": 58
+                }
+            },
+            "rule": "reportUndefinedVariable"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "\"t\" is not defined",
+            "range": {
+                "start": {
+                    "line": 148,
+                    "character": 53
+                },
+                "end": {
+                    "line": 148,
+                    "character": 54
+                }
+            },
+            "rule": "reportUndefinedVariable"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "Operator \"<\" not supported for types \"float\" and \"float | struct_time\"\n┬á┬áOperator \"<\" not supported for types \"float\" and \"struct_time\" when expected type is \"bool\"",
+            "range": {
+                "start": {
+                    "line": 242,
+                    "character": 11
+                },
+                "end": {
+                    "line": 242,
+                    "character": 31
+                }
+            },
+            "rule": "reportOperatorIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "Function with declared return type \"bool\" must return value on all code paths\n┬á┬á\"None\" is not assignable to \"bool\"",
+            "range": {
+                "start": {
+                    "line": 259,
+                    "character": 88
+                },
+                "end": {
+                    "line": 259,
+                    "character": 92
+                }
+            },
+            "rule": "reportReturnType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "Argument of type \"str | datetime | date | struct_time | float | int\" cannot be assigned to parameter \"path\" of type \"FileDescriptorOrPath\" in function \"exists\"\n┬á┬áType \"str | datetime | date | struct_time | float | int\" is not assignable to type \"FileDescriptorOrPath\"\n┬á┬á┬á┬áType \"date\" is not assignable to type \"FileDescriptorOrPath\"\n┬á┬á┬á┬á┬á┬á\"date\" is not assignable to \"int\"\n┬á┬á┬á┬á┬á┬á\"date\" is not assignable to \"str\"\n┬á┬á┬á┬á┬á┬á\"date\" is not assignable to \"bytes\"\n┬á┬á┬á┬á┬á┬á\"date\" is incompatible with protocol \"PathLike[str]\"\n┬á┬á┬á┬á┬á┬á┬á┬á\"__fspath__\" is not present\n┬á┬á┬á┬á┬á┬á\"date\" is incompatible with protocol \"PathLike[bytes]\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 291,
+                    "character": 32
+                },
+                "end": {
+                    "line": 291,
+                    "character": 50
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "Type \"Pattern[str]\" is not assignable to return type \"Pattern[AnyStr@ensure_regex_or_set] | frozenset[str] | None\"\n┬á┬áType \"Pattern[str]\" is not assignable to type \"Pattern[AnyStr@ensure_regex_or_set] | frozenset[str] | None\"\n┬á┬á┬á┬á\"Pattern[str]\" is not assignable to \"Pattern[AnyStr@ensure_regex_or_set]\"\n┬á┬á┬á┬á┬á┬áType parameter \"AnyStr@Pattern\" is invariant, but \"str\" is not the same as \"AnyStr@ensure_regex_or_set\"\n┬á┬á┬á┬á\"Pattern[str]\" is not assignable to \"frozenset[str]\"\n┬á┬á┬á┬á\"Pattern[str]\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 361,
+                    "character": 15
+                },
+                "end": {
+                    "line": 361,
+                    "character": 73
+                }
+            },
+            "rule": "reportReturnType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "Type \"frozenset[str]\" is not assignable to declared type \"str | Sequence[str] | None\"\n┬á┬áType \"frozenset[str]\" is not assignable to type \"str | Sequence[str] | None\"\n┬á┬á┬á┬á\"frozenset[str]\" is not assignable to \"str\"\n┬á┬á┬á┬á\"frozenset[str]\" is not assignable to \"Sequence[str]\"\n┬á┬á┬á┬á\"frozenset[str]\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 381,
+                    "character": 16
+                },
+                "end": {
+                    "line": 381,
+                    "character": 32
+                }
+            },
+            "rule": "reportAssignmentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "Type \"str | Sequence[str] | <subclass of Sequence[str] and frozenset> | <subclass of Sequence[str] and set> | None\" is not assignable to return type \"frozenset[str] | None\"\n┬á┬áType \"str | Sequence[str] | <subclass of Sequence[str] and frozenset> | <subclass of Sequence[str] and set> | None\" is not assignable to type \"frozenset[str] | None\"\n┬á┬á┬á┬áType \"Sequence[str]\" is not assignable to type \"frozenset[str] | None\"\n┬á┬á┬á┬á┬á┬á\"Sequence[str]\" is not assignable to \"frozenset[str]\"\n┬á┬á┬á┬á┬á┬á\"Sequence[str]\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 383,
+                    "character": 11
+                },
+                "end": {
+                    "line": 383,
+                    "character": 16
+                }
+            },
+            "rule": "reportReturnType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "Type \"Pattern[Unknown] | frozenset[str] | None\" is not assignable to declared type \"str | Sequence[str] | Pattern[Unknown] | None\"\n┬á┬áType \"Pattern[Unknown] | frozenset[str] | None\" is not assignable to type \"str | Sequence[str] | Pattern[Unknown] | None\"\n┬á┬á┬á┬áType \"frozenset[str]\" is not assignable to type \"str | Sequence[str] | Pattern[Unknown] | None\"\n┬á┬á┬á┬á┬á┬á\"frozenset[str]\" is not assignable to \"str\"\n┬á┬á┬á┬á┬á┬á\"frozenset[str]\" is not assignable to \"Sequence[str]\"\n┬á┬á┬á┬á┬á┬á\"frozenset[str]\" is not assignable to \"Pattern[Unknown]\"\n┬á┬á┬á┬á┬á┬á\"frozenset[str]\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 446,
+                    "character": 20
+                },
+                "end": {
+                    "line": 446,
+                    "character": 87
+                }
+            },
+            "rule": "reportAssignmentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "Type \"Pattern[Unknown] | frozenset[str] | None\" is not assignable to declared type \"str | Sequence[str] | Pattern[Unknown] | None\"\n┬á┬áType \"Pattern[Unknown] | frozenset[str] | None\" is not assignable to type \"str | Sequence[str] | Pattern[Unknown] | None\"\n┬á┬á┬á┬áType \"frozenset[str]\" is not assignable to type \"str | Sequence[str] | Pattern[Unknown] | None\"\n┬á┬á┬á┬á┬á┬á\"frozenset[str]\" is not assignable to \"str\"\n┬á┬á┬á┬á┬á┬á\"frozenset[str]\" is not assignable to \"Sequence[str]\"\n┬á┬á┬á┬á┬á┬á\"frozenset[str]\" is not assignable to \"Pattern[Unknown]\"\n┬á┬á┬á┬á┬á┬á\"frozenset[str]\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 447,
+                    "character": 20
+                },
+                "end": {
+                    "line": 447,
+                    "character": 87
+                }
+            },
+            "rule": "reportAssignmentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "Type \"Pattern[Unknown] | frozenset[str] | None\" is not assignable to declared type \"str | Sequence[str] | Pattern[Unknown] | None\"\n┬á┬áType \"Pattern[Unknown] | frozenset[str] | None\" is not assignable to type \"str | Sequence[str] | Pattern[Unknown] | None\"\n┬á┬á┬á┬áType \"frozenset[str]\" is not assignable to type \"str | Sequence[str] | Pattern[Unknown] | None\"\n┬á┬á┬á┬á┬á┬á\"frozenset[str]\" is not assignable to \"str\"\n┬á┬á┬á┬á┬á┬á\"frozenset[str]\" is not assignable to \"Sequence[str]\"\n┬á┬á┬á┬á┬á┬á\"frozenset[str]\" is not assignable to \"Pattern[Unknown]\"\n┬á┬á┬á┬á┬á┬á\"frozenset[str]\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 448,
+                    "character": 17
+                },
+                "end": {
+                    "line": 448,
+                    "character": 81
+                }
+            },
+            "rule": "reportAssignmentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "Type \"frozenset[int] | frozenset[str] | None\" is not assignable to declared type \"list[int] | None\"\n┬á┬áType \"frozenset[int] | frozenset[str] | None\" is not assignable to type \"list[int] | None\"\n┬á┬á┬á┬áType \"frozenset[int]\" is not assignable to type \"list[int] | None\"\n┬á┬á┬á┬á┬á┬á\"frozenset[int]\" is not assignable to \"list[int]\"\n┬á┬á┬á┬á┬á┬á\"frozenset[int]\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 449,
+                    "character": 31
+                },
+                "end": {
+                    "line": 450,
+                    "character": 66
+                }
+            },
+            "rule": "reportAssignmentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "Argument of type \"list[int]\" cannot be assigned to parameter \"param\" of type \"str | Sequence[str] | None\" in function \"ensure_string_set\"\n┬á┬áType \"list[int]\" is not assignable to type \"str | Sequence[str] | None\"\n┬á┬á┬á┬á\"list[int]\" is not assignable to \"str\"\n┬á┬á┬á┬á\"list[int]\" is not assignable to \"Sequence[str]\"\n┬á┬á┬á┬á┬á┬áType parameter \"_T_co@Sequence\" is covariant, but \"int\" is not a subtype of \"str\"\n┬á┬á┬á┬á┬á┬á┬á┬á\"int\" is not assignable to \"str\"\n┬á┬á┬á┬á\"list[int]\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 450,
+                    "character": 8
+                },
+                "end": {
+                    "line": 450,
+                    "character": 32
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "Type \"frozenset[str] | None\" is not assignable to declared type \"str | Sequence[str] | None\"\n┬á┬áType \"frozenset[str] | None\" is not assignable to type \"str | Sequence[str] | None\"\n┬á┬á┬á┬áType \"frozenset[str]\" is not assignable to type \"str | Sequence[str] | None\"\n┬á┬á┬á┬á┬á┬á\"frozenset[str]\" is not assignable to \"str\"\n┬á┬á┬á┬á┬á┬á\"frozenset[str]\" is not assignable to \"Sequence[str]\"\n┬á┬á┬á┬á┬á┬á\"frozenset[str]\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 451,
+                    "character": 19
+                },
+                "end": {
+                    "line": 452,
+                    "character": 117
+                }
+            },
+            "rule": "reportAssignmentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"union\" for class \"str\"\n┬á┬áAttribute \"union\" is unknown",
+            "range": {
+                "start": {
+                    "line": 455,
+                    "character": 36
+                },
+                "end": {
+                    "line": 455,
+                    "character": 41
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"union\" for class \"Sequence[str]\"\n┬á┬áAttribute \"union\" is unknown",
+            "range": {
+                "start": {
+                    "line": 455,
+                    "character": 36
+                },
+                "end": {
+                    "line": 455,
+                    "character": 41
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "Type \"frozenset[str]\" is not assignable to declared type \"str | Sequence[str] | None\"\n┬á┬áType \"frozenset[str]\" is not assignable to type \"str | Sequence[str] | None\"\n┬á┬á┬á┬á\"frozenset[str]\" is not assignable to \"str\"\n┬á┬á┬á┬á\"frozenset[str]\" is not assignable to \"Sequence[str]\"\n┬á┬á┬á┬á\"frozenset[str]\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 457,
+                    "character": 23
+                },
+                "end": {
+                    "line": 457,
+                    "character": 98
+                }
+            },
+            "rule": "reportAssignmentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "Return type of generator function must be compatible with \"Generator[tuple[str, list[Unknown]], Any, Any]\"\n┬á┬á\"Generator[tuple[str, list[Unknown]], Unknown, Unknown]\" is not assignable to \"Generator[FindFileResult, None, None]\"\n┬á┬á┬á┬áType parameter \"_YieldT_co@Generator\" is covariant, but \"tuple[str, list[Unknown]]\" is not a subtype of \"FindFileResult\"\n┬á┬á┬á┬á┬á┬á\"tuple[str, list[Unknown]]\" is not assignable to \"FindFileResult\"",
+            "range": {
+                "start": {
+                    "line": 496,
+                    "character": 18
+                },
+                "end": {
+                    "line": 496,
+                    "character": 44
+                }
+            },
+            "rule": "reportReturnType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "Argument of type \"str | Sequence[str] | Pattern[Unknown] | None\" cannot be assigned to parameter \"matchCriteria\" of type \"Pattern[Unknown] | Iterable[Unknown]\" in function \"check_if_str_matches\"\n┬á┬áType \"str | Sequence[str] | Pattern[Unknown] | None\" is not assignable to type \"Pattern[Unknown] | Iterable[Unknown]\"\n┬á┬á┬á┬áType \"None\" is not assignable to type \"Pattern[Unknown] | Iterable[Unknown]\"\n┬á┬á┬á┬á┬á┬á\"None\" is not assignable to \"Pattern[Unknown]\"\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"Iterable[Unknown]\"\n┬á┬á┬á┬á┬á┬á┬á┬á\"__iter__\" is not present",
+            "range": {
+                "start": {
+                    "line": 519,
+                    "character": 52
+                },
+                "end": {
+                    "line": 519,
+                    "character": 62
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "Argument of type \"str | Sequence[str] | Pattern[Unknown] | None\" cannot be assigned to parameter \"MatchNames\" of type \"str | Sequence[str] | None\"\n┬á┬áType \"str | Sequence[str] | Pattern[Unknown] | None\" is not assignable to type \"str | Sequence[str] | None\"\n┬á┬á┬á┬áType \"Pattern[Unknown]\" is not assignable to type \"str | Sequence[str] | None\"\n┬á┬á┬á┬á┬á┬á\"Pattern[Unknown]\" is not assignable to \"str\"\n┬á┬á┬á┬á┬á┬á\"Pattern[Unknown]\" is not assignable to \"Sequence[str]\"\n┬á┬á┬á┬á┬á┬á\"Pattern[Unknown]\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 540,
+                    "character": 54
+                },
+                "end": {
+                    "line": 540,
+                    "character": 64
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "Except clause is unreachable because exception is already handled\n┬á┬á\"FileNotFoundError\" is a subclass of \"IOError\"",
+            "range": {
+                "start": {
+                    "line": 586,
+                    "character": 11
+                },
+                "end": {
+                    "line": 586,
+                    "character": 28
+                }
+            },
+            "rule": "reportUnusedExcept"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\files.py",
+            "severity": "error",
+            "message": "Argument of type \"Sequence[int] | None\" cannot be assigned to parameter \"ExcludedDownsampleLevels\" of type \"list[int] | None\" in function \"_RecurseSubdirectoriesGeneratorTask\"\n┬á┬áType \"Sequence[int] | None\" is not assignable to type \"list[int] | None\"\n┬á┬á┬á┬áType \"Sequence[int]\" is not assignable to type \"list[int] | None\"\n┬á┬á┬á┬á┬á┬á\"Sequence[int]\" is not assignable to \"list[int]\"\n┬á┬á┬á┬á┬á┬á\"Sequence[int]\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 611,
+                    "character": 33
+                },
+                "end": {
+                    "line": 611,
+                    "character": 57
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\histogram.py",
+            "severity": "warning",
+            "message": "Wildcard import from a library not allowed",
+            "range": {
+                "start": {
+                    "line": 6,
+                    "character": 20
+                },
+                "end": {
+                    "line": 6,
+                    "character": 21
+                }
+            },
+            "rule": "reportWildcardImportFromLibrary"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\histogram.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"dom\" for class \"str\"\n┬á┬áAttribute \"dom\" is unknown",
+            "range": {
+                "start": {
+                    "line": 110,
+                    "character": 25
+                },
+                "end": {
+                    "line": 110,
+                    "character": 28
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\histogram.py",
+            "severity": "error",
+            "message": "Argument of type \"Document\" cannot be assigned to parameter \"xml\" of type \"str\" in function \"FromXML\"\n┬á┬á\"Document\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 164,
+                    "character": 37
+                },
+                "end": {
+                    "line": 164,
+                    "character": 44
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\histogram.py",
+            "severity": "error",
+            "message": "Argument of type \"Unknown | None\" cannot be assigned to parameter \"x\" of type \"ConvertibleToFloat\" in function \"__new__\"\n┬á┬áType \"Unknown | None\" is not assignable to type \"ConvertibleToFloat\"\n┬á┬á┬á┬áType \"None\" is not assignable to type \"ConvertibleToFloat\"\n┬á┬á┬á┬á┬á┬á\"None\" is not assignable to \"str\"\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"Buffer\"\n┬á┬á┬á┬á┬á┬á┬á┬á\"__buffer__\" is not present\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"SupportsFloat\"\n┬á┬á┬á┬á┬á┬á┬á┬á\"__float__\" is not present\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"SupportsIndex\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 272,
+                    "character": 45
+                },
+                "end": {
+                    "line": 272,
+                    "character": 51
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\histogram.py",
+            "severity": "error",
+            "message": "Argument of type \"Unknown | None\" cannot be assigned to parameter \"x\" of type \"ConvertibleToFloat\" in function \"__new__\"\n┬á┬áType \"Unknown | None\" is not assignable to type \"ConvertibleToFloat\"\n┬á┬á┬á┬áType \"None\" is not assignable to type \"ConvertibleToFloat\"\n┬á┬á┬á┬á┬á┬á\"None\" is not assignable to \"str\"\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"Buffer\"\n┬á┬á┬á┬á┬á┬á┬á┬á\"__buffer__\" is not present\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"SupportsFloat\"\n┬á┬á┬á┬á┬á┬á┬á┬á\"__float__\" is not present\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"SupportsIndex\"",
+            "range": {
+                "start": {
+                    "line": 272,
+                    "character": 45
+                },
+                "end": {
+                    "line": 272,
+                    "character": 51
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\histogram.py",
+            "severity": "error",
+            "message": "Argument of type \"Unknown | None\" cannot be assigned to parameter \"x\" of type \"ConvertibleToFloat\" in function \"__new__\"\n┬á┬áType \"Unknown | None\" is not assignable to type \"ConvertibleToFloat\"\n┬á┬á┬á┬áType \"None\" is not assignable to type \"ConvertibleToFloat\"\n┬á┬á┬á┬á┬á┬á\"None\" is not assignable to \"str\"\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"Buffer\"\n┬á┬á┬á┬á┬á┬á┬á┬á\"__buffer__\" is not present\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"SupportsFloat\"\n┬á┬á┬á┬á┬á┬á┬á┬á\"__float__\" is not present\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"SupportsIndex\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 272,
+                    "character": 63
+                },
+                "end": {
+                    "line": 272,
+                    "character": 69
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\histogram.py",
+            "severity": "error",
+            "message": "Argument of type \"Unknown | None\" cannot be assigned to parameter \"x\" of type \"ConvertibleToFloat\" in function \"__new__\"\n┬á┬áType \"Unknown | None\" is not assignable to type \"ConvertibleToFloat\"\n┬á┬á┬á┬áType \"None\" is not assignable to type \"ConvertibleToFloat\"\n┬á┬á┬á┬á┬á┬á\"None\" is not assignable to \"str\"\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"Buffer\"\n┬á┬á┬á┬á┬á┬á┬á┬á\"__buffer__\" is not present\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"SupportsFloat\"\n┬á┬á┬á┬á┬á┬á┬á┬á\"__float__\" is not present\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"SupportsIndex\"",
+            "range": {
+                "start": {
+                    "line": 272,
+                    "character": 63
+                },
+                "end": {
+                    "line": 272,
+                    "character": 69
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\histogram.py",
+            "severity": "error",
+            "message": "Argument of type \"Unknown | None\" cannot be assigned to parameter \"x\" of type \"ConvertibleToFloat\" in function \"__new__\"\n┬á┬áType \"Unknown | None\" is not assignable to type \"ConvertibleToFloat\"\n┬á┬á┬á┬áType \"None\" is not assignable to type \"ConvertibleToFloat\"\n┬á┬á┬á┬á┬á┬á\"None\" is not assignable to \"str\"\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"Buffer\"\n┬á┬á┬á┬á┬á┬á┬á┬á\"__buffer__\" is not present\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"SupportsFloat\"\n┬á┬á┬á┬á┬á┬á┬á┬á\"__float__\" is not present\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"SupportsIndex\"\n  ...",
+            "range": {
+                "start": {
+                    "line": 272,
+                    "character": 79
+                },
+                "end": {
+                    "line": 272,
+                    "character": 85
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\histogram.py",
+            "severity": "error",
+            "message": "Argument of type \"Unknown | None\" cannot be assigned to parameter \"x\" of type \"ConvertibleToFloat\" in function \"__new__\"\n┬á┬áType \"Unknown | None\" is not assignable to type \"ConvertibleToFloat\"\n┬á┬á┬á┬áType \"None\" is not assignable to type \"ConvertibleToFloat\"\n┬á┬á┬á┬á┬á┬á\"None\" is not assignable to \"str\"\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"Buffer\"\n┬á┬á┬á┬á┬á┬á┬á┬á\"__buffer__\" is not present\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"SupportsFloat\"\n┬á┬á┬á┬á┬á┬á┬á┬á\"__float__\" is not present\n┬á┬á┬á┬á┬á┬á\"None\" is incompatible with protocol \"SupportsIndex\"",
+            "range": {
+                "start": {
+                    "line": 272,
+                    "character": 79
+                },
+                "end": {
+                    "line": 272,
+                    "character": 85
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\histogram.py",
+            "severity": "warning",
+            "message": "Expression value is unused",
+            "range": {
+                "start": {
+                    "line": 472,
+                    "character": 16
+                },
+                "end": {
+                    "line": 472,
+                    "character": 17
+                }
+            },
+            "rule": "reportUnusedExpression"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\histogram.py",
+            "severity": "error",
+            "message": "Type \"None\" is not assignable to return type \"str\"\n┬á┬á\"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 517,
+                    "character": 12
+                },
+                "end": {
+                    "line": 517,
+                    "character": 18
+                }
+            },
+            "rule": "reportReturnType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\images.py",
+            "severity": "error",
+            "message": "Argument of type \"Literal[':']\" cannot be assigned to parameter \"sep\" of type \"ReadableBuffer | None\" in function \"split\"\n┬á┬áType \"Literal[':']\" is not assignable to type \"ReadableBuffer | None\"\n┬á┬á┬á┬á\"Literal[':']\" is incompatible with protocol \"Buffer\"\n┬á┬á┬á┬á┬á┬á\"__buffer__\" is not present\n┬á┬á┬á┬á\"Literal[':']\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 62,
+                    "character": 31
+                },
+                "end": {
+                    "line": 62,
+                    "character": 34
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\images.py",
+            "severity": "error",
+            "message": "Tuple expression not allowed in type expression\n┬á┬áUse tuple[T1, ..., Tn] to indicate a tuple type or T1 | T2 to indicate a union type",
+            "range": {
+                "start": {
+                    "line": 73,
+                    "character": 32
+                },
+                "end": {
+                    "line": 73,
+                    "character": 60
+                }
+            },
+            "rule": "reportInvalidTypeForm"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\images.py",
+            "severity": "error",
+            "message": "Argument of type \"Literal[':']\" cannot be assigned to parameter \"sep\" of type \"ReadableBuffer | None\" in function \"split\"\n┬á┬áType \"Literal[':']\" is not assignable to type \"ReadableBuffer | None\"\n┬á┬á┬á┬á\"Literal[':']\" is incompatible with protocol \"Buffer\"\n┬á┬á┬á┬á┬á┬á\"__buffer__\" is not present\n┬á┬á┬á┬á\"Literal[':']\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 90,
+                    "character": 31
+                },
+                "end": {
+                    "line": 90,
+                    "character": 34
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\images.py",
+            "severity": "error",
+            "message": "Argument of type \"Literal['()']\" cannot be assigned to parameter \"bytes\" of type \"ReadableBuffer | None\" in function \"strip\"\n┬á┬áType \"Literal['()']\" is not assignable to type \"ReadableBuffer | None\"\n┬á┬á┬á┬á\"Literal['()']\" is incompatible with protocol \"Buffer\"\n┬á┬á┬á┬á┬á┬á\"__buffer__\" is not present\n┬á┬á┬á┬á\"Literal['()']\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 94,
+                    "character": 43
+                },
+                "end": {
+                    "line": 94,
+                    "character": 47
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\images.py",
+            "severity": "error",
+            "message": "Argument of type \"Literal['()']\" cannot be assigned to parameter \"bytes\" of type \"ReadableBuffer | None\" in function \"strip\"\n┬á┬áType \"Literal['()']\" is not assignable to type \"ReadableBuffer | None\"\n┬á┬á┬á┬á\"Literal['()']\" is incompatible with protocol \"Buffer\"\n┬á┬á┬á┬á┬á┬á\"__buffer__\" is not present\n┬á┬á┬á┬á\"Literal['()']\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 97,
+                    "character": 43
+                },
+                "end": {
+                    "line": 97,
+                    "character": 47
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\images.py",
+            "severity": "error",
+            "message": "Argument of type \"Literal['()']\" cannot be assigned to parameter \"bytes\" of type \"ReadableBuffer | None\" in function \"strip\"\n┬á┬áType \"Literal['()']\" is not assignable to type \"ReadableBuffer | None\"\n┬á┬á┬á┬á\"Literal['()']\" is incompatible with protocol \"Buffer\"\n┬á┬á┬á┬á┬á┬á\"__buffer__\" is not present\n┬á┬á┬á┬á\"Literal['()']\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 100,
+                    "character": 44
+                },
+                "end": {
+                    "line": 100,
+                    "character": 48
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\images.py",
+            "severity": "error",
+            "message": "Argument of type \"Literal['()']\" cannot be assigned to parameter \"bytes\" of type \"ReadableBuffer | None\" in function \"strip\"\n┬á┬áType \"Literal['()']\" is not assignable to type \"ReadableBuffer | None\"\n┬á┬á┬á┬á\"Literal['()']\" is incompatible with protocol \"Buffer\"\n┬á┬á┬á┬á┬á┬á\"__buffer__\" is not present\n┬á┬á┬á┬á\"Literal['()']\" is not assignable to \"None\"",
+            "range": {
+                "start": {
+                    "line": 103,
+                    "character": 46
+                },
+                "end": {
+                    "line": 103,
+                    "character": 50
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\images.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"IdentifyOutputInterceptor\" for class \"type[ProcessOutputInterceptor]\"\n┬á┬áAttribute \"IdentifyOutputInterceptor\" is unknown",
+            "range": {
+                "start": {
+                    "line": 120,
+                    "character": 68
+                },
+                "end": {
+                    "line": 120,
+                    "character": 93
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\images.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"IdentifyOutputInterceptor\" for class \"type[ProcessOutputInterceptor]\"\n┬á┬áAttribute \"IdentifyOutputInterceptor\" is unknown",
+            "range": {
+                "start": {
+                    "line": 121,
+                    "character": 54
+                },
+                "end": {
+                    "line": 121,
+                    "character": 79
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\images.py",
+            "severity": "error",
+            "message": "Type \"_AnyShape\" is not assignable to return type \"NDArray[integer[Any]]\"\n┬á┬á\"tuple[Any, ...]\" is not assignable to \"ndarray[_AnyShape, dtype[integer[Any]]]\"",
+            "range": {
+                "start": {
+                    "line": 140,
+                    "character": 15
+                },
+                "end": {
+                    "line": 140,
+                    "character": 32
+                }
+            },
+            "rule": "reportReturnType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\images.py",
+            "severity": "error",
+            "message": "Except clause is unreachable because exception is already handled\n┬á┬á\"FileNotFoundError\" is a subclass of \"OSError\"",
+            "range": {
+                "start": {
+                    "line": 172,
+                    "character": 11
+                },
+                "end": {
+                    "line": 172,
+                    "character": 28
+                }
+            },
+            "rule": "reportUnusedExcept"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\images.py",
+            "severity": "error",
+            "message": "Operator \"*\" not supported for \"None\"",
+            "range": {
+                "start": {
+                    "line": 220,
+                    "character": 22
+                },
+                "end": {
+                    "line": 220,
+                    "character": 44
+                }
+            },
+            "rule": "reportOptionalOperand"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\mathhelper.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"kind\" for class \"_SupportsDType[dtype[Any]]\"\n┬á┬áAttribute \"kind\" is unknown",
+            "range": {
+                "start": {
+                    "line": 39,
+                    "character": 17
+                },
+                "end": {
+                    "line": 39,
+                    "character": 21
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\mathhelper.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"kind\" for class \"tuple[_DTypeLikeNested, _DTypeLikeNested]\"\n┬á┬áAttribute \"kind\" is unknown",
+            "range": {
+                "start": {
+                    "line": 39,
+                    "character": 17
+                },
+                "end": {
+                    "line": 39,
+                    "character": 21
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\mathhelper.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"kind\" for class \"list[Any]\"\n┬á┬áAttribute \"kind\" is unknown",
+            "range": {
+                "start": {
+                    "line": 39,
+                    "character": 17
+                },
+                "end": {
+                    "line": 39,
+                    "character": 21
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\mathhelper.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"kind\" for class \"_DTypeDict\"\n┬á┬áAttribute \"kind\" is unknown",
+            "range": {
+                "start": {
+                    "line": 39,
+                    "character": 17
+                },
+                "end": {
+                    "line": 39,
+                    "character": 21
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\mathhelper.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"kind\" for class \"str\"\n┬á┬áAttribute \"kind\" is unknown",
+            "range": {
+                "start": {
+                    "line": 39,
+                    "character": 17
+                },
+                "end": {
+                    "line": 39,
+                    "character": 21
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\mathhelper.py",
+            "severity": "error",
+            "message": "\"kind\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 39,
+                    "character": 17
+                },
+                "end": {
+                    "line": 39,
+                    "character": 21
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\mathhelper.py",
+            "severity": "error",
+            "message": "No overloads for \"__new__\" match the provided arguments",
+            "range": {
+                "start": {
+                    "line": 42,
+                    "character": 31
+                },
+                "end": {
+                    "line": 42,
+                    "character": 46
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\mathhelper.py",
+            "severity": "error",
+            "message": "Argument of type \"DTypeLike\" cannot be assigned to parameter \"dtype\" of type \"str\" in function \"__new__\"\n┬á┬áType \"DTypeLike\" is not assignable to type \"str\"\n┬á┬á┬á┬á\"_DTypeDict\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 42,
+                    "character": 40
+                },
+                "end": {
+                    "line": 42,
+                    "character": 45
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\mathhelper.py",
+            "severity": "error",
+            "message": "Type \"NDArray[integer[Any]]\" is not assignable to declared type \"list[integer[Any]]\"\n┬á┬á\"ndarray[_AnyShape, dtype[integer[Any]]]\" is not assignable to \"list[integer[Any]]\"",
+            "range": {
+                "start": {
+                    "line": 50,
+                    "character": 13
+                },
+                "end": {
+                    "line": 50,
+                    "character": 30
+                }
+            },
+            "rule": "reportAssignmentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\misc.py",
+            "severity": "warning",
+            "message": "Import \"win32api\" could not be resolved from source",
+            "range": {
+                "start": {
+                    "line": 137,
+                    "character": 19
+                },
+                "end": {
+                    "line": 137,
+                    "character": 27
+                }
+            },
+            "rule": "reportMissingModuleSource"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\misc.py",
+            "severity": "warning",
+            "message": "Import \"win32process\" could not be resolved from source",
+            "range": {
+                "start": {
+                    "line": 137,
+                    "character": 29
+                },
+                "end": {
+                    "line": 137,
+                    "character": 41
+                }
+            },
+            "rule": "reportMissingModuleSource"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\misc.py",
+            "severity": "warning",
+            "message": "Import \"win32con\" could not be resolved from source",
+            "range": {
+                "start": {
+                    "line": 137,
+                    "character": 43
+                },
+                "end": {
+                    "line": 137,
+                    "character": 51
+                }
+            },
+            "rule": "reportMissingModuleSource"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\misc.py",
+            "severity": "error",
+            "message": "\"nice\" is not a known attribute of module \"os\"",
+            "range": {
+                "start": {
+                    "line": 144,
+                    "character": 15
+                },
+                "end": {
+                    "line": 144,
+                    "character": 19
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"pyplot\" is not a known attribute of module \"matplotlib\"",
+            "range": {
+                "start": {
+                    "line": 83,
+                    "character": 31
+                },
+                "end": {
+                    "line": 83,
+                    "character": 37
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "Type \"list[Sequence[float]]\" is not assignable to declared type \"Sequence[float] | None\"\n┬á┬á\"Sequence[float]\" is not assignable to \"float\"",
+            "range": {
+                "start": {
+                    "line": 114,
+                    "character": 27
+                },
+                "end": {
+                    "line": 114,
+                    "character": 38
+                }
+            },
+            "rule": "reportAssignmentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "Operator \">=\" not supported for \"None\"",
+            "range": {
+                "start": {
+                    "line": 126,
+                    "character": 11
+                },
+                "end": {
+                    "line": 126,
+                    "character": 27
+                }
+            },
+            "rule": "reportOptionalOperand"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "Operator \">\" not supported for \"None\"",
+            "range": {
+                "start": {
+                    "line": 126,
+                    "character": 36
+                },
+                "end": {
+                    "line": 126,
+                    "character": 52
+                }
+            },
+            "rule": "reportOptionalOperand"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "Operator \"/\" not supported for \"None\"",
+            "range": {
+                "start": {
+                    "line": 128,
+                    "character": 31
+                },
+                "end": {
+                    "line": 128,
+                    "character": 40
+                }
+            },
+            "rule": "reportOptionalOperand"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"MaxValue\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 128,
+                    "character": 48
+                },
+                "end": {
+                    "line": 128,
+                    "character": 56
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "Operator \"/\" not supported for \"None\"",
+            "range": {
+                "start": {
+                    "line": 130,
+                    "character": 36
+                },
+                "end": {
+                    "line": 130,
+                    "character": 45
+                }
+            },
+            "rule": "reportOptionalOperand"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"MaxValue\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 130,
+                    "character": 53
+                },
+                "end": {
+                    "line": 130,
+                    "character": 61
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"AutoLevel\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 132,
+                    "character": 42
+                },
+                "end": {
+                    "line": 132,
+                    "character": 51
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"BinWidth\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 134,
+                    "character": 40
+                },
+                "end": {
+                    "line": 134,
+                    "character": 48
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"MinValue\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 134,
+                    "character": 57
+                },
+                "end": {
+                    "line": 134,
+                    "character": 65
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"NumBins\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 134,
+                    "character": 90
+                },
+                "end": {
+                    "line": 134,
+                    "character": 97
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"Bins\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 136,
+                    "character": 16
+                },
+                "end": {
+                    "line": 136,
+                    "character": 20
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"NumBins\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 136,
+                    "character": 30
+                },
+                "end": {
+                    "line": 136,
+                    "character": 37
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"Bins\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 149,
+                    "character": 20
+                },
+                "end": {
+                    "line": 149,
+                    "character": 24
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"bar\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 155,
+                    "character": 9
+                },
+                "end": {
+                    "line": 155,
+                    "character": 12
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"Bins\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 155,
+                    "character": 29
+                },
+                "end": {
+                    "line": 155,
+                    "character": 33
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"BinWidth\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 155,
+                    "character": 89
+                },
+                "end": {
+                    "line": 155,
+                    "character": 97
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"set_title\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 156,
+                    "character": 9
+                },
+                "end": {
+                    "line": 156,
+                    "character": 18
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"set_ylabel\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 157,
+                    "character": 9
+                },
+                "end": {
+                    "line": 157,
+                    "character": 19
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"set_xlabel\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 158,
+                    "character": 9
+                },
+                "end": {
+                    "line": 158,
+                    "character": 19
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"set_yticks\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 160,
+                    "character": 9
+                },
+                "end": {
+                    "line": 160,
+                    "character": 19
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"plot\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 166,
+                    "character": 17
+                },
+                "end": {
+                    "line": 166,
+                    "character": 21
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"annotate\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 169,
+                    "character": 21
+                },
+                "end": {
+                    "line": 169,
+                    "character": 29
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"plot\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 172,
+                    "character": 17
+                },
+                "end": {
+                    "line": 172,
+                    "character": 21
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"annotate\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 175,
+                    "character": 21
+                },
+                "end": {
+                    "line": 175,
+                    "character": 29
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "Argument of type \"Sequence[float] | list[float] | None\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@enumerate]\" in function \"__new__\"\n┬á┬áType \"Sequence[float] | list[float] | None\" is not assignable to type \"Iterable[float]\"\n┬á┬á┬á┬á\"None\" is incompatible with protocol \"Iterable[float]\"\n┬á┬á┬á┬á┬á┬á\"__iter__\" is not present",
+            "range": {
+                "start": {
+                    "line": 183,
+                    "character": 36
+                },
+                "end": {
+                    "line": 183,
+                    "character": 47
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "Argument of type \"Sequence[float] | list[float] | None\" cannot be assigned to parameter \"iterable\" of type \"Iterable[_T@enumerate]\" in function \"__new__\"\n┬á┬áType \"Sequence[float] | list[float] | None\" is not assignable to type \"Iterable[_T@enumerate]\"\n┬á┬á┬á┬á\"None\" is incompatible with protocol \"Iterable[_T@enumerate]\"\n┬á┬á┬á┬á┬á┬á\"__iter__\" is not present",
+            "range": {
+                "start": {
+                    "line": 183,
+                    "character": 36
+                },
+                "end": {
+                    "line": 183,
+                    "character": 47
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "Argument of type \"Sequence[float] | list[float] | None\" cannot be assigned to parameter \"obj\" of type \"Sized\" in function \"len\"\n┬á┬áType \"Sequence[float] | list[float] | None\" is not assignable to type \"Sized\"\n┬á┬á┬á┬á\"None\" is incompatible with protocol \"Sized\"\n┬á┬á┬á┬á┬á┬á\"__len__\" is not present",
+            "range": {
+                "start": {
+                    "line": 187,
+                    "character": 59
+                },
+                "end": {
+                    "line": 187,
+                    "character": 70
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"plot\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 190,
+                    "character": 17
+                },
+                "end": {
+                    "line": 190,
+                    "character": 21
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"annotate\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 191,
+                    "character": 17
+                },
+                "end": {
+                    "line": 191,
+                    "character": 25
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"MaxValue\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 200,
+                    "character": 32
+                },
+                "end": {
+                    "line": 200,
+                    "character": 40
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"MinValue\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 200,
+                    "character": 48
+                },
+                "end": {
+                    "line": 200,
+                    "character": 56
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"BinWidth\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 200,
+                    "character": 65
+                },
+                "end": {
+                    "line": 200,
+                    "character": 73
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"XAxis_Extrema_Using_Threshold\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 201,
+                    "character": 48
+                },
+                "end": {
+                    "line": 201,
+                    "character": 77
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"MinValue\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 203,
+                    "character": 48
+                },
+                "end": {
+                    "line": 203,
+                    "character": 56
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"MaxValue\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 203,
+                    "character": 63
+                },
+                "end": {
+                    "line": 203,
+                    "character": 71
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "Operator \"+\" not supported for types \"Sequence[float] | list[float] | None\" and \"list[float | None]\"\n┬á┬áOperator \"+\" not supported for types \"Sequence[float]\" and \"list[float | None]\"\n┬á┬áOperator \"+\" not supported for types \"None\" and \"list[float | None]\"",
+            "range": {
+                "start": {
+                    "line": 206,
+                    "character": 18
+                },
+                "end": {
+                    "line": 206,
+                    "character": 47
+                }
+            },
+            "rule": "reportOperatorIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "Argument of type \"Unknown | list[float | None]\" cannot be assigned to parameter \"iterable\" of type \"Iterable[SupportsRichComparisonT@min]\" in function \"min\"\n┬á┬áType \"Unknown | list[float | None]\" is not assignable to type \"Iterable[SupportsRichComparisonT@min]\"\n┬á┬á┬á┬á\"list[float | None]\" is not assignable to \"Iterable[SupportsRichComparisonT@min]\"\n┬á┬á┬á┬á┬á┬áType parameter \"_T_co@Iterable\" is covariant, but \"float | None\" is not a subtype of \"SupportsRichComparisonT@min\"\n┬á┬á┬á┬á┬á┬á┬á┬áType \"float | None\" is not assignable to type \"SupportsRichComparison\"\n┬á┬á┬á┬á┬á┬á┬á┬á┬á┬áType \"float | None\" is not assignable to type \"SupportsRichComparison\"",
+            "range": {
+                "start": {
+                    "line": 207,
+                    "character": 19
+                },
+                "end": {
+                    "line": 207,
+                    "character": 26
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "Operator \"+\" not supported for types \"Sequence[float] | list[float] | None\" and \"list[float | int | None]\"\n┬á┬áOperator \"+\" not supported for types \"Sequence[float]\" and \"list[float | int | None]\"\n┬á┬áOperator \"+\" not supported for types \"None\" and \"list[float | int | None]\"",
+            "range": {
+                "start": {
+                    "line": 210,
+                    "character": 18
+                },
+                "end": {
+                    "line": 210,
+                    "character": 47
+                }
+            },
+            "rule": "reportOperatorIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "Argument of type \"Unknown | list[float | int | None]\" cannot be assigned to parameter \"iterable\" of type \"Iterable[SupportsRichComparisonT@max]\" in function \"max\"\n┬á┬áType \"Unknown | list[float | int | None]\" is not assignable to type \"Iterable[SupportsRichComparisonT@max]\"\n┬á┬á┬á┬á\"list[float | int | None]\" is not assignable to \"Iterable[SupportsRichComparisonT@max]\"\n┬á┬á┬á┬á┬á┬áType parameter \"_T_co@Iterable\" is covariant, but \"float | int | None\" is not a subtype of \"SupportsRichComparisonT@max\"\n┬á┬á┬á┬á┬á┬á┬á┬áType \"float | int | None\" is not assignable to type \"SupportsRichComparison\"\n┬á┬á┬á┬á┬á┬á┬á┬á┬á┬áType \"float | int | None\" is not assignable to type \"SupportsRichComparison\"",
+            "range": {
+                "start": {
+                    "line": 211,
+                    "character": 19
+                },
+                "end": {
+                    "line": 211,
+                    "character": 26
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "Argument of type \"Unknown | float | None\" cannot be assigned to parameter \"min_val\" of type \"float\" in function \"EnsureAxisLimitsArePowerOfTwo\"\n┬á┬áType \"Unknown | float | None\" is not assignable to type \"float\"\n┬á┬á┬á┬á\"None\" is not assignable to \"float\"",
+            "range": {
+                "start": {
+                    "line": 215,
+                    "character": 51
+                },
+                "end": {
+                    "line": 215,
+                    "character": 55
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "Argument of type \"Unknown | float | None\" cannot be assigned to parameter \"max_val\" of type \"float\" in function \"EnsureAxisLimitsArePowerOfTwo\"\n┬á┬áType \"Unknown | float | None\" is not assignable to type \"float\"\n┬á┬á┬á┬á\"None\" is not assignable to \"float\"",
+            "range": {
+                "start": {
+                    "line": 215,
+                    "character": 57
+                },
+                "end": {
+                    "line": 215,
+                    "character": 61
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"set_xlim\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 217,
+                    "character": 9
+                },
+                "end": {
+                    "line": 217,
+                    "character": 17
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "Operator \"-\" not supported for \"None\"",
+            "range": {
+                "start": {
+                    "line": 217,
+                    "character": 19
+                },
+                "end": {
+                    "line": 217,
+                    "character": 23
+                }
+            },
+            "rule": "reportOptionalOperand"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"BinWidth\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 217,
+                    "character": 31
+                },
+                "end": {
+                    "line": 217,
+                    "character": 39
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "Operator \"+\" not supported for \"None\"",
+            "range": {
+                "start": {
+                    "line": 217,
+                    "character": 41
+                },
+                "end": {
+                    "line": 217,
+                    "character": 45
+                }
+            },
+            "rule": "reportOptionalOperand"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"BinWidth\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 217,
+                    "character": 53
+                },
+                "end": {
+                    "line": 217,
+                    "character": 61
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "Type \"NDArray[floating[Any]]\" is not assignable to declared type \"float\"\n┬á┬á\"ndarray[_AnyShape, dtype[floating[Any]]]\" is not assignable to \"float\"",
+            "range": {
+                "start": {
+                    "line": 243,
+                    "character": 18
+                },
+                "end": {
+                    "line": 243,
+                    "character": 39
+                }
+            },
+            "rule": "reportAssignmentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "Type \"NDArray[floating[Any]]\" is not assignable to declared type \"float\"\n┬á┬á\"ndarray[_AnyShape, dtype[floating[Any]]]\" is not assignable to \"float\"",
+            "range": {
+                "start": {
+                    "line": 249,
+                    "character": 19
+                },
+                "end": {
+                    "line": 249,
+                    "character": 35
+                }
+            },
+            "rule": "reportAssignmentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "Type \"NDArray[floating[Any]]\" is not assignable to declared type \"float\"\n┬á┬á\"ndarray[_AnyShape, dtype[floating[Any]]]\" is not assignable to \"float\"",
+            "range": {
+                "start": {
+                    "line": 250,
+                    "character": 19
+                },
+                "end": {
+                    "line": 250,
+                    "character": 35
+                }
+            },
+            "rule": "reportAssignmentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\plot.py",
+            "severity": "error",
+            "message": "\"collections\" is not a known attribute of module \"matplotlib\"",
+            "range": {
+                "start": {
+                    "line": 462,
+                    "character": 33
+                },
+                "end": {
+                    "line": 462,
+                    "character": 44
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Import \"paho.mqtt.client\" could not be resolved",
+            "range": {
+                "start": {
+                    "line": 14,
+                    "character": 11
+                },
+                "end": {
+                    "line": 14,
+                    "character": 27
+                }
+            },
+            "rule": "reportMissingImports"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Import \"paho.mqtt.enums\" could not be resolved",
+            "range": {
+                "start": {
+                    "line": 15,
+                    "character": 11
+                },
+                "end": {
+                    "line": 15,
+                    "character": 26
+                }
+            },
+            "rule": "reportMissingImports"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Expected class but received \"(iterable: Iterable[object], /) -> bool\"",
+            "range": {
+                "start": {
+                    "line": 68,
+                    "character": 33
+                },
+                "end": {
+                    "line": 68,
+                    "character": 36
+                }
+            },
+            "rule": "reportGeneralTypeIssues"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "\"rc\" is not defined",
+            "range": {
+                "start": {
+                    "line": 77,
+                    "character": 87
+                },
+                "end": {
+                    "line": 77,
+                    "character": 89
+                }
+            },
+            "rule": "reportUndefinedVariable"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Expected class but received \"(iterable: Iterable[object], /) -> bool\"",
+            "range": {
+                "start": {
+                    "line": 80,
+                    "character": 36
+                },
+                "end": {
+                    "line": 80,
+                    "character": 39
+                }
+            },
+            "rule": "reportGeneralTypeIssues"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"getmaxyx\" for class \"list[Unknown]\"\n┬á┬áAttribute \"getmaxyx\" is unknown",
+            "range": {
+                "start": {
+                    "line": 235,
+                    "character": 36
+                },
+                "end": {
+                    "line": 235,
+                    "character": 44
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"addstr\" for class \"list[Unknown]\"\n┬á┬áAttribute \"addstr\" is unknown",
+            "range": {
+                "start": {
+                    "line": 239,
+                    "character": 21
+                },
+                "end": {
+                    "line": 239,
+                    "character": 27
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"clrtoeol\" for class \"list[Unknown]\"\n┬á┬áAttribute \"clrtoeol\" is unknown",
+            "range": {
+                "start": {
+                    "line": 240,
+                    "character": 21
+                },
+                "end": {
+                    "line": 240,
+                    "character": 29
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"move\" for class \"list[Unknown]\"\n┬á┬áAttribute \"move\" is unknown",
+            "range": {
+                "start": {
+                    "line": 241,
+                    "character": 21
+                },
+                "end": {
+                    "line": 241,
+                    "character": 25
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"refresh\" for class \"list[Unknown]\"\n┬á┬áAttribute \"refresh\" is unknown",
+            "range": {
+                "start": {
+                    "line": 242,
+                    "character": 21
+                },
+                "end": {
+                    "line": 242,
+                    "character": 28
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Operator \"-\" not supported for types \"float\" and \"float | None\"\n┬á┬áOperator \"-\" not supported for types \"float\" and \"None\" when expected type is \"ConvertibleToFloat\"",
+            "range": {
+                "start": {
+                    "line": 285,
+                    "character": 31
+                },
+                "end": {
+                    "line": 285,
+                    "character": 62
+                }
+            },
+            "rule": "reportOperatorIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"getmaxyx\" for class \"list[Unknown]\"\n┬á┬áAttribute \"getmaxyx\" is unknown",
+            "range": {
+                "start": {
+                    "line": 308,
+                    "character": 36
+                },
+                "end": {
+                    "line": 308,
+                    "character": 44
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"addnstr\" for class \"list[Unknown]\"\n┬á┬áAttribute \"addnstr\" is unknown",
+            "range": {
+                "start": {
+                    "line": 319,
+                    "character": 25
+                },
+                "end": {
+                    "line": 319,
+                    "character": 32
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"clrtoeol\" for class \"list[Unknown]\"\n┬á┬áAttribute \"clrtoeol\" is unknown",
+            "range": {
+                "start": {
+                    "line": 320,
+                    "character": 25
+                },
+                "end": {
+                    "line": 320,
+                    "character": 33
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Operator \"*\" not supported for \"None\"",
+            "range": {
+                "start": {
+                    "line": 323,
+                    "character": 51
+                },
+                "end": {
+                    "line": 323,
+                    "character": 59
+                }
+            },
+            "rule": "reportOptionalOperand"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"addnstr\" for class \"list[Unknown]\"\n┬á┬áAttribute \"addnstr\" is unknown",
+            "range": {
+                "start": {
+                    "line": 329,
+                    "character": 25
+                },
+                "end": {
+                    "line": 329,
+                    "character": 32
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"clrtoeol\" for class \"list[Unknown]\"\n┬á┬áAttribute \"clrtoeol\" is unknown",
+            "range": {
+                "start": {
+                    "line": 330,
+                    "character": 25
+                },
+                "end": {
+                    "line": 330,
+                    "character": 33
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"move\" for class \"list[Unknown]\"\n┬á┬áAttribute \"move\" is unknown",
+            "range": {
+                "start": {
+                    "line": 331,
+                    "character": 25
+                },
+                "end": {
+                    "line": 331,
+                    "character": 29
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"refresh\" for class \"list[Unknown]\"\n┬á┬áAttribute \"refresh\" is unknown",
+            "range": {
+                "start": {
+                    "line": 332,
+                    "character": 25
+                },
+                "end": {
+                    "line": 332,
+                    "character": 32
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "\"__name__\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 374,
+                    "character": 45
+                },
+                "end": {
+                    "line": 374,
+                    "character": 53
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Operator \"+\" not supported for types \"LiteralString\" and \"str | None\"\n┬á┬áOperator \"+\" not supported for types \"LiteralString\" and \"None\" when expected type is \"str\"",
+            "range": {
+                "start": {
+                    "line": 403,
+                    "character": 32
+                },
+                "end": {
+                    "line": 403,
+                    "character": 82
+                }
+            },
+            "rule": "reportOperatorIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "\"getmaxyx\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 435,
+                    "character": 30
+                },
+                "end": {
+                    "line": 435,
+                    "character": 38
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"move\" for class \"list[Unknown]\"\n┬á┬áAttribute \"move\" is unknown",
+            "range": {
+                "start": {
+                    "line": 441,
+                    "character": 18
+                },
+                "end": {
+                    "line": 441,
+                    "character": 22
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"insertln\" for class \"list[Unknown]\"\n┬á┬áAttribute \"insertln\" is unknown",
+            "range": {
+                "start": {
+                    "line": 444,
+                    "character": 22
+                },
+                "end": {
+                    "line": 444,
+                    "character": 30
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"addstr\" for class \"list[Unknown]\"\n┬á┬áAttribute \"addstr\" is unknown",
+            "range": {
+                "start": {
+                    "line": 446,
+                    "character": 18
+                },
+                "end": {
+                    "line": 446,
+                    "character": 24
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"clrtoeol\" for class \"list[Unknown]\"\n┬á┬áAttribute \"clrtoeol\" is unknown",
+            "range": {
+                "start": {
+                    "line": 447,
+                    "character": 18
+                },
+                "end": {
+                    "line": 447,
+                    "character": 26
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"refresh\" for class \"list[Unknown]\"\n┬á┬áAttribute \"refresh\" is unknown",
+            "range": {
+                "start": {
+                    "line": 448,
+                    "character": 18
+                },
+                "end": {
+                    "line": 448,
+                    "character": 25
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Object of type \"None\" is not subscriptable",
+            "range": {
+                "start": {
+                    "line": 466,
+                    "character": 7
+                },
+                "end": {
+                    "line": 466,
+                    "character": 19
+                }
+            },
+            "rule": "reportOptionalSubscript"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Operator \"+=\" not supported for types \"str | None\" and \"Literal['\\n']\"\n┬á┬áOperator \"+\" not supported for types \"None\" and \"Literal['\\n']\"",
+            "range": {
+                "start": {
+                    "line": 467,
+                    "character": 8
+                },
+                "end": {
+                    "line": 467,
+                    "character": 28
+                }
+            },
+            "rule": "reportOperatorIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\prettyoutput.py",
+            "severity": "error",
+            "message": "Argument of type \"str | Unknown | None\" cannot be assigned to parameter \"message\" of type \"str\" in function \"_publish_mqtt_message\"\n┬á┬áType \"str | Unknown | None\" is not assignable to type \"str\"\n┬á┬á┬á┬á\"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 476,
+                    "character": 35
+                },
+                "end": {
+                    "line": 476,
+                    "character": 47
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\processoutputinterceptor.py",
+            "severity": "error",
+            "message": "Argument of type \"None\" cannot be assigned to parameter \"text\" of type \"str\" in function \"CurseProgress\"\n┬á┬á\"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 81,
+                    "character": 39
+                },
+                "end": {
+                    "line": 81,
+                    "character": 43
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\processoutputinterceptor.py",
+            "severity": "error",
+            "message": "Argument of type \"None\" cannot be assigned to parameter \"text\" of type \"str\" in function \"CurseProgress\"\n┬á┬á\"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 102,
+                    "character": 39
+                },
+                "end": {
+                    "line": 102,
+                    "character": 43
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\processoutputinterceptor.py",
+            "severity": "error",
+            "message": "Operator \"+\" not supported for types \"Unknown | str | None\" and \"Unknown | None\"\n┬á┬áOperator \"+\" not supported for types \"None\" and \"None\"\n┬á┬áOperator \"+\" not supported for types \"str\" and \"None\"",
+            "range": {
+                "start": {
+                    "line": 165,
+                    "character": 61
+                },
+                "end": {
+                    "line": 165,
+                    "character": 98
+                }
+            },
+            "rule": "reportOperatorIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\processoutputinterceptor.py",
+            "severity": "error",
+            "message": "Operator \"+\" not supported for types \"Unknown | str | None\" and \"Unknown | None\"\n┬á┬áOperator \"+\" not supported for types \"None\" and \"None\" when expected type is \"PathLike[Unknown]\"\n┬á┬áOperator \"+\" not supported for types \"str\" and \"None\" when expected type is \"PathLike[Unknown]\"",
+            "range": {
+                "start": {
+                    "line": 168,
+                    "character": 32
+                },
+                "end": {
+                    "line": 168,
+                    "character": 69
+                }
+            },
+            "rule": "reportOperatorIssue"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\processoutputinterceptor.py",
+            "severity": "error",
+            "message": "Argument of type \"float | int\" cannot be assigned to parameter \"key\" of type \"int\" in function \"__getitem__\"\n┬á┬áType \"float | int\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"float\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 244,
+                    "character": 22
+                },
+                "end": {
+                    "line": 244,
+                    "character": 64
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\processoutputinterceptor.py",
+            "severity": "error",
+            "message": "Argument of type \"float | int\" cannot be assigned to parameter \"key\" of type \"int\" in function \"__getitem__\"\n┬á┬áType \"float | int\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"float\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 246,
+                    "character": 26
+                },
+                "end": {
+                    "line": 246,
+                    "character": 69
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\processoutputinterceptor.py",
+            "severity": "error",
+            "message": "Argument of type \"float | int\" cannot be assigned to parameter \"key\" of type \"int\" in function \"__getitem__\"\n┬á┬áType \"float | int\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"float\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 248,
+                    "character": 59
+                },
+                "end": {
+                    "line": 248,
+                    "character": 102
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\processoutputinterceptor.py",
+            "severity": "error",
+            "message": "Argument of type \"float | Literal[0]\" cannot be assigned to parameter \"key\" of type \"int\" in function \"__setitem__\"\n┬á┬áType \"float | Literal[0]\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"float\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 252,
+                    "character": 16
+                },
+                "end": {
+                    "line": 252,
+                    "character": 50
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\processoutputinterceptor.py",
+            "severity": "error",
+            "message": "Argument of type \"Category\" cannot be assigned to parameter \"value\" of type \"Self@IdentifyOutputInterceptor\" in function \"__setitem__\"\n┬á┬áType \"Category\" is not assignable to type \"Self@IdentifyOutputInterceptor\"",
+            "range": {
+                "start": {
+                    "line": 252,
+                    "character": 16
+                },
+                "end": {
+                    "line": 252,
+                    "character": 50
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\processoutputinterceptor.py",
+            "severity": "error",
+            "message": "Argument of type \"float | int\" cannot be assigned to parameter \"key\" of type \"int\" in function \"__getitem__\"\n┬á┬áType \"float | int\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"float\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 253,
+                    "character": 16
+                },
+                "end": {
+                    "line": 253,
+                    "character": 59
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\processoutputinterceptor.py",
+            "severity": "error",
+            "message": "Argument of type \"None\" cannot be assigned to parameter \"key\" of type \"str\" in function \"__setitem__\"\n┬á┬á\"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 253,
+                    "character": 16
+                },
+                "end": {
+                    "line": 253,
+                    "character": 73
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\processoutputinterceptor.py",
+            "severity": "error",
+            "message": "Argument of type \"float | Literal[0]\" cannot be assigned to parameter \"key\" of type \"int\" in function \"__setitem__\"\n┬á┬áType \"float | Literal[0]\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"float\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 259,
+                    "character": 12
+                },
+                "end": {
+                    "line": 259,
+                    "character": 45
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\processoutputinterceptor.py",
+            "severity": "error",
+            "message": "Argument of type \"float | Literal[0]\" cannot be assigned to parameter \"key\" of type \"int\" in function \"__getitem__\"\n┬á┬áType \"float | Literal[0]\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"float\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 272,
+                    "character": 20
+                },
+                "end": {
+                    "line": 272,
+                    "character": 54
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\processoutputinterceptor.py",
+            "severity": "error",
+            "message": "Argument of type \"float | Literal[0]\" cannot be assigned to parameter \"key\" of type \"int\" in function \"__getitem__\"\n┬á┬áType \"float | Literal[0]\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"float\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 278,
+                    "character": 20
+                },
+                "end": {
+                    "line": 278,
+                    "character": 54
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\processoutputinterceptor.py",
+            "severity": "error",
+            "message": "Argument of type \"float | Literal[0]\" cannot be assigned to parameter \"key\" of type \"int\" in function \"__getitem__\"\n┬á┬áType \"float | Literal[0]\" is not assignable to type \"int\"\n┬á┬á┬á┬á\"float\" is not assignable to \"int\"",
+            "range": {
+                "start": {
+                    "line": 284,
+                    "character": 16
+                },
+                "end": {
+                    "line": 284,
+                    "character": 50
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\tasktimer.py",
+            "severity": "error",
+            "message": "\"f_back\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 75,
+                    "character": 29
+                },
+                "end": {
+                    "line": 75,
+                    "character": 35
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\tasktimer.py",
+            "severity": "error",
+            "message": "\"f_back\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 75,
+                    "character": 36
+                },
+                "end": {
+                    "line": 75,
+                    "character": 42
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "d:\\src\\git\\nornir\\nornir-shared\\nornir_shared\\tasktimer.py",
+            "severity": "error",
+            "message": "\"f_code\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 76,
+                    "character": 28
+                },
+                "end": {
+                    "line": 76,
+                    "character": 34
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        }
+    ],
+    "summary": {
+        "filesAnalyzed": 20,
+        "errorCount": 184,
+        "warningCount": 10,
+        "informationCount": 0,
+        "timeInSec": 2.932
+    }
+}
+

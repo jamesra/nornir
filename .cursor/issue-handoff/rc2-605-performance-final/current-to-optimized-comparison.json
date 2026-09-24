@@ -1,0 +1,19 @@
+{
+  "cell_deltas_csv": "/workspace/.cursor/issue-handoff/rc2-605-performance-final/current-to-optimized-cell-deltas.csv",
+  "delta_max": 0.0,
+  "delta_median": 0.0,
+  "delta_min": 0.0,
+  "delta_p05": 0.0,
+  "delta_p95": 0.0,
+  "distribution_png": "/workspace/.cursor/issue-handoff/rc2-605-performance-final/current-to-optimized-distribution.png",
+  "excluded_count": 270,
+  "heatmap_png": "/workspace/.cursor/issue-handoff/rc2-605-performance-final/current-to-optimized-heatmap.png",
+  "improved_count": 0,
+  "improved_fraction": 0.0,
+  "paired_count": 1136,
+  "tolerance": 0.0001,
+  "unchanged_count": 1136,
+  "unchanged_fraction": 1.0,
+  "worse_count": 0,
+  "worse_fraction": 0.0
+}

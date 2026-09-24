@@ -1,0 +1,45 @@
+---
+description: NAS/GPU/RAM performance envelope for Nornir I/O and compute decisions
+globs: nornir-imageregistration/**/*.py
+alwaysApply: false
+---
+
+# Nornir deployment performance envelope
+
+Factor this hardware and I/O profile into performance, caching, and parallelism choices.
+
+## Dataset and storage
+
+- Production volumes are very large (**~100 TB** scale), typically on **NAS**.
+- Network path is often about **10 Gbps**; treat disk and network I/O as **high-latency and costly**.
+- Prefer sequential/streaming access, fewer round-trips, and bounded concurrency over many tiny random reads/writes on NAS.
+- Do not assume local-disk latency for paths on the volume root.
+
+## Local SSD cache (`/tmp`)
+
+- When hot data must leave NAS, use **local SSD caches under `/tmp`** (or the configured Nornir temp root).
+- **Document size requirements** for any such cache (expected working set and worst case).
+- Budget for caches in the **512 GB–1 TB** range when the algorithm needs large local scratch; do not silently assume unlimited `/tmp`.
+
+## Memory and paging
+
+- Plan on roughly **2 GB RAM per CPU core** (sometimes **~3 GB/core**).
+- Design peak resident set and pool sizing against that envelope; spill or chunk before relying on anonymous RAM growth.
+- Paging, when it occurs, is on **SSD or better**—still treat heavy swap as a failure mode for hot loops, not a normal strategy.
+
+## GPU
+
+- Typical GPUs are **Ada RTX 4500 class or better**.
+- GPU paths should assume that class of VRAM/throughput; still minimize host↔device transfers (see NumPy/CuPy rule).
+
+## Decision checklist
+
+- Will this add many small NAS IOPS? Batch, coalesce, or stage to `/tmp` first.
+- If using `/tmp`, is capacity (up to **512 GB–1 TB**) documented for operators?
+- Does parallelism × working set fit **~2–3 GB/core** without pathological swapping?
+- Does a GPU path pay for itself after transfer cost on Ada-4500-class hardware?
+
+### Related rules
+
+- Streaming and memory-bounded processing (chunking, backpressure, spill-to-disk).
+- NumPy/CuPy compatibility (execution locality, transfer cost).

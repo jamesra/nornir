@@ -1,0 +1,5 @@
+# Sphinx monodoc (Nornir umbrella). Pin loosely; CI uses Python 3.13.
+sphinx>=7,<9
+myst-parser>=3,<5
+sphinx-rtd-theme>=2,<4
+sphinx-argparse>=0.4,<1

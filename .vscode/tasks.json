@@ -1,0 +1,152 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "pyre: freeze bundle",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/nornir-pyre/packaging/windows/build-freeze.ps1",
+                "-Python",
+                "${workspaceFolder}/venv/pyre314/Scripts/python.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "focus": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "pyre: validate frozen bundle",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/nornir-pyre/packaging/windows/validate-frozen.ps1"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/nornir-pyre/packaging/windows"
+            },
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "pyre: build installer",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/nornir-pyre/packaging/windows/build-installer.ps1"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/nornir-pyre/packaging/windows"
+            },
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "focus": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "pyre: build Windows installer (full)",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "pyre: freeze bundle",
+                "pyre: validate frozen bundle",
+                "pyre: build installer"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "pyre: run frozen bundle (GUI)",
+            "type": "process",
+            "command": "${workspaceFolder}/nornir-pyre/packaging/windows/dist/pyre/pyre.exe",
+            "options": {
+                "cwd": "${workspaceFolder}/nornir-pyre/packaging/windows/dist/pyre"
+            },
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "ExportAnnotationCrops (OData) run",
+            "type": "process",
+            "command": "${command:python.interpreterPath}",
+            "args": [
+                "-m",
+                "nornir_buildmanager",
+                "-computational_library",
+                "numpy",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
+                "ExportAnnotationCrops",
+                "-OData",
+                "https://websvc.codepharm.net/${input:nornirVolumeName}/OData",
+                "-Output",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}/AnnotationCrops",
+                "-Channels",
+                "TEM",
+                "-Filters",
+                "Leveled",
+                "-MaxTexture",
+                "1024"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "NORNIR_HEADLESS": "1",
+                    "PYTHONUNBUFFERED": "1",
+                    "NORNIR_MQTT_HOST": "host.docker.internal",
+                    "NORNIR_MQTT_PORT": "1883",
+                    "NORNIR_MQTT_ENABLE": "1"
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "focus": true
+            },
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+            "id": "nornirVolumesRoot",
+            "type": "promptString",
+            "description": "Absolute root path that holds volume folders (VolumeData.xml). Example: /storage4",
+            "default": "/storage4"
+        },
+        {
+            "id": "nornirVolumeName",
+            "type": "promptString",
+            "description": "Volume folder name under nornirVolumesRoot. Example: RPC3 → /storage4/RPC3",
+            "default": "RPC3"
+        }
+    ]
+}

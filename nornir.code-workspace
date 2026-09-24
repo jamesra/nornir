@@ -1,6 +1,7 @@
 {
 	"folders": [
 		{
+			"name": "Nornir",
 			"path": "."
 		}
 	],
@@ -10,7 +11,7 @@
 			"**/.project": true,
 			"**/.pydevproject": true,
 			"**/*.egg-info": true,
-			"**/.idea": true,
+			"**/.idea": true
 		},
 		"python.analysis.include": [
 			"../nornir-*/**"
@@ -50,14 +51,36 @@
 			{
 				"path": "pyre",
 				"maxDepth": 5,
-				"includeAllSymbols": true				
-			},
+				"includeAllSymbols": true
+			}
 		],
 		"python.analysis.typeCheckingMode": "basic",
 		"python.linting.enabled": true,
-		"python.analysis.diagnosticMode": "workspace"
-
-		
-		
+		"python.analysis.diagnosticMode": "workspace",
+		"cursorpyright.analysis.diagnosticMode": "workspace",
+		"cursorpyright.analysis.extraPaths": [
+			"nornir-buildmanager/",
+			"nornir-imageregistration/",
+			"nornir-pools/",
+			"nornir-shared/",
+			"nornir-pyre",
+			"nornir-*/**"
+		],
+		"cursorpyright.analysis.ignore": [
+			"**/__pycache__",
+			"**/build",
+			"**/dist/"
+		],
+		"cursorpyright.analysis.include": [
+			"../nornir-*/**"
+		],
+		"cursorpyright.analysis.typeCheckingMode": "basic",
+		"python.languageServer": "None"
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-python.python",
+			"ms-python.debugpy"
+		]
 	}
 }
