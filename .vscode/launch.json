@@ -919,7 +919,8 @@
                 "-Filters", "Leveled", 
                 "-Workers", "16",
                 "-MaskWorkers", "8",
-                "-MaxTexture", "1024"
+                "-MaxTexture", "1024",
+                "-RefreshOData"
             ],
             "env": {
                 "NORNIR_HEADLESS": "1",
@@ -949,7 +950,40 @@
                 "-Filters", "Leveled",
                 "-MaxTexture", "1024",
                 "-Workers", "16",
-                "-MaskWorkers", "8"
+                "-MaskWorkers", "8",
+                "-RefreshOData"
+            ],
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
+        },
+        {
+            "name": "ExportAnnotationCrops (OData) run legacy",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "nornir_buildmanager",
+            "python": "${command:python.interpreterPath}",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "subProcess": true,
+            "justMyCode": true,
+            "args": [
+                "-computational_library", "numpy",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
+                "ExportAnnotationCrops",
+                "-OData", "https://websvc.codepharm.net/${input:nornirVolumeName}/OData",
+                "-Output", "${input:nornirVolumesRoot}/${input:nornirVolumeName}/AnnotationCrops_v1",
+                "-Channels", "TEM",
+                "-Filters", "Leveled",
+                "-Exporter", "legacy",
+                "-MaxTexture", "1024",
+                "-Workers", "16",
+                "-MaskWorkers", "8" /*,
+                "-RefreshOData" */
             ],
             "env": {
                 "NORNIR_HEADLESS": "1",
