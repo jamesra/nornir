@@ -3,7 +3,7 @@
 Overview of volume building
 ===========================
 
-To build a 3D volume using transmission electron microscopes we begin by taking a sample and embedding it in a **block** of plastic resin. This block is then cut into thin, about 70--90 nm, **sections**. Each section is placed on a grid or a slide. At 5000× our transmission electron microscope can produce an image representing an 8 µm square. To collect a larger area we collect a **mosaic** of images with a 10%--12% overlap. We refer to an image in a mosaic as a **tile** even though proper tiles would not overlap. Nornir figures out how to lay out the tiles so we can **assemble** a single image of the entire mosaic.
+To build a 3D volume using transmission electron microscopes we begin by taking a sample and embedding it in a **block** of `Epon resin <https://bwjoneslab.com/tools/protocols/epoxy-resin-sample-stacksmosaics/>`_. This block is then cut into thin, about 70--90 nm, **sections**. Each section is placed on a grid or a slide. At 5000× our transmission electron microscope can produce an image representing an 8 µm square. To collect a larger area we collect a **mosaic** of images with a 10%--12% overlap. We refer to an image in a mosaic as a **tile** even though proper tiles would not overlap. Nornir figures out how to lay out the tiles so we can **assemble** a single image of the entire mosaic.
 
 We assemble a mosaic image for each section cut from the block. Sometimes we call a section a **slice**. Each section is then registered to the adjacent sections to produce **slice-to-slice** (``.stos``) transformations. We decide which mosaic is the **center** of the volume. Transforms can then be added such that any point on a mosaic can be mapped through slice-to-slice transforms until the center is reached. This produces a mapping for each section to the volume. The **slice-to-volume** transforms can be used with Viking_ or, if the mosaic images are small enough, volume-aligned section images can be produced.
 
@@ -12,7 +12,7 @@ We assemble a mosaic image for each section cut from the block. Sometimes we cal
 Mosaic registration
 -------------------
 
-Pipeline commands for this stage are ``ImportIDoc`` (or ``ImportDM4`` / ``ImportPMG``), ``Prune``, and ``Mosaic``. See :doc:`guides/build_volume`.
+The lab commands for this stage are ``TEMImport`` and ``TEMBuild`` (:doc:`guides/tem_scripts`).
 
 Mosaic capture
 ^^^^^^^^^^^^^^
@@ -76,7 +76,7 @@ Taken as a whole, we can see the overall movement of the tiles to produce the fi
 Slice-to-slice registration
 ---------------------------
 
-Pipeline commands for this stage are ``CreateBlobFilter``, ``AlignSections``, and ``RefineSectionAlignment``. Interactive fixes use Pyre (:doc:`guides/pyre_use`).
+The lab command for this stage is ``TEMAlign`` (:doc:`guides/tem_scripts`). Interactive fixes use Pyre (:doc:`guides/pyre_use`).
 
 Once the mosaics are built for each section we begin aligning sections into a volume. The initial registration is done via brute force: the image is rotated by a small angle and a strength score is calculated for the resulting registration.
 
@@ -118,7 +118,7 @@ As in the mosaics, the solution is to lay a grid of cells over the images and de
 Volume registration
 ^^^^^^^^^^^^^^^^^^^
 
-The pipeline command is ``SliceToVolume``, followed by ``Assemble`` and ``CreateVikingXML``.
+``TEMAlign`` continues here with ``SliceToVolume``, ``Assemble``, and ``CreateVikingXML`` (:doc:`guides/tem_scripts`).
 
 The final step is to map all sections to a single coordinate system. Nornir designates a section as the **center**. It passes the control points for each slice-to-slice registration through any intermediate transformations between the section and the center. The result is a mapping that warps a section directly to the volume in a single step.
 
@@ -129,4 +129,4 @@ Figure 2 of the `Viking Viewer for Connectomics`_ paper demonstrates the concept
 View and analyze
 ----------------
 
-Nornir's output is a VikingXML manifest and image pyramids. View and annotate the volume in `Viking <https://github.com/connectomes/Viking>`_. Analyze those annotations with `SBFSEM-tools <https://github.com/neitzlab/SBFSEM-tools>`_ (MATLAB). The command that writes the manifest is ``CreateVikingXML``; see :doc:`guides/build_volume`.
+Nornir's output is a VikingXML manifest and image pyramids. View and annotate the volume in `Viking <https://github.com/connectomes/Viking>`_. Analyze those annotations with `SBFSEM-tools <https://github.com/neitzlab/SBFSEM-tools>`_ (MATLAB). The command that writes the manifest is the ``CreateVikingXML`` step in ``TEMAlign``; see :doc:`guides/tem_scripts`.

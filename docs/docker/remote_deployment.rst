@@ -2,7 +2,8 @@ Remote build appliance
 ======================
 
 Production Windows+WSL2 box for interactive ``nornir-build`` with shared NAS mounts
-and a co-located MQTT dashboard. Keep this role separate from the programmer Dev
+and a co-located MQTT dashboard. The setup sequence is :doc:`../guides/deploy_build_container`.
+Keep this role separate from the programmer Dev
 Container (``run-cursor-dev.ps1``) and the Cursor AI worker (``start-cursor-worker.ps1``).
 
 Quickstart: new production box

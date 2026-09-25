@@ -48,9 +48,20 @@ Deploy credentials (Option A)
 
 Pushing from this repo into **another** repository requires a token or deploy key with write access to ``nornir/nornir.github.io``. The workflow uses **peaceiris/actions-gh-pages** with:
 
-* **Secret (placeholder name):** ``NORNIR_GITHUB_IO_DEPLOY_TOKEN`` — a fine-grained or classic PAT with ``contents: write`` on ``nornir/nornir.github.io``, stored in this monorepo’s **Settings → Secrets and variables → Actions**.
+* **Secret (placeholder name):** ``NORNIR_ORG_GITHUB_IO_DEPLOY_TOKEN`` — a fine-grained or classic PAT with ``contents: write`` on ``nornir/nornir.github.io``, stored in this monorepo’s **Settings → Secrets and variables → Actions**.
 
-Without that secret, the HTML **build** can succeed while **Publish to nornir.github.io** fails with ``not found deploy key or tokens``.
+Without that secret, the HTML **build** succeeds and **Publish to nornir.github.io** is
+**skipped** with a workflow warning (so missing credentials do not turn every ``master``
+push red). Set the secret when you want Pages to update automatically.
+
+To add the secret
+~~~~~~~~~~~~~~~~~
+
+#. Create a fine-grained PAT (or classic PAT) with **Contents: Read and write** on
+   ``nornir/nornir.github.io``.
+#. In **https://github.com/jamesra/nornir** → **Settings → Secrets and variables → Actions**,
+   create repository secret ``NORNIR_ORG_GITHUB_IO_DEPLOY_TOKEN`` with that token value.
+#. Re-run the **Documentation** workflow (or push to ``master`` under the docs path filters).
 
 Version banner
 --------------

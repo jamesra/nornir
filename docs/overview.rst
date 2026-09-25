@@ -27,7 +27,7 @@ Nornir is a work in progress. It supports importing images from transmission ele
 Related tools
 -------------
 
-Nornir builds the aligned volume and a VikingXML manifest. **Viking** views and annotates that volume. **SBFSEM-tools** analyzes Viking annotations in MATLAB. Build in Nornir, view and annotate in Viking, analyze in SBFSEM-tools.
+Volume images frequently exceed a reasonable size for a single file. Nornir builds the aligned volume and a VikingXML manifest. **Viking** views and annotates that volume when the output is placed on a web server. **SBFSEM-tools** analyzes Viking annotations in MATLAB. Build in Nornir, view and annotate in Viking, analyze in SBFSEM-tools.
 
 * `Viking <https://github.com/connectomes/Viking>`_
 * `SBFSEM-tools <https://github.com/neitzlab/SBFSEM-tools>`_

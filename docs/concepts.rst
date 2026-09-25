@@ -7,7 +7,7 @@ Glossary
 --------
 
 **Block**
-    Plastic-embedded sample before sectioning. In the volume tree, a block groups sections and is the unit of batch processing.
+    `Epon-embedded <https://bwjoneslab.com/tools/protocols/epoxy-resin-sample-stacksmosaics/>`_ sample before sectioning. In the volume tree, a block groups sections and is the unit of batch processing.
 
 **Section / slice**
     One thin physical slice from the block, typically tens of nanometres thick for TEM. One Z level in the volume.

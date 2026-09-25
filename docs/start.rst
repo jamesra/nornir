@@ -11,7 +11,9 @@ New users
 * :doc:`overview_alignment_theory` — how a volume is built, with figures.
 * :doc:`packages/pyre_install` — Windows installer for the interactive tool.
 * :doc:`guides/pyre_use` — mouse, keyboard, and registration controls.
-* :doc:`guides/build_volume` — import through ``CreateVikingXML``, then Viking and SBFSEM-tools.
+* :doc:`guides/deploy_build_container` — set up the build appliance and open a shell.
+* :doc:`guides/tem_scripts` — what ``TEMImport``, ``TEMBuild``, and ``TEMAlign`` do, stage by stage.
+* :doc:`guides/build_volume` — the same work in science order, then Viking and SBFSEM-tools.
 
 Agents and contributors
 -----------------------

@@ -18,7 +18,7 @@ Headless Nornir runs in Docker. Pyre does not. Three roles stay separate:
      - :doc:`../docker/cursor_worker`
    * - Build appliance
      - Interactive ``nornir-build`` with NAS mounts and the dashboard
-     - :doc:`../docker/remote_deployment`
+     - :doc:`deploy_build_container`
 
 Image tags, GPU versus CPU images, and how to build them are in :doc:`../docker/images`. Run one ``nornir-build`` command in a container with :doc:`../docker/nd_build`.
 
