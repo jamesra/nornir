@@ -28,6 +28,8 @@ jobs:
         with:
           # Editable installs need the package trees, not empty submodule placeholders.
           submodules: recursive
+          # Avoid shallow submodule fetch failing on non-tip recorded SHAs.
+          fetch-depth: 0
           # Pyre Windows installer under docs/_static/downloads is Git LFS.
           lfs: true
 
@@ -76,10 +78,23 @@ jobs:
           name: html-docs
           path: html
 
+      - name: Require deploy token or skip publish
+        id: token
+        env:
+          DEPLOY_TOKEN: ${{ secrets.NORNIR_ORG_GITHUB_IO_DEPLOY_TOKEN }}
+        run: |
+          if [ -z "${DEPLOY_TOKEN}" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::NORNIR_ORG_GITHUB_IO_DEPLOY_TOKEN is not set on jamesra/nornir. HTML built successfully but was not published. Add a PAT with contents:write on nornir/nornir.github.io (Settings → Secrets and variables → Actions). See docs/development/publishing_documentation.rst"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish to nornir.github.io
+        if: steps.token.outputs.configured == 'true'
         uses: peaceiris/actions-gh-pages@v4
         with:
-          personal_token: ${{ secrets.NORNIR_GITHUB_IO_DEPLOY_TOKEN }}
+          personal_token: ${{ secrets.NORNIR_ORG_GITHUB_IO_DEPLOY_TOKEN }}
           external_repository: nornir/nornir.github.io
           # GitHub Pages for this repo is configured on master, not main.
           publish_branch: master
