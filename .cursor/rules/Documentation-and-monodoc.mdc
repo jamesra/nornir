@@ -18,7 +18,9 @@ alwaysApply: false
 
 - Each **`nornir-*`** package keeps a **short** landing file: what the package does, links to **https://nornir.github.io/**, links to that package’s section and **API** pages.
 - **Do not** duplicate long guides or hand-maintained API listings in READMEs; link to Sphinx autodoc instead.
+- **Pyre exception:** in-app Help (`Operations → Mouse and Keyboard Help`) reads **`nornir-pyre/pyre/README.txt`**, not the short root `README.rst`. Keep mouse/keyboard control text in that packaged file (and in `package-data`) when changing controls; update `docs/guides/pyre_use.rst` for the public manual. Do not remove `CONTROLS_HELP_ANCHOR` (`Mouse Controls`) without updating `pyre/resource_paths.py` and `tests/test_help_text.py`.
 
 ## Publishing
 
-- Cross-repo deploy uses **`NORNIR_GITHUB_IO_DEPLOY_TOKEN`** (see publishing doc). Never commit tokens.
+- Cross-repo deploy uses **`NORNIR_ORG_GITHUB_IO_DEPLOY_TOKEN`** (see publishing doc). Never commit tokens.
+- If the secret is missing, CI **builds** HTML and **skips** publish with a warning — configure the secret on `jamesra/nornir` before expecting Pages updates.

@@ -237,6 +237,33 @@
                 "NORNIR_MQTT_ENABLE": "1"
             }
         },
+        
+        {
+            "name": "TEM Build: Histogram (RC1)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "nornir_buildmanager",
+            "python": "${command:python.interpreterPath}",
+            "pythonArgs": ["-Xfrozen_modules=off"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": false,
+            "redirectOutput": true,
+            "args": [
+                "-debug", "-computational_library", "cupy",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
+                "Histogram", "-Filters", "Raw8", "-InputTransform", "Stage", "-Downsample", "4", "-Channels", "TEM",
+                "-Sections", "${input:nornirSections}"
+            ],
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
+        },
         {
             "name": "TEM Build: AdjustContrast",
             "type": "debugpy",
@@ -253,6 +280,33 @@
                 "-debug", "-computational_library", "cupy",
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "AdjustContrast", "-InputFilter", "Raw8", "-OutputFilter", "Leveled", "-InputTransform", "Prune", "-Channels", "TEM"
+            ],
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
+        },
+        
+        {
+            "name": "TEM Build: AdjustContrast (sections)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "nornir_buildmanager",
+            "python": "${command:python.interpreterPath}",
+            "pythonArgs": ["-Xfrozen_modules=off"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": false,
+            "redirectOutput": true,
+            "args": [
+                "-debug", "-computational_library", "cupy",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
+                "AdjustContrast", "-InputFilter", "Raw8", "-OutputFilter", "Leveled", "-InputTransform", "Stage", "-Channels", "TEM",
+                "-Sections", "${input:nornirSections}"
             ],
             "env": {
                 "NORNIR_HEADLESS": "1",
@@ -354,6 +408,32 @@
                 "-debug", "-computational_library", "cupy",
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "AssembleTiles", "-Channels", "TEM", "-Filters", "Leveled", "-Transform", "Grid", "-Shape", "512,512"
+            ],
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
+        },
+        {
+            "name": "TEM Build: AssembleTiles (optimized tileset 512x512, sections)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "nornir_buildmanager",
+            "python": "${command:python.interpreterPath}",
+            "pythonArgs": ["-Xfrozen_modules=off"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": false,
+            "redirectOutput": true,
+            "args": [
+                "-debug", "-computational_library", "cupy",
+                "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
+                "AssembleTiles", "-Channels", "TEM", "-Filters", "Leveled", "-Transform", "Grid", "-Shape", "512,512",
+                "-Sections", "${input:nornirSections}"
             ],
             "env": {
                 "NORNIR_HEADLESS": "1",
@@ -920,7 +1000,8 @@
                 "-Workers", "16",
                 "-MaskWorkers", "8",
                 "-MaxTexture", "1024",
-                "-RefreshOData"
+                "-StructureTypeId", "1,3"/*,
+                "-RefreshOData",*/
             ],
             "env": {
                 "NORNIR_HEADLESS": "1",
@@ -938,7 +1019,7 @@
             "python": "${command:python.interpreterPath}",
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
-            "subProcess": true,
+            "subProcess": false,
             "justMyCode": true,
             "args": [
                 "-computational_library", "numpy",
@@ -950,8 +1031,9 @@
                 "-Filters", "Leveled",
                 "-MaxTexture", "1024",
                 "-Workers", "16",
-                "-MaskWorkers", "8",
-                "-RefreshOData"
+                "-MaskWorkers", "8", 
+                "-StructureTypeId", "1",
+                "-Repair"
             ],
             "env": {
                 "NORNIR_HEADLESS": "1",
@@ -969,7 +1051,7 @@
             "python": "${command:python.interpreterPath}",
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
-            "subProcess": true,
+            "subProcess": false,
             "justMyCode": true,
             "args": [
                 "-computational_library", "numpy",
@@ -982,8 +1064,9 @@
                 "-Exporter", "legacy",
                 "-MaxTexture", "1024",
                 "-Workers", "16",
-                "-MaskWorkers", "8" /*,
-                "-RefreshOData" */
+                "-MaskWorkers", "8",
+                "-StructureTypeId", "1",
+                "-Update" 
             ],
             "env": {
                 "NORNIR_HEADLESS": "1",
@@ -1189,6 +1272,12 @@
             "type": "promptString",
             "description": "Volume folder name under nornirVolumesRoot. Example: RPC3 → /storage4/RPC3",
             "default": "RPC3"
+        },
+        {
+            "id": "nornirSections",
+            "type": "promptString",
+            "description": "Sections for -Sections. One number or a list, same syntax as the pipeline flag (1,3,5-7).",
+            "default": "1"
         }
     ]
 }

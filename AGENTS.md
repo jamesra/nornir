@@ -35,6 +35,7 @@ Default virtual environment: `D:\src\git\nornir\venv\pyre314` (see **Virtual-Env
 | [Pyre-host-array-boundary.mdc](.cursor/rules/Pyre-host-array-boundary.mdc) | `nornir-pyre` | `xp` math; `EnsureNumpyArray` only at Qt/GL/SciPy/floats |
 | [Streaming-and-memory-bounded-processing.mdc](.cursor/rules/Streaming-and-memory-bounded-processing.mdc) | buildmanager, imageregistration, pools, shared | Stream work; bound peak memory |
 | [Documentation-and-monodoc.mdc](.cursor/rules/Documentation-and-monodoc.mdc) | `docs/**`, READMEs | Monodoc under `docs/`; short package READMEs |
+| [CI-hygiene.mdc](.cursor/rules/CI-hygiene.mdc) | workflows, tests | Recurring Actions footguns after check-in |
 | [powershell-scripts.mdc](.cursor/rules/powershell-scripts.mdc) | `**/*.ps1` | Comment-based help on generated scripts |
 | [nornir-docker-conventions.mdc](.cursor/rules/nornir-docker-conventions.mdc) | `nornir-docker/**`, compose, Dockerfiles, `.devcontainer` | Submodule assets, secrets, Compose bridge |
 | [Serial-batched-primitives.mdc](.cursor/rules/Serial-batched-primitives.mdc) | phase/batched registration paths | Verification matrix; ≥100-tile perf sign-off |

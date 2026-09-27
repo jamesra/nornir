@@ -13,6 +13,7 @@
       "extensions": [
         "ms-python.python",
         "ms-python.debugpy",
+        "ozzafar.debugmcpextension",
 //        "ms-python.vscode-pylance", //Not available in the container.  Using Jedi instead.
         "lextudio.restructuredtext"
       ],
@@ -20,7 +21,8 @@
         "python.defaultInterpreterPath": "/opt/venv/bin/python",
         "python.testing.pytestEnabled": true,
         "python.testing.unittestEnabled": false,
-        "python.languageServer": "Jedi"
+        "python.languageServer": "Jedi",
+        "debugmcp.serverPort": 2001
       }
     }
   }

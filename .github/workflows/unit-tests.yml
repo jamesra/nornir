@@ -27,6 +27,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          # Shallow submodule fetch fails when a recorded SHA is not the tip of a
+          # fetched branch ("upload-pack: not our ref"). Full history avoids that.
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:

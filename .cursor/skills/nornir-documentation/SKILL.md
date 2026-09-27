@@ -28,5 +28,6 @@ Open **`docs/_build/html/index.html`**. On Unix you can run **`make -C docs html
 
 - **Sources:** **`docs/`** (RST primary; **MyST** for `.md`).
 - **Version banner:** repo-root **`VERSION`** (read in **`docs/conf.py`**).
-- **CI:** **`.github/workflows/docs.yml`** — builds on PRs; on **`main`/`master`** push, deploys to **`nornir/nornir.github.io`** using secret **`NORNIR_GITHUB_IO_DEPLOY_TOKEN`**.
+- **CI:** **`.github/workflows/docs.yml`** — builds on PRs; on **`main`/`master`** push, deploys to **`nornir/nornir.github.io`** when secret **`NORNIR_ORG_GITHUB_IO_DEPLOY_TOKEN`** is set (otherwise publish is skipped with a warning).
 - **Human-facing publish instructions:** **`docs/development/publishing_documentation.rst`**.
+- **Pyre in-app controls:** keep mouse/keyboard text in **`nornir-pyre/pyre/README.txt`** (Help dialog); public narrative in **`docs/guides/pyre_use.rst`**; root **`README.rst`** stays a short landing page.

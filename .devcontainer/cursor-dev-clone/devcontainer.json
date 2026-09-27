@@ -13,13 +13,15 @@
       "extensions": [
         "ms-python.python",
         "ms-python.debugpy",
+        "ozzafar.debugmcpextension",
         "ms-python.vscode-pylance",
         "lextudio.restructuredtext"
       ],
       "settings": {
         "python.defaultInterpreterPath": "/opt/venv/bin/python",
         "python.testing.pytestEnabled": true,
-        "python.testing.unittestEnabled": false
+        "python.testing.unittestEnabled": false,
+        "debugmcp.serverPort": 2001
       }
     }
   }

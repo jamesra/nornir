@@ -1,0 +1,31 @@
+---
+description: Keep package and umbrella GitHub Actions green after check-ins; avoid known recurring CI footguns
+globs: **/.github/workflows/**/*.{yml,yaml},**/tests/**/*.py,**/test_*.py
+alwaysApply: false
+---
+
+## CI hygiene after check-in changes
+
+Minor submodule or docs edits often turn CI red for reasons unrelated to the feature. Before treating a push as done, check the **package repo** workflow and the **umbrella** workflows that the change can trigger.
+
+### Recurring failure modes (fix these, do not ignore)
+
+| Symptom | Usual cause | Prevention |
+|---------|-------------|------------|
+| Docs **deploy** `not found deploy key or tokens` | Missing `NORNIR_ORG_GITHUB_IO_DEPLOY_TOKEN` on `jamesra/nornir` | Secret must be set for publish; workflow should **skip** publish (not fail) when absent |
+| Docs **build** `neither setup.py nor pyproject.toml` | Checkout without `submodules: recursive` | Keep submodule checkout on docs/unit-test workflows |
+| Umbrella checkout `upload-pack: not our ref` / submodule SHA missing | Recorded submodule commit not on remote, or shallow submodule fetch | **Push submodule commits before** bumping the umbrella pointer; use `fetch-depth: 0` with recursive submodules |
+| Package CI `Start directory is not importable: './test'` | Workflow still points at retired `test/` after rename to `tests/` | When renaming test trees, update **that package's** `.github/workflows` in the **same** commit |
+| Tests assert on README / help anchors after monodoc trim | In-app help file and short landing README diverged | Keep packaged help (`pyre/README.txt`) and tests aligned when shortening READMEs |
+| Optional dependency `ModuleNotFoundError` in package-only CI | Test imports a higher package not installed in that repo's workflow | `skipTest` / `create=True` mocks, or install the optional dep only when required |
+
+### Checklist when editing workflows or test layout
+
+1. Path in the workflow matches the on-disk test directory (`tests/` vs `test/`).
+2. Install steps match what the tests import (including optional cross-package deps).
+3. Umbrella workflows that `pip install -e nornir-*` still check out **submodules**.
+4. Submodule SHAs referenced by the umbrella are **pushed** to their remotes before the pointer bump.
+
+### After pushing
+
+Use `gh run list --repo <owner>/<repo> --limit 5` (package and umbrella) and open any failure logs. Do not assume a green local pytest means GitHub Actions is green.
