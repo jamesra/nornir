@@ -36,6 +36,7 @@ To refresh images later without re-running initialize::
 
   .\nornir-docker\docker-pull.ps1 -IncludeDashboard -ContinueOnError
   # or pin to monorepo VERSION: -PreferVersioned
+  # -List shows clean vs dirty; -Help prints the flags. Unchanged digests are skipped.
 
 Dashboard UI: http://127.0.0.1:8087 — see :doc:`dashboard`.
 
@@ -206,5 +207,16 @@ Maintainer publish (build machine)
 
 Not part of the operator checklist::
 
+  .\nornir-docker\docker-build.ps1 -List
   .\nornir-docker\docker-build.ps1
-  .\nornir-docker\docker-push.ps1 -IncludeDashboard
+  .\nornir-docker\docker-push.ps1 -List
+  .\nornir-docker\docker-push.ps1
+
+With no image list, ``docker-push.ps1`` pushes every catalogue image that is
+built locally and whose GHCR digest differs (``dev``, ``dev-cursor-base``,
+``cursor-worker``, ``prod``, ``cupy``, ``dashboard``, ``gallery``,
+``sam2-trainer``). ``-Help`` prints the flags. ``-Images cupy,gallery`` limits
+the set. ``docker-pull.ps1`` with no image list still pulls only ``prod`` and
+``cupy``; ``-IncludeDashboard`` adds the dashboard only. ``-Help`` and
+``-List`` match the other two scripts, and a tag whose GHCR digest is already
+local is skipped.

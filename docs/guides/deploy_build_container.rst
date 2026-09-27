@@ -47,4 +47,8 @@ To refresh images later without re-running the initializer::
 
    .\nornir-docker\docker-pull.ps1 -IncludeDashboard -ContinueOnError
 
-Pass ``-PreferVersioned`` to pin the pull to the monorepo ``VERSION``.
+``-Help`` prints the flags. ``-List`` shows which images would be pulled.
+A tag already present with the same GHCR digest is skipped. Pass ``-Images``
+to pull something other than ``prod`` and ``cupy`` (``-IncludeDashboard``
+adds the dashboard only). Pass ``-PreferVersioned`` to pin the pull to the
+monorepo ``VERSION``.

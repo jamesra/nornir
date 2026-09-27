@@ -53,7 +53,7 @@ From the **invocation directory** (script `cd`s to monorepo root for context `.`
 4. `nornir:prod`
 5. `nornir:cupy`
 
-Examples: `.\docker-build.ps1 -Images prod,cupy` (appliance only); `-NoCache` passes `--no-cache`. Accepts `cupy`, `nornir:cupy`, or `nornir-cupy`.
+Examples: `.\docker-build.ps1 -Help`; `.\docker-build.ps1 -List`; `.\docker-build.ps1 -Images prod,cupy` (appliance only). `-Tags` is an alias of `-Images`. `-NoCache` passes `--no-cache`. `-DryRun` prints docker commands and does not build. Accepts `cupy`, `nornir:cupy`, or `nornir-cupy`. Empty `-Images`/`-Tags` builds the whole catalogue.
 
 Reads **`VERSION`**, git `HEAD` → `SOURCE_REVISION`, UTC `BUILD_DATE`, and `release/docker_package_versions_json.py` + `release/package-versions.yaml` → `PACKAGE_VERSIONS_JSON_B64`. Sets OCI labels (`org.opencontainers.image.*`, `org.nornir.variant`, `org.nornir.package_versions.json.base64`). Tags `nornir:<suffix>-<VERSION>` after each successful build.
 

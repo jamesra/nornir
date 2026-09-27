@@ -50,16 +50,21 @@ Recommended (OCI labels + BOM JSON) — run from ``nornir-docker/`` (or any dire
     .\docker-build.ps1     # PowerShell
     build.cmd              # cmd
 
-Build only selected tags with ``-Images`` (catalogue order; skips everything else).
-Names may be short (``prod``), ``nornir:prod``, or ``nornir-prod``. Selecting
-``cursor-worker`` also builds ``dev-cursor-base`` first. ``prod`` / ``cupy`` do
-**not** require ``nornir:dev``::
+``-Help`` (or ``-?``) prints the flags. ``-List`` prints each catalogue image as
+present or missing and does not build. With no image list, every catalogue
+image is built. Limit the set with ``-Images`` or ``-Tags`` (same names;
+catalogue order). Names may be short (``prod``), ``nornir:prod``, or
+``nornir-prod``. Selecting ``cursor-worker`` also builds ``dev-cursor-base``
+first. ``prod`` / ``cupy`` do **not** require ``nornir:dev``::
 
+    .\docker-build.ps1 -List
     .\docker-build.ps1 -Images prod,cupy
 
-Force a clean rebuild of those tags::
+``-DryRun`` prints the ``docker build`` and version-tag commands and does not
+build. ``-NoCache`` passes ``--no-cache``::
 
     .\docker-build.ps1 -Images prod,cupy -NoCache
+    .\docker-build.ps1 -Tags cursor-worker -DryRun
 
 After each successful image, the script prints ``Id`` / ``Created`` / OCI labels and also tags
 ``nornir:<name>-<VERSION>`` (from the monorepo ``VERSION`` file). ``docker-push.ps1`` prints the
