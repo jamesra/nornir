@@ -1032,8 +1032,8 @@
                 "-MaxTexture", "1024",
                 "-Workers", "16",
                 "-MaskWorkers", "8", 
-                "-StructureTypeId", "1",
-                "-Repair"
+                "-StructureTypeId", "1", 
+                "-Update", "-Sections", "285-400"
             ],
             "env": {
                 "NORNIR_HEADLESS": "1",
