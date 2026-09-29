@@ -1033,7 +1033,7 @@
                 "-Workers", "16",
                 "-MaskWorkers", "8", 
                 "-StructureTypeId", "1", 
-                "-Update", "-Sections", "285-400"
+                "-Update"
             ],
             "env": {
                 "NORNIR_HEADLESS": "1",
