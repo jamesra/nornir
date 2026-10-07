@@ -17,17 +17,32 @@ the counts.
 Every distinct pattern below has at least one golden case, with `#Variable` and
 `%s`/`{...}` placeholders written as `#v`. No pattern is excluded.
 `test_every_inventoried_pattern_has_a_golden_case` re-derives the pattern set from
-`Pipelines.xml` (XPath, RowXPath, ColumnXPaths) and from the literal
-`find`/`findall`/`iterfind` arguments in `operations/` and `volumemanager/`, adds the
-run-time-built patterns listed in `INDIRECT_PATTERNS`, and fails when the set and the
-case table disagree in either direction. A new pattern therefore needs a case (or an
-entry here and in the test explaining why it cannot be exercised).
+`Pipelines.xml` (XPath, RowXPath, ColumnXPaths) and from the `find`/`findall`/`iterfind`
+arguments in `operations/` and `volumemanager/`, adds the run-time-built patterns
+listed in `INDIRECT_PATTERNS`, and fails when the set and the case table disagree in
+either direction. A new pattern therefore needs a case (or an entry here and in the
+test explaining why it cannot be exercised). The source scan parses each file with
+`ast`, so calls split across lines and arguments built from string literals by `+`,
+`%`, or f-strings are seen; only an argument that is a bare variable (a template held
+in a name) needs an `INDIRECT_PATTERNS` entry.
+
+Matching on pattern text alone cannot tell where a pattern runs. Reporting columns are
+evaluated below each `RowXPath` match, so
+`test_report_columns_are_pinned_under_their_row_context` also requires, for every
+`ColumnXPaths` entry, a case rooted at its row context: the pipeline's
+`ReportingElement` Select joined to `RowXPath`, compared with predicates dropped
+(`Block/Section` for ImageReport, `Block/StosGroup/SectionMappings` for StosReport).
+`Histogram/Image` is a column under both a Filter (through `Channel/Filter[...]/...`)
+and a SectionMappings row, and each has its own case.
 
 The XPath cases run on a second fixture, `build_volume(..., extras=True)`, that adds
 the nodes only some queries reach: `Scale` on each channel, channel-level `Image`
 and `Data`, a `Translated_Prune` transform, `Data` under each filter and prune node,
-`AutoLevelHint` under each histogram, `NonStosSectionNumbers` on the block, and a
-SectionMappings `Image` with `InputTransformChecksum`. The golden-bytes fixture is
+`AutoLevelHint` and an `InputTransformChecksum` of `hist-<filter>` on each filter
+histogram, `NonStosSectionNumbers` on the block, a SectionMappings `Image` with
+`InputTransformChecksum`, and a SectionMappings warp `Histogram` (with `Data` and
+`Image`) created by the production `GetOrCreateHistogramNodeHelper`, as
+`operations/block.py` does for stos warp histograms. The golden-bytes fixture is
 unchanged, so `GOLDEN_SHA` did not move. Each case checks `findall` and, on a
 separate fresh load, `find`, against plain ElementTree on the link-merged tree.
 
@@ -89,10 +104,15 @@ outer node, so the XPath is relative to that node. Counts are occurrences.
 | `SectionMappings/Transform`, `SectionMappings/Transform[@Type='#v']` | 1, 1 | | StosGroup |
 | `Mapping` | 3 | | StosMap |
 
-Reporting `PythonCall` arguments: `RowXPath` `Section`, `SectionMappings`;
-`ColumnXPaths` `Channel/Filter[@Name='#v']`, `Channel/TransformData`, `Channel/Notes`,
-`Channel/Data`, `Channel/Filter[@Name='#v']/Histogram/Image`,
-`Channel/Filter[@Name='#v']/Prune/Image`, `Image`, `Transform`, `Histogram/Image`.
+Reporting `PythonCall` arguments (`reporting.GenerateTableReport`):
+
+- ImageReport: `ReportingElement` = `Block`, `RowXPath` `Section`; `ColumnXPaths`
+  `Channel/Filter[@Name='#v']`, `Channel/TransformData`, `Channel/Notes`,
+  `Channel/Data`, `Channel/Filter[@Name='#v']/Histogram/Image`,
+  `Channel/Filter[@Name='#v']/Prune/Image`, each run below a Section.
+- StosReport: `ReportingElement` = `Block/StosGroup[@Name='#v']`, `RowXPath`
+  `SectionMappings`; `ColumnXPaths` `Image`, `Transform`, `Histogram/Image`, each run
+  below a SectionMappings (the warp histogram's image).
 
 ## operations/ and volumemanager/ call sites
 
@@ -108,6 +128,10 @@ Literal or formatted XPaths passed to `find`/`findall` (excluding `str.find`):
   - `Section[@Number='%d']` (vikingxml.py, protected export; read only);
   - `Filter/TilePyramid/Level[@Downsample='%s']` (diagnostics.py);
   - `Image[@InputTransformChecksum='%s']` (block.py);
+  - `Histogram[@InputTransformChecksum='<checksum>']` (tile.py
+    `_ClearInvalidHistogramElements`, run on a Filter): built at run time by string
+    concatenation (`"...='" + checksum + "']"`) on a continuation line, which the
+    earlier line-regex scan missed; the checksum is pasted unescaped;
   - `SectionMappings[@MappedSectionNumber='%d']/Transform[@ControlSectionNumber='%d']`
     (block.py template, call site commented out);
   - `Mapping[@Control='%s']`, `StosGroup[@Name='%s']`, `*[@Path='%s']` (volumemanager);
@@ -163,8 +187,10 @@ None of the inventoried patterns use XPath beyond ElementTree's subset:
 
 ## Reproduce
 
-`pytest nornir-buildmanager/tests/test_volume_metadata_characterize.py -k inventoried`
-checks the case table against the current sources. The raw counts come from:
+`pytest nornir-buildmanager/tests/test_volume_metadata_characterize.py -k "inventoried or row_context"`
+checks the case table against the current sources. The raw counts come from the
+commands below; the `rg` line is a quick look only and misses concatenated or
+multi-line arguments (the test's `ast` scan is authoritative):
 
 ```bash
 cd nornir-buildmanager/nornir_buildmanager
