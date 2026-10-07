@@ -65,6 +65,7 @@ Full catalog: [`.cursor/skills/README.md`](.cursor/skills/README.md).
 | [pyre-registration-performance](.cursor/skills/pyre-registration-performance/SKILL.md) | After Pyre registration edits: check profiler; ≤1 s/control point |
 | [nornir-headless-unit-tests](.cursor/skills/nornir-headless-unit-tests/SKILL.md) | `NORNIR_HEADLESS`, plot artifact triage |
 | [nornir-review-issue-fixing](.cursor/skills/nornir-review-issue-fixing/SKILL.md) | Working the bug-review queue end to end |
+| [nornir-improve-loop](.cursor/skills/nornir-improve-loop/SKILL.md) | Only when the user launches it: timed improvement loop over the monorepo, incl. the XML-to-SQLite metadata port |
 | [nornir-serial-batched-primitives](.cursor/skills/nornir-serial-batched-primitives/SKILL.md) | Serial/batched registration verification |
 | [refine-grid-trust-review](.cursor/skills/refine-grid-trust-review/SKILL.md) | Trust-question review of refine-grid gates and mesh membership |
 | [pyre-stos-rigid-transform-ui](.cursor/skills/pyre-stos-rigid-transform-ui/SKILL.md) | Pyre STOS rigid UI semantics |
