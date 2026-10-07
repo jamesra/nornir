@@ -150,6 +150,7 @@ jobs:
           nornir-buildmanager/tests/pipeline/test_VolumeManager.py
           nornir-buildmanager/tests/pipeline/metadata/test_tilesetinfo.py
           nornir-buildmanager/tests/volumemanager/test_save_xml.py
+          nornir-buildmanager/tests/test_volume_metadata_characterize.py
 
       - name: Run B-class unit tests (requires ci-testdata-v1 fixture pack)
         if: steps.fixture-cache.outputs.cache-hit == 'true' || steps.fixture-download.outcome == 'success'
