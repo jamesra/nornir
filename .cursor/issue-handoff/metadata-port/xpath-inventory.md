@@ -174,16 +174,22 @@ None of the inventoried patterns use XPath beyond ElementTree's subset:
   whole tree changes memory and timing even if results match
   (`test_links_resolve_lazily_and_only_where_matched`).
 - **Document order is observable.** `find` returns the first match and `Iterate`
-  walks results in child order, so a backend must preserve child order. Today an
-  attribute-only container save writes children in reverse of their loaded order
-  (`test_attribute_only_save_reverses_child_order`): `sort()` sorts descending and
-  `_Save` walks `list(self)[::-1]`, but the sort only runs when `ChildrenChanged`.
-  On-disk order therefore flips on each such save. Even a sorting save only groups
-  by tag (`SortKey` is the tag and the sort is stable), so same-tag siblings such as
-  `Filter` or `Transform` are written in reverse of their in-memory order on every
-  save (`test_parent_sort_leaves_attribute_only_children_unsorted`). Pinned, not
-  fixed, because a fix changes saved bytes (decision `port-child-order-flip` in the
-  loop ledger).
+  walks results in child order, so a backend must preserve child order. `_Save`
+  writes children in tree order: an attribute-only save keeps the loaded order, and
+  a save after a child-list change first runs `sort()`, which orders wrapped
+  children ascending by `(SortKey, Path, Name)` and then unloaded `*_Link` stubs by
+  `(tag, Path, Name)`. Repeated saves write identical bytes
+  (`test_repeated_forced_saves_keep_child_order`) and the order does not depend on
+  insertion order (`test_sort_is_ascending_and_ignores_insertion_order`,
+  `test_insertion_order_does_not_change_saved_bytes`). Before decision
+  `port-child-order-flip` (B) `sort()` was descending and `_Save` walked
+  `list(self)[::-1]`, so on-disk order flipped on every attribute-only save and
+  same-tag siblings reversed on every sorting save; the fix was a one-time,
+  approved byte change (only the embedded `Histogram` children of Filter files
+  changed in the fixture). Known remaining order dependencies: a loaded linked
+  container sorts with the wrapped group while its unloaded stub sorts after it,
+  so the order a child-list save writes depends on which links were resolved; and
+  `sort()` returns early for a single child without recursing into it.
 
 ## Reproduce
 
