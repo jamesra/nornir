@@ -4,10 +4,32 @@ Inventory of every distinct XPath shape the build pipeline runs against the
 volume metadata tree, captured for the XML-to-SQLite metadata port
 (`.cursor/skills/nornir-improve-loop/metadata-port.md`, stage 0). Golden tests that
 pin the result sets live in
-`nornir-buildmanager/tests/test_volume_metadata_characterize.py`.
+`nornir-buildmanager/tests/test_volume_metadata_characterize.py`; the case table
+(`XPATH_CASES`) and fixture builder are in
+`nornir-buildmanager/tests/metadata_port_characterize_data.py`.
 
-Captured 2026-10-07 against `nornir-buildmanager` `dev` @ `8fc56b3`. Re-run the
-commands at the bottom before relying on the counts.
+Captured 2026-10-07 against `nornir-buildmanager` `dev` @ `8fc56b3`; coverage
+completed against `7219cb8`. Re-run the commands at the bottom before relying on
+the counts.
+
+## Coverage of this inventory
+
+Every distinct pattern below has at least one golden case, with `#Variable` and
+`%s`/`{...}` placeholders written as `#v`. No pattern is excluded.
+`test_every_inventoried_pattern_has_a_golden_case` re-derives the pattern set from
+`Pipelines.xml` (XPath, RowXPath, ColumnXPaths) and from the literal
+`find`/`findall`/`iterfind` arguments in `operations/` and `volumemanager/`, adds the
+run-time-built patterns listed in `INDIRECT_PATTERNS`, and fails when the set and the
+case table disagree in either direction. A new pattern therefore needs a case (or an
+entry here and in the test explaining why it cannot be exercised).
+
+The XPath cases run on a second fixture, `build_volume(..., extras=True)`, that adds
+the nodes only some queries reach: `Scale` on each channel, channel-level `Image`
+and `Data`, a `Translated_Prune` transform, `Data` under each filter and prune node,
+`AutoLevelHint` under each histogram, `NonStosSectionNumbers` on the block, and a
+SectionMappings `Image` with `InputTransformChecksum`. The golden-bytes fixture is
+unchanged, so `GOLDEN_SHA` did not move. Each case checks `findall` and, on a
+separate fresh load, `find`, against plain ElementTree on the link-merged tree.
 
 ## How queries reach the tree
 
@@ -58,7 +80,7 @@ outer node, so the XPath is relative to that node. Counts are occurrences.
 | `ImageSet/Level`, `ImageSet/Level/Image` | 1, 1 | | Filter |
 | `Histogram` | 1 | 1 | Filter |
 | `Prune`, `Prune[@Overlap='#v']` | | 2, 1 | Filter |
-| `Image`, `Data` | 1, 2 | | Histogram / Prune / Level |
+| `Image`, `Data` | 1, 2 | | Channel and Filter (Cleanup); cases also cover Histogram, Prune, Level, SectionMappings |
 | `Transform` | 5 | | Channel, SectionMappings |
 | `Transform[@Name='#v']` (incl. `Translated_#v`) | | 11 | Channel |
 | `TransformData` | 1 | | Channel |
@@ -89,9 +111,19 @@ Literal or formatted XPaths passed to `find`/`findall` (excluding `str.find`):
   - `SectionMappings[@MappedSectionNumber='%d']/Transform[@ControlSectionNumber='%d']`
     (block.py template, call site commented out);
   - `Mapping[@Control='%s']`, `StosGroup[@Name='%s']`, `*[@Path='%s']` (volumemanager);
-  - `Transform[@<attr>='%s']` (iterate point lookups);
-  - `GetChildByAttrib` / `GetChildrenByAttrib` / `UpdateOrAddChildByAttrib` build
-    `Tag[@Attr='%g']` for numbers or `Tag[@Attr='%s']` for strings.
+  - `Transform[@ControlSectionNumber='%s']`, `Transform[@MappedSectionNumber='%s']`
+    (iterate point lookups, `pipelinemanager_iterate_filters.py`);
+  - `Block[@Name='%s']`, `Channel[@Name='%s']`, `Filter[@Name='%s']` (iterate literal
+    lookups through `GetChildByAttrib`);
+  - `GetChildByAttrib` / `GetChildrenByAttrib` build `Tag[@Attr='%g']` for floats
+    (so `1.0` finds `Downsample="1"`) or `Tag[@Attr='%s']` otherwise; pinned in
+    `test_get_child_by_attrib_formats_floats_with_g`, with `Level[@Downsample='#v']`
+    as the table case;
+  - `UpdateOrAddChildByAttrib` builds `Tag[@A='v']` for one name (default `Name`) and
+    `Tag[@A='v' and @B='w']` for several. ElementTree rejects `and` with
+    `SyntaxError: invalid predicate`; the only multi-name caller
+    (`stosgroupnode.py`) is commented out. Pinned as rejected in
+    `test_multi_attribute_update_or_add_is_rejected` rather than given a table case.
 - Reporting `RecursiveReportGenerator` runs caller-supplied XPaths with `findall`.
 
 ## ElementTree limitations that shape the port
@@ -103,8 +135,11 @@ None of the inventoried patterns use XPath beyond ElementTree's subset:
 - **No `and` / `or`.** Multi-criteria lookups are hand-written loops
   (`SectionMappingsNode.FindStosTransform` says so); `Require*` nodes filter
   candidates in Python after the fetch.
-- **No `*_Link` wildcard.** A wildcard first step loads every child and filters link
-  tags in Python.
+- **No `*_Link` wildcard.** A wildcard first step (`*[@Path='%s']`, used by
+  `XContainerElementWrapper` to detect unlinked subdirectories) loads every matching
+  child and filters link tags in Python. `findall` also re-resolves any `*_Link` left
+  among its matches, so its pre-load and that fallback mask each other: mutating
+  either alone leaves results unchanged (recorded as equivalent in the mutation run).
 - **String-only predicates.** `[@Downsample='1']` does not match `1.0`; numbers must be
   formatted exactly as saved (`%g` in `GetChildByAttrib`, `%d` in templates).
 - **No escaping.** A substituted value containing `'` produces an invalid XPath. A
@@ -127,6 +162,9 @@ None of the inventoried patterns use XPath beyond ElementTree's subset:
   loop ledger).
 
 ## Reproduce
+
+`pytest nornir-buildmanager/tests/test_volume_metadata_characterize.py -k inventoried`
+checks the case table against the current sources. The raw counts come from:
 
 ```bash
 cd nornir-buildmanager/nornir_buildmanager
