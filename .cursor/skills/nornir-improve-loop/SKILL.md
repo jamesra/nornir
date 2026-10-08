@@ -15,8 +15,9 @@ disable-model-invocation: true
 
 When this skill is launched, start the loop. Do not start it because this file was opened for another task. If `AGENT_LOOP_WAKE_nornir_improve` is already sleeping in this session, do not start a second copy.
 
-Files in this skill (each subagent reads only its own; see Each wake):
+Files in this skill (each subagent reads only its own; see Each wake). Do not paste file bodies into Task prompts — pass the skill folder path and ledger path only:
 
+- [main-session.md](main-session.md): thin wake playbook for the **main** session only (context budget). After launch, main reads this and nothing else from the skill.
 - [protected.md](protected.md): areas the loop never edits.
 - [categories.md](categories.md): hotspots, the 19 categories, proposals.
 - [gates.md](gates.md): what a change must pass; tests, mutation, benchmarks, commit, publish.
@@ -69,7 +70,7 @@ Do not edit generated files (`*.egg-info`, build output), comment code out to co
 
 ## Sync from the remote
 
-At the start of every wake, before the scout runs, the main session brings the checkouts up to date with git; no subagent is needed.
+**Launch** runs Sync once in the main session. On **later wakes**, the **scout** runs Sync (not main), so fetch/merge output stays out of the long-lived chat context. (Viking's loop Syncs in main every wake; Nornir keeps Sync in the scout on purpose.) Write results to `lastSync` and `syncSkips` in the ledger.
 
 - For the umbrella and for each submodule: `git fetch origin`, then `git merge --ff-only @{u}` on the checked-out branch.
 - Never run `git submodule update`. It would detach submodules at the umbrella-recorded pointers (see [Monorepo-submodule-changes](../../rules/Monorepo-submodule-changes.mdc)).
@@ -105,19 +106,20 @@ On Windows PowerShell, use `Start-Sleep -Seconds <seconds>` and `Write-Output` w
 
 ## Each wake
 
-The main session only schedules, relays, and talks to the user. All work runs in fresh `generalPurpose` subagents (models per Model routing), in the foreground, one at a time, so the main session's context does not grow. Give each subagent only the files named here and the ledger path.
+The main session only schedules, relays, and talks to the user. Follow [main-session.md](main-session.md) — after launch, that file is the main session's only skill reading. All work runs in fresh `generalPurpose` subagents (models per Model routing), in the foreground, one at a time, so the main session's context does not grow. Give each subagent only the skill folder path and the ledger path; each role then opens only the files named for it above. **Never** paste wake history, open-decision lists, ledger JSON, or multi-paragraph "Context:" into the Task prompt. The ledger and `STEERING.md` are the memory.
 
-1. Read the payload. Do not re-read the `loop` skill. Record any decision answers the user gave in chat into the ledger. Run Sync from the remote and note it in `lastSync` and `syncSkips`.
-2. **Scout** (reads SKILL.md, protected.md, categories.md, the ledger, `STEERING.md`; metadata-port.md on port wakes; reports.md and gates.md Test baseline only when a report or baseline is due). Prompt: "Run the scout step of skill nornir-improve-loop. Skill folder: <path>. Ledger: <path>." In order, the scout:
-   1. reads `STEERING.md` and the ledger;
-   2. stops on `stop`, the deadline, or `emptyWakes` reaching 3, writing the `final` report;
-   3. when 24 hours have passed since `lastReportAt` (or `startedAt`), writes the `daily` report, rebuilds `hotspots`, re-runs the test baseline, and checks for reworked commits;
-   4. on `pause`, ends the wake;
-   5. otherwise picks one candidate and writes it to `candidate`: category (or port stage), package, files, a one-paragraph plan, and a risk level (`low` or `high`, per Model routing). It edits no production code. A protected or unmeasurable candidate becomes a proposal or decision, and the wake ends.
+1. Main: read the payload; do not re-read the `loop` skill or full `SKILL.md`. Record any decision answers from chat into the ledger. **Do not Sync in main** after launch.
+2. **Scout** (runs Sync first; then reads SKILL.md, protected.md, categories.md, the ledger, `STEERING.md`; metadata-port.md on port wakes; reports.md and gates.md Test baseline only when a report or baseline is due). Prompt exactly: `Run the scout step of skill nornir-improve-loop. Skill folder: <path>. Ledger: <path>.` In order, the scout:
+   1. runs Sync from the remote; writes `lastSync` / `syncSkips` / refreshes `runner.heartbeatAt`;
+   2. reads `STEERING.md` and the ledger;
+   3. stops on `stop`, the deadline, or `emptyWakes` reaching 3, writing the `final` report;
+   4. when 24 hours have passed since `lastReportAt` (or `startedAt`), writes the `daily` report, rebuilds `hotspots`, re-runs the test baseline, and checks for reworked commits;
+   5. on `pause`, ends the wake;
+   6. otherwise picks one candidate and writes it to `candidate`: category (or port stage), package, files, a one-paragraph plan, and a risk level (`low` or `high`, per Model routing). It edits no production code. A protected or unmeasurable candidate becomes a proposal or decision, and the wake ends.
    It returns at most four lines: the candidate and its risk or why there is none; new decisions; report path if written; whether to stop.
-3. **Implementer** (reads SKILL.md Scope and Time box, protected.md, gates.md, the ledger; metadata-port.md on port wakes). Prompt: "Run the implement step of skill nornir-improve-loop for the candidate in the ledger. Skill folder: <path>. Ledger: <path>." It runs the candidate through the gates, tests, mutation check, and benchmark when needed; commits in the owning submodule if green and bumps the umbrella pointer; publishes if due; clears `candidate`; and writes the ledger. If it finds the candidate riskier than the scout said, it stops without committing and sets the risk to `high`; the next wake re-runs it with the high-risk model. It returns at most four lines: commit sha and summary or why nothing passed, new decisions, whether a publish ran.
-4. **Reviewer, high risk only** (reads protected.md, gates.md). After a high-risk commit: "Review commit <sha> in <submodule> against the gates in <skill folder>. Report problems only." On a gate violation or likely defect, launch the implementer once more to fix it in a follow-up commit, or revert the commit (and its pointer bump) when a fix is not clear. Record the outcome in the commit's ledger entry.
-5. Post a one- or two-sentence summary, post any new decision as a question, then arm one Y-minute sleep, or arm nothing when the scout said stop.
+3. **Implementer** (reads SKILL.md Scope and Time box, protected.md, gates.md, the ledger; metadata-port.md on port wakes). Prompt exactly: `Run the implement step of skill nornir-improve-loop for the candidate in the ledger. Skill folder: <path>. Ledger: <path>.` It runs the candidate through the gates, tests, mutation check, and benchmark when needed; commits in the owning submodule if green and bumps the umbrella pointer; publishes if due; clears `candidate`; and writes the ledger. If it finds the candidate riskier than the scout said, it stops without committing and sets the risk to `high`; the next wake re-runs it with the high-risk model. It returns at most four lines: commit sha and summary or why nothing passed, new decisions, whether a publish ran.
+4. **Reviewer, high risk only** (reads protected.md, gates.md). After a high-risk commit: `Review commit <sha> in <submodule> against the gates in <skill folder>. Report problems only.` On a gate violation or likely defect, launch the implementer once more with `Follow-up after review of <sha>. Skill folder: <path>. Ledger: <path>.`, or revert the commit (and its pointer bump) when a fix is not clear. Record the outcome in the commit's ledger entry.
+5. Main: post a one- or two-sentence summary, post any **new** decision as a question, then arm one Y-minute sleep, or arm nothing when the scout said stop. Ignore stale sleeper completion notices (see main-session.md).
 6. When the user asks for a report, launch the scout model to write a `requested` report right away; the loop keeps running. When the user asks to stop, kill the tracked sleeper PID, launch the scout model to write the `final` report, and arm nothing.
 
 ### Choosing between the port and the rotation
@@ -174,4 +176,4 @@ The loop is long-running and not time-sensitive, so it spends fewer tokens inste
 - **High-risk implementer:** `claude-opus-5-5-high`. Everything else, plus any low-risk category that touches a shared package (`nornir-shared`, `nornir-pools`), more than one package, a numeric dtype, a file next to a protected area, the `volumemanager` package, or any metadata-port stage.
 - **Reviewer:** `gpt-5.5-medium`. Only after high-risk commits, so the second opinion comes from a different model family.
 
-The main session can run on any inexpensive model that is not a fast variant; it does no code work. Record the model used for each step in the commit's ledger entry.
+The main session can run on Auto or any inexpensive model that is not a fast variant; it does no code work. After launch it follows [main-session.md](main-session.md) only (model table is duplicated there so main never re-opens this file). Record the model used for each step in the commit's ledger entry.

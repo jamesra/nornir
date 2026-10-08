@@ -30,3 +30,48 @@
 - Result: Rejected and reverted. The candidate was 1.7% slower.
 - Do not retry without evidence that `ElementTree.tostringlist` emits enough
   fragments for concatenation to dominate serialization.
+
+## Empty-volume Block count without list()
+
+- Date: 2026-10-08
+- Package: `nornir-buildmanager`
+- Candidate: `sum(1 for _ in volume.findall('Block'))` instead of
+  `len(list(...))` on the fail-fast path in `PipelineManager.Execute`.
+- Benchmark: pyperf isolated count on in-memory `VolumeNode`, container, idle;
+  10 processes, 20 values, 2^18 loops/value; tracemalloc peak on host.
+- At 0 Blocks (fail-fast empty volume): list mean 736 ns vs sum 738 ns (not
+  significant); tracemalloc peak 707 B vs 926 B (+31% for sum).
+- At 203 Blocks: tracemalloc peak 6075 B vs 4531 B (−25% for sum); not the
+  empty-volume path this commit targeted.
+- Result: Rejected and reverted (`f66e6bb` / umbrella `a4673b8`).
+- Do not retry on the empty-volume fail-fast path unless a measured hot path
+  materializes large Block lists at pipeline start.
+
+## CreateDistanceImage half-plane broadcast
+
+- Date: 2026-10-08
+- Package: `nornir-imageregistration`
+- Candidate: Replace the half-plane Python row loop in `CreateDistanceImage`
+  with `np.sqrt(y_range[:, np.newaxis] + x_range)` before mirroring.
+- Benchmark: pyperf `create_distance_image_shapes` (256², 512², 1024² per
+  iteration), container, default processes; old median 4.42 ms, new 4.52 ms;
+  `compare_to` not significant (no ≥5% time win). Isolated half-plane at
+  512²: row loop ~1.17 ms vs broadcast ~1.59 ms per call.
+- Result: Rejected and reverted; no commit.
+- Do not retry unless profiling shows the row loop dominates end-to-end assemble
+  cache warm-up and a different vectorization avoids extra temporaries.
+
+## Histogram FilenameToTask items() vs list(keys())
+
+- Date: 2026-10-08
+- Package: `nornir-imageregistration`
+- Candidate: `for f, task in FilenameToTask.items()` instead of
+  `list(FilenameToTask.keys())` plus lookup in `Histogram`.
+- Benchmark: stub microbench with instant `wait_return`; tracemalloc peak
+  32864→112 B and pyperf median 162→123 µs at n=4096; no separate pre/post
+  checkout JSON or `pyperf compare_to`; not credible vs real Histogram (I/O
+  dominates).
+- Result: Rejected and reverted (`5a3df5b` / umbrella `687a5cd`; original
+  `6df0708` / `ae7725b`).
+- Do not retry unless a real Histogram or end-to-end bench clears cat-18 gates
+  with proper compare_to JSON and an old-vs-new equivalence test.
