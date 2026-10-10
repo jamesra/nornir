@@ -19,6 +19,8 @@ Rank by churn times size. Within each category, search hotspots before the rest 
 
 On a rotation wake, start at the category after `lastCategory` and search for an instance. If a category has none, move to the next. A wake is empty only after every category comes up empty. Category 15 is not part of the rotation; it is the port and runs on port wakes (see SKILL.md).
 
+**Documentation-skill compliance** is a valid reason to change code (or package READMEs / docstrings the skills cover): bring production or docs into line with [nornir-documentation](../nornir-documentation/SKILL.md) and [Documentation-and-monodoc](../../rules/Documentation-and-monodoc.mdc). Pair it with the nearest category below (often 11 for stale docs, 12 for resolvable debt, or 14 when only tests are needed). It still must pass [gates.md](gates.md).
+
 Refactoring:
 
 1. **Near-duplicates.** Code that differs only by a type, constant, field, or callable. Merge into one function, parameterized helper, or a function that takes a callable.

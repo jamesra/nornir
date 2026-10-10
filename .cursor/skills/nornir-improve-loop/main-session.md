@@ -2,7 +2,7 @@
 
 Read **only this file** on wakes after launch. Do not open full `SKILL.md`, `gates.md`, `categories.md`, `metadata-port.md`, or `reports.md` in the main session. Subagents load those.
 
-Goal: keep the main chat context nearly flat across dozens of wakes. The main session only schedules, relays, and talks to the user — no Sync, no code, no git exploration.
+Goal: keep the main chat context nearly flat across dozens of wakes. The main session only schedules, relays, and talks to the user — no Sync, no code, no git exploration. Prefer a **dedicated chat** for this loop.
 
 ## Model routing (do not re-open SKILL.md for this)
 
@@ -34,16 +34,18 @@ Never pass a `-fast` model. If a listed slug is unavailable, use the closest sam
    `Review commit <sha> in <submodule> against the gates in <skill folder>. Report problems only.`
 
    On gaps, one follow-up implementer prompt: `Follow-up after review of <sha>. Skill folder: <path>. Ledger: <path>.` — still no history dump.
-6. User-facing reply: **one or two sentences** (sha + one-line outcome; publish fraction if it changed). Post **new** decision questions only. No recap of prior wakes or open-decision lists.
-7. Arm exactly one Y-minute sleeper; write `runner.sleeperPid` / `sleeperShellId` / `heartbeatAt` to the ledger.
+6. User-facing reply: **silent** on empty / reject / pause wakes (no status line unless the user asked for status). One or two sentences only for a commit, a **new** decision question, a publish, or a stop. No recap of prior wakes or open-decision lists.
+7. Before arming: increment `wakeCount` (port/rotation; never reset for hygiene) and `wakesSinceCompact` in the ledger. If `wakesSinceCompact >= 25`, write a one-paragraph `compactSummary` (deadline, interval, last outcome, open decisions count, runner/sleeper ids), tell the user **once** to `/summarize` or start a fresh chat re-armed from the ledger + that summary, then reset `wakesSinceCompact` to 0.
+8. Arm exactly one Y-minute sleeper; write `runner.sleeperPid` / `sleeperShellId` / `heartbeatAt` to the ledger. When the scout said stop, arm nothing.
 
 ## Forbidden in main (context burns)
 
-- Running Sync from the remote (scout does sync — Nornir divergence from Viking, where Sync was in main).
+- Running Sync from the remote (scout does sync — Nornir divergence from Viking, where Sync was in main; Viking improve now Syncs in the orchestrator too).
 - Re-reading `SKILL.md` or any other skill file after launch.
 - Pasting multi-paragraph "Context:", wake history, or ledger JSON into Task prompts.
 - Tooling on stale sleeper completion notices.
 - Restating open decision lists every wake unless a **new** decision appeared.
+- Narrating empty / reject / pause wakes.
 - Any production-code edit, test run, or commit from the main session.
 
 ## Launch only (not each wake)

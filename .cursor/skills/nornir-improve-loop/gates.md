@@ -10,7 +10,7 @@ All commands run with `$PY` (see SKILL.md Environment) and `NORNIR_HEADLESS=1` (
 - **Real callers.** Every generalization serves two or more existing call sites. No code for hypothetical callers.
 - **Net simpler.** For refactoring, production code gets shorter, or a rule that lived in several places now lives in one. Performance changes may add a little code if the measured gain is real and the code stays readable.
 - **No new flags.** Do not merge functions with a `bool` or mode parameter that picks between old bodies.
-- **Structural, not cosmetic.** Renames, formatting, import sorting, quote style, and annotation-only edits do not count as a wake's change on their own. They may ride along with a structural change in the same lines.
+- **Structural, not cosmetic.** Renames, formatting, import sorting, quote style, and annotation-only edits do not count as a wake's change on their own. They may ride along with a structural change in the same lines. **Exception:** bringing code into compliance with documentation skills and rules ([nornir-documentation](../nornir-documentation/SKILL.md), [Documentation-and-monodoc](../../rules/Documentation-and-monodoc.mdc), and related package README/docstring conventions) is a valid reason for a wake's change when the edit is required for that compliance and still meets the other gates.
 - **Semantics traps checked.** Check each caller for the trap that applies:
   - a generator replacing a list is lazy and single-use;
   - a dataclass gains `__eq__` and, if frozen, `__hash__` (check dict keys, sets, `==`, identity checks);

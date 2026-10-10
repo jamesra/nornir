@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "debugmcp": {
+      "type": "streamableHttp",
+      "url": "http://127.0.0.1:2001/mcp",
+      "description": "DebugMCP - Debugging tools for AI assistants"
+    }
+  }
+}

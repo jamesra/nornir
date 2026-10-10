@@ -58,6 +58,7 @@ Rules that apply in both:
 
 - `$LOOP_ROOT` must be outside every git repo and survive a container recreate. In the container, `$TESTOUTPUTPATH` is bind-mounted from the host (default `D:\nornir-test-output`), which satisfies both; `/workspace` and `/tmp` do not. If neither `NORNIR_LOOP_ROOT` nor `TESTOUTPUTPATH` is set, stop and raise a decision instead of choosing a path inside a repo. Set `NORNIR_LOOP_ROOT` to the same folder on both sides if you want the ledger and reports shared between host and container runs.
 - **One runner per checkout.** The container bind-mounts the host checkout, so a loop on each side would edit the same files. The ledger holds `runner: { environment, host, startedAt, heartbeatAt }`, refreshed every wake. At launch, if another runner's heartbeat is newer than `max(3 * Y minutes, 30 minutes)`, do not start; tell the user which runner holds it. A stopped loop clears `runner`.
+- Prefer a **dedicated chat** for this loop so wake noise does not fill a human-work thread (same spirit as the one-runner rule).
 - Never rely on user-level skills being present: `~/.cursor/skills*` is not mounted in the container. See Launch for the `loop` fallback.
 - Commands in this skill are written once; translate path separators and shell syntax to the detected environment.
 - In the container, do not change git configuration. If `git` reports `dubious ownership`, or `user.name`/`user.email` is unset, raise a decision (the user decides whether to set `safe.directory` or an identity) and do no commits until answered. Edits made by the host and by the container to the same bind mount can show mass mode or line-ending changes; record each repo's `git status --short` at launch as `launchDirty`, and if the whole tree looks modified, stop with a decision rather than guess which edits are the loop's.
@@ -119,12 +120,16 @@ The main session only schedules, relays, and talks to the user. Follow [main-ses
    It returns at most four lines: the candidate and its risk or why there is none; new decisions; report path if written; whether to stop.
 3. **Implementer** (reads SKILL.md Scope and Time box, protected.md, gates.md, the ledger; metadata-port.md on port wakes). Prompt exactly: `Run the implement step of skill nornir-improve-loop for the candidate in the ledger. Skill folder: <path>. Ledger: <path>.` It runs the candidate through the gates, tests, mutation check, and benchmark when needed; commits in the owning submodule if green and bumps the umbrella pointer; publishes if due; clears `candidate`; and writes the ledger. If it finds the candidate riskier than the scout said, it stops without committing and sets the risk to `high`; the next wake re-runs it with the high-risk model. It returns at most four lines: commit sha and summary or why nothing passed, new decisions, whether a publish ran.
 4. **Reviewer, high risk only** (reads protected.md, gates.md). After a high-risk commit: `Review commit <sha> in <submodule> against the gates in <skill folder>. Report problems only.` On a gate violation or likely defect, launch the implementer once more with `Follow-up after review of <sha>. Skill folder: <path>. Ledger: <path>.`, or revert the commit (and its pointer bump) when a fix is not clear. Record the outcome in the commit's ledger entry.
-5. Main: post a one- or two-sentence summary, post any **new** decision as a question, then arm one Y-minute sleep, or arm nothing when the scout said stop. Ignore stale sleeper completion notices (see main-session.md).
+5. Main: post to the user only when there is a commit, a **new** decision (as a question), a publish, a compact notice, or a stop — otherwise stay silent (empty / reject / pause wakes re-arm with no status line unless the user asked for status). When arming: increment `wakeCount` and `wakesSinceCompact`; run compactness hygiene if due (see below). Arm one Y-minute sleep, or arm nothing when the scout said stop. Ignore stale sleeper completion notices (see main-session.md).
 6. When the user asks for a report, launch the scout model to write a `requested` report right away; the loop keeps running. When the user asks to stop, kill the tracked sleeper PID, launch the scout model to write the `final` report, and arm nothing.
+
+### Compactness hygiene
+
+Ledger field `wakesSinceCompact` (separate from `wakeCount`) drives parent-chat hygiene so port/rotation odd-even is never reset. Parent increments `wakesSinceCompact` when arming each sleeper. Every **25** wakes: write a one-paragraph `compactSummary` (deadline, interval, last outcome, open decisions count, runner/sleeper ids if any); tell the user **once** to `/summarize` or start a fresh chat re-armed from the ledger + that summary; then reset `wakesSinceCompact` to 0. Between notices, empty wakes stay silent. Still ignore bare sleeper-completion noise after the wake was handled.
 
 ### Choosing between the port and the rotation
 
-- Odd-numbered wakes are **port wakes** when `metadata-port.md` has a stage that is open and not blocked on a decision. The scout takes the lowest open stage.
+- Odd-numbered wakes (`wakeCount` odd) are **port wakes** when `metadata-port.md` has a stage that is open and not blocked on a decision. The scout takes the lowest open stage. Parent increments `wakeCount` once per armed wake; never reset it for compactness.
 - Even-numbered wakes, and port wakes with no open stage, are **rotation wakes**: start at the category after `lastCategory` (see categories.md). Category 15 is the port, so it is only chosen by the odd-wake rule.
 - A `focus:` or `avoid:` line in `STEERING.md` overrides this alternation.
 
@@ -153,7 +158,7 @@ When a candidate needs the user's call (two reasonable designs, a behavior chang
   "environment": "windows|container", "runner": {}, "launchDirty": {},
   "branches": {}, "mutationMode": "native|container|manual",
   "hotspots": [], "baselineFailures": [], "flaky": [],
-  "lastCategory": 0, "wakeCount": 0, "emptyWakes": 0,
+  "lastCategory": 0, "wakeCount": 0, "wakesSinceCompact": 0, "compactSummary": "", "emptyWakes": 0,
   "portStage": 0, "portEvidence": [],
   "candidate": { "category": 0, "stage": null, "package": "", "files": [], "plan": "", "risk": "low|high" },
   "commits": [{ "package": "", "sha": "", "umbrellaSha": "", "category": 0, "stage": null, "summary": "", "lineDelta": 0,
