@@ -102,3 +102,6 @@ tmp_check_progress.sh
 # Test data corpus (large; not part of the monorepo)
 nornir-testdata/
 nornir-testdata.zip
+
+# Runtime console/profile logs
+logs/
