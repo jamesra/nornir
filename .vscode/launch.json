@@ -1033,7 +1033,9 @@
                 "-Workers", "16",
                 "-MaskWorkers", "8", 
                 "-StructureTypeId", "1", 
-                "-Update"
+                "-Downsample", "1", 
+                "-Update",
+                "-RefreshOData"
             ],
             "env": {
                 "NORNIR_HEADLESS": "1",
