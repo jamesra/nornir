@@ -131,7 +131,7 @@
             "problemMatcher": []
         },
         {
-            "label": "ExportAnnotationCrops (OData) run",
+            "label": "ExportTrainingData (OData) run",
             "type": "process",
             "command": "${command:python.interpreterPath}",
             "args": [
@@ -140,7 +140,7 @@
                 "-computational_library",
                 "numpy",
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
-                "ExportAnnotationCrops",
+                "ExportTrainingData",
                 "-OData",
                 "https://websvc.codepharm.net/${input:nornirVolumeName}/OData",
                 "-Output",

@@ -978,7 +978,7 @@
             }
         },
         {
-            "name": "ExportAnnotationCrops (OData)",
+            "name": "ExportTrainingData (OData)",
             "type": "debugpy",
             "request": "launch",
             "module": "nornir_buildmanager",
@@ -992,7 +992,7 @@
             "args": [
                 "-debug", "-computational_library", "numpy",
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
-                "ExportAnnotationCrops",
+                "ExportTrainingData",
                 "-OData", "https://websvc.codepharm.net/${input:nornirVolumeName}/OData",
                 "-Output", "${input:nornirVolumesRoot}/${input:nornirVolumeName}/AnnotationCrops",
                 "-Channels", "TEM",
@@ -1012,7 +1012,7 @@
             }
         },
         {
-            "name": "ExportAnnotationCrops (OData) run",
+            "name": "ExportTrainingData (OData) run",
             "type": "debugpy",
             "request": "launch",
             "module": "nornir_buildmanager",
@@ -1024,7 +1024,7 @@
             "args": [
                 "-computational_library", "numpy",
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
-                "ExportAnnotationCrops",
+                "ExportTrainingData",
                 "-OData", "https://websvc.codepharm.net/${input:nornirVolumeName}/OData",
                 "-Output", "${input:nornirVolumesRoot}/${input:nornirVolumeName}/AnnotationCrops",
                 "-Channels", "TEM",
@@ -1046,7 +1046,7 @@
             }
         },
         {
-            "name": "ExportAnnotationCrops (OData) run legacy",
+            "name": "ExportTrainingData (OData) run legacy",
             "type": "debugpy",
             "request": "launch",
             "module": "nornir_buildmanager",
@@ -1058,7 +1058,7 @@
             "args": [
                 "-computational_library", "numpy",
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
-                "ExportAnnotationCrops",
+                "ExportTrainingData",
                 "-OData", "https://websvc.codepharm.net/${input:nornirVolumeName}/OData",
                 "-Output", "${input:nornirVolumesRoot}/${input:nornirVolumeName}/AnnotationCrops_v1",
                 "-Channels", "TEM",
