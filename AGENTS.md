@@ -43,6 +43,7 @@ Default virtual environment: `D:\src\git\nornir\venv\pyre314` (see **Virtual-Env
 | [Pyre-STOS-rigid-transform-UI.mdc](.cursor/rules/Pyre-STOS-rigid-transform-UI.mdc) | pyre rigid transform UI paths | Read paired skill before panel/sync changes |
 | [Review-driven-bugfixing.mdc](.cursor/rules/Review-driven-bugfixing.mdc) | bug-review master list, `issue-handoff` | Findings are hypotheses; reproduce or measure before fixing |
 | [Stable-path-output-parity.mdc](.cursor/rules/Stable-path-output-parity.mdc) | importers, image I/O, coordinates, transforms | Compare outputs before/after on long-stable paths |
+| [Training-set-naming.mdc](.cursor/rules/Training-set-naming.mdc) | `segmentationtraining` (ExportTrainingData) | Sets are `v#.#` (same creation rules within a set number); every set gets a `training_set.json` sidecar; sets and models have separate version numbers |
 
 ---
 

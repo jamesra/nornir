@@ -1,0 +1,61 @@
+---
+description: Training sets exported by ExportTrainingData are named v#.# and generated with a training_set.json metadata sidecar
+globs: nornir-buildmanager/nornir_buildmanager/operations/segmentationtraining/**/*.py,nornir-buildmanager/tests/operations/test_segmentationtraining*.py
+alwaysApply: false
+---
+
+## Training sets: name and sidecar
+
+The SAM2 trainer consumes what `ExportTrainingData` writes. A training **set** and a trained **model** have separate
+version numbers: the `3` in set `v3` is unrelated to the `3` in model `v3.1`. The model convention
+(`v<VERSION>.<EPOCH>`, its `.model.json` sidecar and `description`) belongs to the trainer; the full convention is in
+the Sam2Trainer repository (outside this workspace): `D:\src\git\Sam2Trainer\.cursor\rules\naming-conventions.mdc`.
+In messages, logs and docstrings write "set v3", never a bare "v3".
+
+### Naming
+
+- A set is `v<SET>` or `v<SET>.<REVISION>`: `v2`, `v2.1`.
+- `v2.1` is a repopulated or tweaked `v2` made with **the same creation rules**. Any change to the rules that define a
+  sample (crop size, circle or diameter handling, filtering, ignore or approval semantics, what is exported) is a new
+  set number (`v3`), never a new revision.
+- A published set is immutable: re-exporting after annotation edits produces `v2.1`, not an overwritten `v2`.
+- Revisions compare numerically: `v2` < `v2.1` < `v2.10` < `v3`. Do not parse a name as a float.
+- `current` (the trainer's symlink) is a pointer, not a name. Record the resolved folder name.
+- Names that already exist (`v1`, `v1b`, `v3`) stay as they are. Do not create new letter-suffixed names.
+
+### The sidecar
+
+`ExportTrainingData` writes **`training_set.json` into its `-Output` folder**, next to `manifest.jsonl`: one per volume.
+The folder is later copied into the set (`SAM2TrainingData/<set>/<VOL>/`), so the sidecar travels with the volume's data.
+A person never types one. The pipeline takes `-SetVersion` (`v2.1`), `-ParentSet` (needs `-SetVersion`) and
+`-SetDescription`; omitted, the set named in the folder's existing sidecar is kept. Fields:
+
+| Field | Meaning |
+|-------|---------|
+| `schema_version` | `1` |
+| `set_version` | The set (`v2.1`); null for a folder that was never versioned. Must equal the set folder it is copied into. |
+| `parent` | The set this one revises or derives from. A revision (`v2.1`) defaults to `v2`; null for a new set number. |
+| `created_at`, `updated_at` | UTC, ISO 8601. `created_at` is kept while the set number stays the same. |
+| `generator` | Tool and version that wrote it (`nornir-buildmanager` and its version). |
+| `creation_rules` | The exporter parameters that define a sample: `pad`, `downsample`, `exporter` and its `geometry_version`, `max_texture`, `min_process_pixels`, `include_off_edge`, `channels`, `filters`, `structure_type_ids`, `odata_filter`. Not run-time settings (workers, scratch, overlays, force/update modes) and not the annotation source. |
+| `creation_rules_fingerprint` | 12 hex digits of the hash of `creation_rules`. Equal for a set and its revisions, different across set numbers. |
+| `source` | Where the annotations came from (`odata`, `geometries`, `viking_xml`). Informational, not a rule. |
+| `description` | Free text an operator may edit. A re-export keeps what is there. |
+
+How the exporter behaves (`training_set.py`):
+
+- `CheckTrainingSet` is the **first** pipeline step and writes nothing: it refuses a malformed `-SetVersion`, a set number
+  that would go backwards in that folder, a parent that is not an earlier set, and **changed creation rules under the
+  same set number**. It runs before any section is exported, so a mistake costs seconds, not hours.
+- `WriteTrainingSetInfo` is the **last** step: it writes the sidecar atomically (temp file, then replace) after the data
+  it describes, so a set without one is visibly incomplete. `-Cleanup` and `-Repair` runs export nothing and leave it alone.
+- A non-empty `description` is never overwritten unless `-SetDescription` is given.
+- The sidecar never changes what the export builds. The only thing read back is the rules fingerprint, to enforce the
+  line between a revision and a new set number.
+- New rules mean a new number: `-SetVersion v3` is accepted with changed rules, `-SetVersion v2.1` is not.
+
+### Status
+
+- `version-bump` / `version-sync` (Sam2Trainer `scripts/NAS`) do not yet check that a volume's `set_version` equals the
+  set folder, or that a revision's fingerprint matches its parent's; the trainer does not yet read the sidecar into its
+  training-data record. Delete this item when both are done.
