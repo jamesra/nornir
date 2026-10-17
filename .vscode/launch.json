@@ -1079,6 +1079,158 @@
             }
         },
         {
+            "name": "ExportTrainingData (TemporalMonkey2, remote VikingXML)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "nornir_buildmanager",
+            "python": "${command:python.interpreterPath}",
+            "pythonArgs": ["-Xfrozen_modules=off"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": false,
+            "redirectOutput": true,
+            "args": [
+                "-debug", "-computational_library", "numpy",
+                // No local Nornir volume is needed; this folder may be empty.
+                "${input:nornirVolumesRoot}/TemporalMonkey2",
+                "ExportTrainingData",
+                "-VikingXML", "http://v2486.host.s.uw.edu/Neitz/TemporalMonkey2/TemporalMonkey.xml",
+                "-OData", "https://websvc.codepharm.net/NeitzTemporalMonkeyTokenTest/OData",
+                "-Output", "Y:/SAM2TrainingData/SEM/v1/TemporalMonkey",
+                "-Channels", "SEM",
+                "-Filters", "Leveled",
+                "-Downsample", "1",
+                "-Workers", "16",
+                "-MaskWorkers", "8",
+                "-MaxTexture", "1024",
+                "-StructureTypeId", "1,3",
+                "-Update"
+                // Add "-Sections", "400-500" for a trial run; "-Update" / "-RefreshOData" on later runs.
+            ],
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
+        },
+        {
+            "name": "ExportTrainingData (InferiorMonkey, remote VikingXML)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "nornir_buildmanager",
+            "python": "${command:python.interpreterPath}",
+            "pythonArgs": ["-Xfrozen_modules=off"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": false,
+            "redirectOutput": true,
+            "args": [
+                "-debug", "-computational_library", "numpy",
+                // No local Nornir volume is needed; this folder may be empty.
+                "${input:nornirVolumesRoot}/InferiorMonkey",
+                "ExportTrainingData",
+                "-VikingXML", "http://v2486.host.s.uw.edu/Neitz/InferiorMonkey/InferiorMonkey.xml",
+                "-OData", "https://websvc.codepharm.net/NeitzInferiorMonkey/OData",
+                "-Output", "Y:/SAM2TrainingData/SEM/v1/InferiorMonkey",
+                "-Channels", "SEM",
+                "-Filters", "Leveled",
+                "-Downsample", "1",
+                "-Workers", "16",
+                "-MaskWorkers", "8",
+                "-MaxTexture", "1024",
+                "-StructureTypeId", "1,3",
+                "-Update"
+                // Add "-Sections", "400-500" for a trial run; "-Update" / "-RefreshOData" on later runs.
+            ],
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
+        },
+        {
+            "name": "ExportTrainingData (CPED, remote VikingXML)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "nornir_buildmanager",
+            "python": "${command:python.interpreterPath}",
+            "pythonArgs": ["-Xfrozen_modules=off"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": false,
+            "redirectOutput": true,
+            "args": [
+                "-debug", "-computational_library", "numpy",
+                // No local Nornir volume is needed; this folder may be empty.
+                "${input:nornirVolumesRoot}/CPED",
+                "ExportTrainingData",
+                "-VikingXML", "http://v2223.host.s.uw.edu/Neitz/CPED/cped.xml",
+                "-OData", "https://websvc.codepharm.net/NeitzCPED/OData",
+                "-Output", "Y:/SAM2TrainingData/SEM/v1/CPED",
+                "-Channels", "SEM",
+                "-Filters", "Leveled",
+                "-Downsample", "1",
+                "-Workers", "16",
+                "-MaskWorkers", "8",
+                "-MaxTexture", "1024",
+                "-StructureTypeId", "1,3", 
+                "-Update"
+                // Add "-Sections", "400-500" for a trial run; "-Update" / "-RefreshOData" on later runs.
+            ],
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
+        },
+        {
+            "name": "ExportTrainingData (NasalMonkey, remote VikingXML)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "nornir_buildmanager",
+            "python": "${command:python.interpreterPath}",
+            "pythonArgs": ["-Xfrozen_modules=off"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": false,
+            "redirectOutput": true,
+            "args": [
+                "-debug", "-computational_library", "numpy",
+                // No local Nornir volume is needed; this folder may be empty.
+                "${input:nornirVolumesRoot}/NasalMonkey",
+                "ExportTrainingData",
+                "-VikingXML", "http://v2486.host.s.uw.edu/Neitz/NM/NasalMonkey.xml",
+                "-OData", "https://websvc.codepharm.net/NeitzNM/OData",
+                "-Output", "Y:/SAM2TrainingData/SEM/v1/NasalMonkey",
+                "-Channels", "SEM",
+                "-Filters", "Leveled",
+                "-Downsample", "1",
+                "-Workers", "16",
+                "-MaskWorkers", "8",
+                "-MaxTexture", "1024",
+                "-StructureTypeId", "1,3",
+                "-Update"
+                // Add "-Sections", "400-500" for a trial run; "-Update" / "-RefreshOData" on later runs.
+            ],
+            "env": {
+                "NORNIR_HEADLESS": "1",
+                "PYTHONUNBUFFERED": "1",
+                "NORNIR_MQTT_HOST": "host.docker.internal",
+                "NORNIR_MQTT_PORT": "1883",
+                "NORNIR_MQTT_ENABLE": "1"
+            }
+        },
+        {
             "name": "RC2: RepairAnnotationOverlays",
             "type": "debugpy",
             "request": "launch",
