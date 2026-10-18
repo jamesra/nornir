@@ -26,7 +26,7 @@ In messages, logs and docstrings write "set v3", never a bare "v3".
 ### The sidecar
 
 `ExportTrainingData` writes **`training_set.json` into its `-Output` folder**, next to `manifest.jsonl`: one per volume.
-The folder is later copied into the set (`SAM2TrainingData/<set>/<VOL>/`), so the sidecar travels with the volume's data.
+The folder is later copied into the set (`SAM2TrainingData/<TEM|SEM>/<set>/<VOL>/`; TEM and SEM sets are numbered independently), so the sidecar travels with the volume's data.
 A person never types one. The pipeline takes `-SetVersion` (`v2.1`), `-ParentSet` (needs `-SetVersion`) and
 `-SetDescription`; omitted, the set named in the folder's existing sidecar is kept. Fields:
 
