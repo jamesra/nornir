@@ -75,3 +75,24 @@
   `6df0708` / `ae7725b`).
 - Do not retry unless a real Histogram or end-to-end bench clears cat-18 gates
   with proper compare_to JSON and an old-vs-new equivalence test.
+
+## Precompute per-edge constants for _signed_clearance
+
+- Date: 2026-10-19
+- Package: `nornir-buildmanager`
+- Candidate: In `segmentationtraining/circles.py`, compute `dx`, `dy`,
+  `length_sq`, `length_sq > 0` and the safe divisor once in `_edge_arrays`
+  instead of on every `_signed_clearance` call from `_refine_center`.
+- Benchmark: pyperf, Windows host, idle, `--copy-env`; wobbly star polygon
+  in mosaic coordinates (center ~150000, radius ~400 px) at 200 and 60
+  vertices; `_refine_center` in isolation and `max_inscribed_circle` end to end.
+- Baseline: `_refine_center` 2.60 ms (v200), 2.67 ms (v60);
+  `max_inscribed_circle` 230 ms (both).
+- Candidate: `_refine_center` 2.08 ms / 2.12 ms (1.25x faster);
+  `max_inscribed_circle` 235 / 239 ms, not significant.
+- Result: Rejected and reverted. The refinement is about 1% of
+  `max_inscribed_circle`; the polygon raster (up to 2048 px side) and
+  `distance_transform_edt` take the rest, so the 0.5 ms saving per polygon is
+  invisible end to end.
+- Do not retry unless the raster/EDT stage is made much cheaper first, so the
+  exact refinement becomes a measurable share of the per-polygon cost.
