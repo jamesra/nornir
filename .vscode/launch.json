@@ -994,7 +994,8 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "ExportTrainingData",
                 "-OData", "https://websvc.codepharm.net/${input:nornirVolumeName}/OData",
-                "-Output", "${input:nornirVolumesRoot}/${input:nornirVolumeName}/AnnotationCrops",
+                "-Output", "//192.168.0.199/Data/SAM2TrainingData/TEM/${input:trainingSetVersion}/${input:nornirVolumeName}",
+                "-SetVersion", "${input:trainingSetVersion}",
                 "-Channels", "TEM",
                 "-Filters", "Leveled", 
                 "-Workers", "16",
@@ -1026,7 +1027,8 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "ExportTrainingData",
                 "-OData", "https://websvc.codepharm.net/${input:nornirVolumeName}/OData",
-                "-Output", "${input:nornirVolumesRoot}/${input:nornirVolumeName}/AnnotationCrops",
+                "-Output", "//192.168.0.199/Data/SAM2TrainingData/TEM/${input:trainingSetVersion}/${input:nornirVolumeName}",
+                "-SetVersion", "${input:trainingSetVersion}",
                 "-Channels", "TEM",
                 "-Filters", "Leveled",
                 "-MaxTexture", "1024",
@@ -1060,7 +1062,7 @@
                 "${input:nornirVolumesRoot}/${input:nornirVolumeName}",
                 "ExportTrainingData",
                 "-OData", "https://websvc.codepharm.net/${input:nornirVolumeName}/OData",
-                "-Output", "${input:nornirVolumesRoot}/${input:nornirVolumeName}/AnnotationCrops_v1",
+                "-Output", "//192.168.0.199/Data/SAM2TrainingData/TEM/${input:legacySetFolder}/${input:nornirVolumeName}",
                 "-Channels", "TEM",
                 "-Filters", "Leveled",
                 "-Exporter", "legacy",
@@ -1426,6 +1428,18 @@
             "type": "promptString",
             "description": "Volume folder name under nornirVolumesRoot. Example: RPC3 → /storage4/RPC3",
             "default": "RPC3"
+        },
+        {
+            "id": "trainingSetVersion",
+            "type": "promptString",
+            "description": "Training set folder under SAM2TrainingData/TEM, e.g. v4. Existing: v1b, v2, v3 (RC1, RC2, RPC1, RPC2 are volumes, not sets). Also passed as -SetVersion.",
+            "default": "v4"
+        },
+        {
+            "id": "legacySetFolder",
+            "type": "promptString",
+            "description": "Folder under SAM2TrainingData/TEM for a legacy-exporter-only set. Not passed as -SetVersion: set versions must look like v4 or v4.1.",
+            "default": "legacy"
         },
         {
             "id": "nornirSections",
