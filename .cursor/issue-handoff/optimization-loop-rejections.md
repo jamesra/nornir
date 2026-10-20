@@ -120,3 +120,40 @@
 - Do not retry unless rings arrive as numpy arrays from parsing (no per-point
   conversion), and an end-to-end `location_shape` / `write_location_shapes`
   bench shows the area/centroid step as a measurable share.
+
+## Exterior-bbox precheck in geometry._maximin_phase_windows
+
+- Date: 2026-10-20
+- Package: `nornir-buildmanager`
+- Candidate: In `segmentationtraining/geometry.py`, compute each polygon's
+  exterior-ring mosaic bbox once per `place_mask_windows` call and skip
+  `_window_mask_area` (area 0) for windows that no polygon's bbox can touch,
+  so `pixel_rings_in_crop` stops converting every vertex for those windows.
+  The precheck can be made exact (not just conservative): `int(round(...))`
+  of `(m - origin) / downsample` is monotonic, so the min/max pixel of the
+  ring equals the rounded bbox edge and `_ring_touches_image` (itself a bbox
+  test) is decided from four numbers.
+- Benchmark (count before timing, Windows host, ad hoc script, Pad=1 as in
+  `ExportTrainingData`): windows whose exterior ring fails the touch test,
+  i.e. the only windows the precheck could skip:
+  - one 400-vertex cell, r=6000, ds 1, crop 2048: 0 of 196 area calls;
+  - one 600-vertex diagonal strip 40000 px long, ds 1, crop 1024: 0 of 6724
+    (2.35 s for the call);
+  - same strip, ds 4, crop 512: 0 of 1764 (0.65 s);
+  - synthetic MULTIPOLYGON of 3 far-apart 200-vertex parts: 2965 of 3149.
+- Result: Rejected; no code change. With the default 1 px pad the padded bbox
+  equals the exterior bbox, so for a single polygon every lattice window that
+  meets the padded bbox also passes the old (bbox-based) touch test. The skip
+  only fires on disjoint multipolygon locations, and no real location data
+  with such parts is on this machine, so a benchmark would rest on synthetic
+  input the gates forbid.
+- Lead (not tried): the strip's cost is real. cProfile of the ds 1 strip:
+  `pixel_rings_in_crop` vertex conversion ~1.7 s self + `round` 0.65 s,
+  `_clip_ring_to_image` 2.6 s cumulative, over 6724 windows of which 120 are
+  kept. Converting per vertex depends only on `origin_x` (x) or `origin_y`
+  (y), so the conversions could be hoisted per lattice column/row with the
+  same expression (bit-identical); clip and simplify would still run per
+  window.
+- Do not retry unless real location data shows multipolygon parts far apart
+  (or a much larger pad is used), and a pyperf bench on that data shows the
+  skip as a significant share of `plan_section_crops`.
