@@ -49,7 +49,7 @@ $LatestExe = Join-Path $InstallerDir "Pyre-Setup.exe"
 $NotesFile = Join-Path $RepoRoot "release\_pyre_release_notes.md"
 
 if (-not (Test-Path $VersionedExe)) {
-    throw "Missing installer: $VersionedExe — run pyre: build Windows installer (full) first."
+    throw "Missing installer: $VersionedExe - run pyre: build Windows installer (full) first."
 }
 
 Write-Host "Preparing release $Tag from $VersionedExe"
@@ -92,12 +92,10 @@ Write-Host "Published: https://github.com/$Repo/releases/tag/$Tag"
 Write-Host "Latest download: https://github.com/$Repo/releases/latest/download/Pyre-Setup.exe"
 
 if (-not $SkipDocsTrigger) {
-    Write-Host "Triggering documentation workflow…"
-    gh workflow run docs.yml --repo $Repo -f "" 2>$null
-    if ($LASTEXITCODE -ne 0) {
-        # workflow_dispatch without inputs
-        gh workflow run Documentation --repo $Repo
-    }
+    Write-Host "Triggering documentation workflow..."
+    # docs.yml's workflow_dispatch takes no inputs. Run gh via cmd so its stderr does not
+    # become a terminating error under $ErrorActionPreference = "Stop" in Windows PowerShell 5.1.
+    cmd /c "gh workflow run docs.yml --repo $Repo 2>&1"
     if ($LASTEXITCODE -ne 0) {
         Write-Warning "Could not trigger docs workflow; push docs changelog changes or run it manually."
     }
