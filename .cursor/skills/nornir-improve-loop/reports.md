@@ -16,6 +16,10 @@ When to write:
 
 An interim (`daily` or `requested`) report covers the period since `lastReportAt`. A `final` report covers the whole run. After writing, set `lastReportAt`, append the path to `reports`, and post the path and a two-line summary in chat.
 
+## Cumulative list
+
+`$LOOP_ROOT/CHANGES-BY-REGION.md` is the running total across every run, grouped by package and then code region, for the user to review. Dated reports cover one run; this file covers all of them. Whenever a report is written, also update it: add each commit since its **As of** line under the matching region with its label (Fix, Faster, Refactor, Cleanup, Tests, Port), one plain-English line and the short sha; add new fixes to "Review these first"; move reverted commits to "Reverted and rejected"; refresh **As of**, the "At a glance" counts and "Open items". Edit it in place; do not start a new file per run.
+
 Keep each report reviewable in a few minutes:
 
 1. **Totals:** the `environment` the loop ran in (and `$LOOP_ROOT`), period covered, wakes, commits (and how many were port commits), total production line delta, total test line delta, publishes with the Pyre installer builds they triggered, commit count per category and per package, and any model substitutions.
