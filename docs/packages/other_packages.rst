@@ -4,7 +4,7 @@ Other repositories in the umbrella
 These components are part of the same workspace. Their deep documentation lives in dedicated sections of this monodoc:
 
 * **nornir-docker** — see :doc:`../docker/index`.
-* **nornir-builddashboard** — MQTT build telemetry dashboard (sources submodule; Docker image/service name ``nornir-dashboard``). See :doc:`../docker/dashboard`.
+* **nornir-builddashboard** — MQTT build telemetry dashboard (sources submodule; Docker image/service name ``nornir-dashboard``). See :doc:`../deployment/dashboard`.
 * **nornir-pyre** — interactive registration and visualization (PyQt6 / OpenGL).
 
   * End users (Windows installer): |pyre-windows-installer-latest| — :doc:`pyre_install`

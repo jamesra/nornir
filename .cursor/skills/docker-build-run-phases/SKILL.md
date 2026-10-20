@@ -17,7 +17,8 @@ description: >-
 | Skill | Use when |
 |-------|----------|
 | **docker-build-run-phases** (this) | Build vs run scripts, `example.*.env` templates, env layering |
-| **docker-machine-layout** | Where machine-local files live under `D:\Docker` |
+| **deploy-connectomes** | Deploying or debugging the connectomes.pitt.edu hosts with `stack.ps1` |
+| **docker-machine-layout** | Where machine-local files live under `D:\Docker` / `/srv/docker` |
 | **nornir-docker-images-ci** | Image matrix, OCI/BOM, Dockerfile/CI review |
 | **nornir-docker-devcontainer** | Day-to-day cursor-dev / Dev Containers setup |
 
@@ -41,11 +42,10 @@ Committed templates **always end in `.env`**. Names:
 - **`example.<id>.build.env`** — committed **templates** for `--build-arg` defaults (copy values into your own `docker build` flags or into CWD files for `docker-build.ps1`; the script does not read these files)
 - **`example.<id>.run.env`** — runtime variable templates for Compose or copy targets (e.g. `.env`, `.env.cursor-worker`)
 
-`<id>` is the **normalized image tag** with `:` → `-` (e.g. `nornir-dev`), or a **Compose stack / service name** when the run template is for a named stack (e.g. `cursor-dev`). Shared build defaults: **`example._shared.build.env`** at the submodule root.
+`<id>` is the **normalized image tag** with `:` → `-` (e.g. `nornir-dev`), or a **Compose stack / service name** when the run template is for a named stack (e.g. `cursor-dev`, or a `stack.ps1` stack key such as `nornir-build`). There is no shared build template; shared build overrides go in a machine-local `build.env` in the invocation directory. Deploy run templates for `stack.ps1` stacks live in `nornir-docker/deploy/examples/` (`example.<stack>.run.env`, `example.host.env`).
 
 | Role | Example path under `nornir-docker/` |
 |------|-------------------------------------|
-| Shared build defaults | `example._shared.build.env` |
 | `nornir:dev`, `nornir:dev-cursor-base` (from `dev/Dockerfile`) | `dev/example.nornir-dev.build.env`, `dev/example.nornir-dev-cursor-base.build.env` |
 | cursor-dev run (Compose service) | `dev/example.cursor-dev.run.env` |
 | `nornir:prod`, `nornir:cupy` (`prod/Dockerfile`) | `prod/example.nornir-prod.build.env`, `prod/example.nornir-cupy.build.env` |
@@ -73,6 +73,7 @@ Per-developer machine settings—real `.env` files, secrets, host-specific bind 
 | **Compose bridge** | `nornir-docker/.env` | Hardlink or copy of the Run file — Compose/Dev Containers only auto-load this path |
 | **Run (worker)** | `$NORNIR_DOCKER_USER_ROOT/Run/nornir-cursor-worker/nornir-cursor-worker.run.env` | See `start-cursor-worker.ps1` |
 | **Net mounts** | `$NORNIR_DOCKER_USER_ROOT/Run/nornir-net-mounts/` | Prefer over legacy `Run/nornir-dev/` for shared CIFS |
+| **Run (`stack.ps1` stacks)** | `$NORNIR_DOCKER_USER_ROOT/Run/<stack>/<stack>.run.env` + `Run/<stack>/secrets/` | Merged after `Run/_host/host.env` and host secrets (later wins); see `docs/deployment/host_layout.rst` |
 
 - **`docker-build.ps1` does not merge** the Run tree for image build args.
 - Do **not** use `$NORNIR_DOCKER_USER_ROOT/dev/cursor-dev.run.env` — that path is obsolete; use `Run/nornir-dev/`.
@@ -110,6 +111,7 @@ After loading, if **required** variables for that phase are still unset or empty
 
 - **nornir-docker-devcontainer** — cursor-dev / Dev Containers / test data mounts
 - **nornir-docker-images-ci** — image matrix, `docker-build.ps1` order, OCI/BOM, Dockerfile review checklist
-- **docker-machine-layout** — `D:\Docker\Builds` / `Run` / `mounted-configs` on Windows
+- **docker-machine-layout** — `Run` / `Builds` / `Data` / `Certs` / `Work` / `Logs` under `D:\Docker` or `/srv/docker`
+- **deploy-connectomes** — `stack.ps1` deploy and debug procedure
 
 This skill covers **phased scripts and env layering** only.

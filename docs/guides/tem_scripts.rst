@@ -1,7 +1,7 @@
 TEM build scripts
 =================
 
-Inside the build container (:doc:`deploy_build_container`) the lab sequence is three wrappers. Each one is a single ``nornir-build`` process. Stages run in order, joined by ``--then``, and the process stops on the first failure. The default compute library is CuPy (``NORNIR_COMPUTATIONAL_LIBRARY``). Progress is published to the co-located dashboard.
+Inside the build container (:doc:`../deployment/nornir_build_appliance`) the lab sequence is three wrappers. Each one is a single ``nornir-build`` process. Stages run in order, joined by ``--then``, and the process stops on the first failure. The default compute library is CuPy (``NORNIR_COMPUTATIONAL_LIBRARY``). Progress is published to the co-located dashboard.
 
 Run them in this order:
 

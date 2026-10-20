@@ -15,6 +15,12 @@ Nornir takes large sets of overlapping images in 2D and produces registered (ali
 
 .. toctree::
    :maxdepth: 2
+   :caption: Deployment & Configuration
+
+   deployment/index
+
+.. toctree::
+   :maxdepth: 2
    :caption: Concepts
 
    concepts

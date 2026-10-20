@@ -72,11 +72,9 @@ same local metadata before push and warns if the floating tag looks stale.
 
 Optional build-arg overrides: place ``build.env`` (shared) and ``.build.<id>.env`` per image (``<id>`` is the tag with ``:`` replaced by ``-``, e.g. ``.build.nornir-dev.env``) in that **invocation** directory. The script does not read committed ``example.*.build.env`` files; use those files in the repo only as templates.
 
-Minimal samples (Compose / same builds from repo root)::
-
-    .\nornir-docker\start-sample.ps1 -Sample List
-
-This reads ``VERSION``, git SHA, build time, and embeds a base64-encoded JSON bill of materials.
+``docker-build.ps1`` reads ``VERSION``, the git SHA, and the build time, and embeds a
+base64-encoded JSON bill of materials. Run the built images with ``stack.ps1``
+(:doc:`../deployment/stacks_and_commands`).
 
 Manual ``docker build`` (from monorepo root)::
 
@@ -126,7 +124,7 @@ so ``WORKDIR /workspace`` is usually an **empty** directory unless you mount som
   ``NORNIR_CLONE_URL`` / ``NORNIR_CLONE_BRANCH`` if you override defaults), then drops into
   your shell, for example (one line, or use ``^`` continuation in ``cmd`` / backtick in PowerShell)::
 
-    docker run --rm -it --env-file secrets.env --env-file .env.run.nornir-dev -v "D:\Docker\mounted-configs\nornir-dev:/workspace" -w /workspace nornir:dev /usr/local/bin/cursor-dev-entry.sh bash
+    docker run --rm -it --env-file secrets.env --env-file .run.nornir-dev.env -v "D:\Docker\Work\nornir-dev-clone:/workspace" -w /workspace nornir:dev /usr/local/bin/cursor-dev-entry.sh bash
 
   If the mount is **non-empty** and not a git repo, the script refuses to clone (see script
   error text); use an empty directory or a real checkout.
@@ -147,10 +145,10 @@ so ``WORKDIR /workspace`` is usually an **empty** directory unless you mount som
 
   Or use ``docker compose -f nornir-docker/compose.cursor-dev.yaml run --rm cursor-dev``, which
   wires ``NORNIR_TESTDATA_HOST``, ``TESTINPUTPATH``, and ``cursor-dev-entry.sh`` for bind-mounted sources (service **cursor-dev**), or use ``cursor-dev-clone`` for a named-volume clone (see
-  :doc:`cursor_dev`).
+  :doc:`../deployment/nornir_dev_and_worker`).
 
 GPU runtime
 -----------
 
-Use ``nd-build -Gpu`` / ``NORNIR_DOCKER_GPU=1`` or ``docker run --gpus all`` to expose NVIDIA
+Use ``nd-build -Gpu`` (:doc:`../deployment/stacks_and_commands`) / ``NORNIR_DOCKER_GPU=1`` or ``docker run --gpus all`` to expose NVIDIA
 devices. A GPU is **not** required at image build time.

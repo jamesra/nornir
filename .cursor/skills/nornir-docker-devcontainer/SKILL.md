@@ -19,25 +19,26 @@ description: >-
 | Skill | Use when |
 |-------|----------|
 | **docker-build-run-phases** | Build vs run scripts, `example.*.env` templates, env layering |
-| **docker-machine-layout** | Where machine-local files live under `D:\Docker` |
+| **docker-machine-layout** | Where machine-local files live under `D:\Docker` / `/srv/docker` |
 | **nornir-docker-images-ci** | Image matrix, OCI/BOM, Dockerfile/CI review |
 | **nornir-docker-devcontainer** (this) | Day-to-day cursor-dev / Dev Containers setup |
 
 ## Source of truth
 
-Dockerfiles, Compose files, and **checked-in env examples** for Nornir live in the **`nornir-docker/`** directory. In the monorepo that directory is the **`nornir-docker` git submodule** (same content as the standalone `nornir/nornir-docker` repository). Overview and script index: [nornir-docker/README.md](../../../nornir-docker/README.md); narrative docs in the monodoc under `docs/docker/`.
+Dockerfiles, Compose files, and **checked-in env examples** for Nornir live in the **`nornir-docker/`** directory. In the monorepo that directory is the **`nornir-docker` git submodule** (same content as the standalone `nornir/nornir-docker` repository). Overview and script index: [nornir-docker/README.md](../../../nornir-docker/README.md); narrative docs in the monodoc: `docs/deployment/nornir_dev_and_worker.rst` (images: `docs/docker/images.rst`).
 
-For **build vs run scripts** and env layering, see **docker-build-run-phases**. For `Builds` / `Run` / `mounted-configs`, see **docker-machine-layout**.
+For **build vs run scripts** and env layering, see **docker-build-run-phases**. For the `Run` / `Builds` / `Data` / `Work` layout, see **docker-machine-layout**.
 
 ## Examples vs local environment (do not commit secrets)
 
-- **Committed:** templates such as `nornir-docker/dev/example.cursor-dev.run.env`, `nornir-docker/example._shared.build.env`, plus root stubs like `.env.cursor-dev.example` pointing at those files.
+- **Committed:** templates such as `nornir-docker/dev/example.cursor-dev.run.env` and the per-image `*/example.<id>.build.env` files. There are **no** root `.env*.example` stubs any more; point people at the template directly.
 - **Not committed:** real `.env` files, tokens, or machine-specific paths. [`nornir-docker/.gitignore`](../../../nornir-docker/.gitignore) ignores `.env`, `build.env`, `.build.*.env`, etc.
 
 **cursor-dev (recommended):**
 
 1. Copy `nornir-docker/dev/example.cursor-dev.run.env` → `$NORNIR_DOCKER_USER_ROOT/Run/nornir-dev/.env` (default root `D:\Docker`).
 2. **Bridge** that file to `nornir-docker/.env` (hardlink or copy) so Compose/Dev Containers substitute `${NORNIR_TESTDATA_HOST}`. Junctions are directories-only; SymbolicLink needs Developer Mode.
+3. `compose.cursor-dev.yaml` also loads `nornir-docker/.env` as **`env_file`** (optional), so every key in it (`NORNIR_SYNC_REMOTE`, `NORNIR_SUBMODULE_UPDATE`, `GITHUB_TOKEN`, `NORNIR_TILE_*`, ...) reaches the container without editing the compose file; the compose `environment:` block still wins for the keys it sets.
 
 ## What this is
 
@@ -53,7 +54,7 @@ Authoritative files:
 - `nornir-docker/dev/Dockerfile` — image: Python 3.14, git, ImageMagick, CuPy, pytest, venv
 - `.devcontainer/devcontainer.json` — default: compose **cursor-dev** + `workspaceFolder` `/workspace`
 - `.devcontainer/cursor-dev-clone/devcontainer.json` — optional: compose **cursor-dev-clone** (fresh clone in volume)
-- `docs/docker/cursor_dev.rst` — human-oriented walkthrough
+- `docs/deployment/nornir_dev_and_worker.rst` — human-oriented walkthrough
 
 ## Preconditions
 
@@ -170,4 +171,4 @@ Set `user.name` / `user.email` in the container (or via repo-local git config) b
 
 ## Additional documentation
 
-For narrative docs and diagrams, see [docs/docker/cursor_dev.rst](../../../docs/docker/cursor_dev.rst).
+For narrative docs, see [docs/deployment/nornir_dev_and_worker.rst](../../../docs/deployment/nornir_dev_and_worker.rst). `stack.ps1 nornir-dev shell` runs the same `run-cursor-dev.ps1`.

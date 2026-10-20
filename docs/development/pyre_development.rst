@@ -35,7 +35,7 @@ Editable install (BOM order)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Install siblings with ``--no-deps`` so git URL pins in ``pyproject.toml`` do not
-override local sources (same pattern as :doc:`../docker/cursor_dev`):
+override local sources (same pattern as :doc:`../deployment/nornir_dev_and_worker`):
 
 .. code-block:: powershell
 

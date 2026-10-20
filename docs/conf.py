@@ -50,6 +50,7 @@ extensions = [
     "sphinxarg.ext",
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.extlinks",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
 ]
@@ -84,6 +85,14 @@ autodoc_default_options = {
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
+}
+
+# Viking owns its deployment pages (Viking repo: Documentation/source/deployment/).
+# Usage: :viking:`TLS <tls.html>`.
+# TODO verify URL: Viking's Documentation/README.md names the publish repo "connectomes.github.io";
+# change this base if the Viking site is published there instead.
+extlinks = {
+    "viking": ("https://jamesra.github.io/Viking/deployment/%s", "%s"),
 }
 
 # -- HTML -------------------------------------------------------------------

@@ -11,7 +11,7 @@ New users
 * :doc:`overview_alignment_theory` — how a volume is built, with figures.
 * :doc:`packages/pyre_install` — Windows installer for the interactive tool.
 * :doc:`guides/pyre_use` — mouse, keyboard, and registration controls.
-* :doc:`guides/deploy_build_container` — set up the build appliance and open a shell.
+* :doc:`deployment/index` — deploy the servers and containers; :doc:`deployment/nornir_build_appliance` sets up the build appliance and opens a shell.
 * :doc:`guides/tem_scripts` — what ``TEMImport``, ``TEMBuild``, and ``TEMAlign`` do, stage by stage.
 * :doc:`guides/build_volume` — the same work in science order, then Viking and SBFSEM-tools.
 
@@ -20,7 +20,7 @@ Agents and contributors
 
 * :doc:`agents` — monorepo layout, installs, tests, and logging.
 * :doc:`development/logging` — session log files and worker processes.
-* :doc:`docker/cursor_dev` — Dev Container shell.
+* :doc:`deployment/nornir_dev_and_worker` — Dev Container shell and Cursor worker.
 
 Performance
 -----------

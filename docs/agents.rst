@@ -15,7 +15,7 @@ Install
 
 Host UI work uses Python 3.13+ and ``venv/pyre314``. Editable install order, with ``--no-deps`` so git URL pins do not replace the local trees, is in :doc:`development/pyre_development`.
 
-Docker images are Python 3.14, headless, and do not include Pyre. The Dev Container is :doc:`docker/cursor_dev`. The self-hosted worker is :doc:`docker/cursor_worker`.
+Docker images are Python 3.14, headless, and do not include Pyre. The Dev Container and the self-hosted worker are :doc:`deployment/nornir_dev_and_worker`.
 
 Logging and tests
 -----------------

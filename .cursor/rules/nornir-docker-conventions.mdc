@@ -1,47 +1,107 @@
 ---
-description: Guardrails for Nornir Docker images, Compose, env templates, and entry scripts under nornir-docker/
-globs: nornir-docker/**/*,docs/docker/**/*,.devcontainer/**/*,**/Dockerfile*,**/compose*.yaml,**/compose*.yml
+description: Guardrails for Nornir Docker images, Compose, env templates, stack.ps1 deploys, and entry scripts under nornir-docker/
+globs: nornir-docker/**/*,docs/docker/**/*,docs/deployment/**/*,.devcontainer/**/*,**/Dockerfile*,**/compose*.yaml,**/compose*.yml
 alwaysApply: false
 ---
 
 ## Nornir Docker conventions
 
+Human docs: `docs/deployment/` (published at https://nornir.github.io/deployment/). Keep this rule
+and those pages consistent.
+
+### Entry point
+
+- **`nornir-docker/deploy/stack.ps1`** is the one entry point for starting, stopping, inspecting and
+  deploying every stack (nornir and Viking), locally or with `-Target <host>` over SSH. New stacks go
+  in a registry (`nornir-docker/deploy/stacks.psd1`, or `<Viking>/deploy/stacks.psd1`), not in a new
+  ad hoc launcher.
+- Host setup is **`deploy/Initialize-DockerHost.ps1 -Role compute|web|iis|dev`**. Launchers it writes
+  under the layout root are **forwarding** scripts; never copy repo scripts into the layout (they
+  dot-source siblings and break).
+
 ### Where Docker assets live
 
-- Dockerfiles, Compose files, entry scripts, and **committed** `example.*.build.env` / `example.*.run.env` templates belong under **`nornir-docker/`** (a git submodule in the monorepo).
-- Do **not** add parallel monorepo-root `docker/` trees or duplicate image definitions without an explicit design decision.
+- Dockerfiles, Compose files, entry scripts, and **committed** `example.*.build.env` / `example.*.run.env`
+  templates belong under **`nornir-docker/`** (a git submodule in the monorepo). Deploy templates are in
+  `nornir-docker/deploy/examples/`.
+- Do **not** add parallel monorepo-root `docker/` trees or duplicate image definitions without an
+  explicit design decision.
 
-### Secrets and local env
+### Machine-local layout (never committed)
 
-- **Do not** commit real `.env`, tokens, PATs, or machine-specific host paths.
-- Use committed **`example.*`** templates. Machine-local files live under **`$NORNIR_DOCKER_USER_ROOT`** (default **`D:\Docker`**):
-  - **Build:** `Builds/nornir/` → `build.env`, `.build.<id>.env` (invoke `docker-build.ps1` from that directory).
-  - **Run:** `Run/<project-key>/` (e.g. `Run/nornir-dev/.env` for cursor-dev; worker/net-mounts under their keys).
-- **Compose bridge (cursor-dev):** Docker Compose / Dev Containers auto-load **`nornir-docker/.env`** only. Hardlink or copy the Run file there (junctions are directories-only; SymbolicLink needs Developer Mode). See **docker-machine-layout** and **nornir-docker-devcontainer**.
-- **`docker-build.ps1`** merges build-args only from the **invocation directory** (`build.env`, `.build.<id>.env`); it does not read committed `example.*.build.env` files automatically.
+Root **`NORNIR_DOCKER_USER_ROOT`**: **`D:\Docker`** on Windows, **`/srv/docker`** on Ubuntu.
+
+- `Run/_host/host.env`, `Run/_host/secrets/secrets.env`, `Run/_host/targets.psd1`
+- `Run/<stack>/<stack>.run.env`, `Run/<stack>/secrets/` (700; files 600 on Linux)
+- `Run/nornir-net-mounts/` (CIFS manifest + `secrets/net-creds/*.cred`)
+- `Builds/<stack>/` (build-time env for `docker-build.ps1`), `Data/<stack>/` (persistent service data),
+  `Certs/<cert-name>/` (shared TLS certificate), `Work/` (disposable `nornir-build` sessions; was
+  `mounted-configs`), `Logs/<stack>/` (persistent logs; `nornir-build` mounts it as `NORNIR_LOG_ROOT`).
+- Env merge order (later wins): `host.env`, `Run/_host/secrets/secrets.env`, `Run/<stack>/<stack>.run.env`,
+  `Run/<stack>/secrets/secrets.env`. Compose files use the contract variables (`STACK_RUN_DIR`,
+  `STACK_SECRETS_DIR`, `STACK_DATA_DIR`, `STACK_LOGS_DIR`, `DOCKER_CERTS_DIR`, `DOCKER_WORK_DIR`,
+  `NORNIR_REPO_ROOT_HOST`, `VIKING_REPO_ROOT_HOST`, `VIKING_HOSTNAME_*`, `TLS_CERT_NAME`) instead of
+  hard-coded host paths.
+- **Compose bridge (cursor-dev):** Compose / Dev Containers only read **`nornir-docker/.env`**. It is a
+  hardlink (or copy) of `Run/nornir-dev/.env`; `compose.cursor-dev.yaml` also passes it as `env_file`.
+
+### Naming
+
+- `NORNIR_*` nornir behaviour; `NORNIR_DOCKER_*` machine-level Docker settings; `VIKING_*` Viking
+  deployment settings; `TLS_*` the certificate.
+- `*_HOST` = host bind path; `*_HOSTNAME` = DNS name. `NORNIR_REPO_ROOT_HOST` replaces host-side
+  `NORNIR_MONOREPO_ROOT` (still read, with a warning).
+- Stack keys are kebab-case and equal the `Run/<stack>/` folder, the `<stack>.run.env` name, and the
+  compose project name.
+
+### Secrets
+
+- **Do not** commit real `.env`, `Run/` files, tokens, PATs, certificates, or machine-specific host paths.
+  Templates only (`example.*`).
+- **Do not** put secrets in `host.env` or `<stack>.run.env`; they go in a `secrets/` folder.
+- **Do not** load `GITHUB_TOKEN` / `GH_TOKEN` into the host process; pass them to containers via `--env-file`.
+- **`docker-build.ps1`** merges build-args only from the **invocation directory** (`build.env`,
+  `.build.<id>.env`); it does not read committed `example.*.build.env` files automatically.
+
+### Network exposure
+
+- On Linux, Docker-published ports bypass ufw. **Do not** publish internal ports (MQTT 1883, dashboard
+  8087, debuggers 4024/5678, Docker API) on anything but `127.0.0.1`. Cross-host ports are filtered
+  in the `DOCKER-USER` chain.
 
 ### Submodule workflow
 
-- When `nornir-docker` is a submodule: commit Docker changes **inside the submodule**, then bump the parent monorepo submodule pointer. Do not assume parent-repo commits include submodule file changes unless the pointer was updated.
+- When `nornir-docker` is a submodule: commit Docker changes **inside the submodule**, then bump the
+  parent monorepo submodule pointer. Do not assume parent-repo commits include submodule file changes
+  unless the pointer was updated.
 
 ### CuPy, CUDA, and GPU
 
-- Dev and CuPy prod images ship a **`CUPY_PACKAGE`** wheel (default `cupy-cuda13x`); the **host** still needs a compatible NVIDIA driver and GPU passthrough (`--gpus all` or compose reservations) for device use at **run** time.
+- Dev and CuPy prod images ship a **`CUPY_PACKAGE`** wheel (default `cupy-cuda13x`); the **host** still
+  needs a compatible NVIDIA driver and GPU passthrough (`--gpus all` or compose reservations; NVIDIA
+  container toolkit on Linux) for device use at **run** time.
 - Do not imply GPU works in docs or scripts without stating the run-time GPU requirement.
 
 ### Compose and `/workspace`
 
-- Avoid **double-mounting** `/workspace` (Compose bind/volume **and** devcontainer `workspaceMount` on the same target).
-- **`cursor-dev`** (default): bind-mounted monorepo root; entry script uses **`NORNIR_WORKSPACE_STRATEGY=mounted`** — no forced branch checkout unless **`NORNIR_SYNC_REMOTE=1`**.
-- **`cursor-dev-clone`**: named volume + clone strategy; use the separate devcontainer config when a fresh in-container tree is intended.
+- Avoid **double-mounting** `/workspace` (Compose bind/volume **and** devcontainer `workspaceMount` on
+  the same target).
+- **`cursor-dev`** (default): bind-mounted monorepo root; entry script uses
+  **`NORNIR_WORKSPACE_STRATEGY=mounted`** — no forced branch checkout unless **`NORNIR_SYNC_REMOTE=1`**.
+- **`cursor-dev-clone`**: named volume + clone strategy; use the separate devcontainer config when a
+  fresh in-container tree is intended.
 
 ### Logging
 
-- Do **not** add ad hoc debug log files in entry scripts or Docker-run paths (repo-root `debug-*.log`, per-project log dirs). Persistent logging follows the unified Nornir convention (`nornir_shared.misc.SetupLogging`, `NORNIR_LOG_ROOT`) in application code, not in shell entrypoints.
+- Do **not** add ad hoc debug log files in entry scripts or Docker-run paths (repo-root `debug-*.log`,
+  per-project log dirs). Persistent logging follows the unified Nornir convention
+  (`nornir_shared.misc.SetupLogging`, `NORNIR_LOG_ROOT`) in application code, not in shell entrypoints;
+  host-side log folders are `Logs/<stack>/`.
 
 ### Related skills
 
+- **deploy-connectomes** — deploying or debugging the connectomes.pitt.edu hosts with `stack.ps1`
 - **docker-build-run-phases** — build vs run scripts and env layering
 - **nornir-docker-devcontainer** — cursor-dev / Dev Containers / test data mounts
 - **nornir-docker-images-ci** — image matrix, OCI labels, maintenance checklist
-- **docker-machine-layout** — `D:\Docker\Builds` / `Run` / `mounted-configs` layout
+- **docker-machine-layout** — `D:\Docker` / `/srv/docker` layout (`Run`, `Builds`, `Data`, `Certs`, `Work`, `Logs`)

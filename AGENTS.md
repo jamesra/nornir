@@ -55,8 +55,9 @@ Full catalog: [`.cursor/skills/README.md`](.cursor/skills/README.md).
 |-------|-------------|
 | [archive-built-plans](.cursor/skills/archive-built-plans/SKILL.md) | Archive completed Cursor plans |
 | [cupy-missing-api-bugfix](.cursor/skills/cupy-missing-api-bugfix/SKILL.md) | CuPy/NumPy API gaps — dual-backend first |
+| [deploy-connectomes](.cursor/skills/deploy-connectomes/SKILL.md) | Deploying or debugging connectomes.pitt.edu hosts: `stack.ps1 doctor` → `-Sync` → up/rebuild → status; certs |
 | [docker-build-run-phases](.cursor/skills/docker-build-run-phases/SKILL.md) | Build vs run scripts and env layering |
-| [docker-machine-layout](.cursor/skills/docker-machine-layout/SKILL.md) | `D:\Docker\Builds` / `Run` / `mounted-configs` |
+| [docker-machine-layout](.cursor/skills/docker-machine-layout/SKILL.md) | `D:\Docker` / `/srv/docker`: `Run` / `Builds` / `Data` / `Certs` / `Work` / `Logs` |
 | [hypothesis-testing](.cursor/skills/hypothesis-testing/SKILL.md) | Property-based tests with Hypothesis |
 | [nornir-docker-devcontainer](.cursor/skills/nornir-docker-devcontainer/SKILL.md) | cursor-dev / Dev Containers setup |
 | [nornir-docker-images-ci](.cursor/skills/nornir-docker-images-ci/SKILL.md) | Image matrix, OCI/BOM, Docker CI |

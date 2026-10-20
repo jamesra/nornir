@@ -14,6 +14,9 @@ on:
       - "nornir-pools/**"
       - "nornir-imageregistration/**"
       - "nornir-buildmanager/**"
+      # Submodule pointer bumps are reported as the bare path; files as nornir-docker/...
+      - "nornir-docker"
+      - "nornir-docker/**"
   pull_request:
   workflow_dispatch:
 
