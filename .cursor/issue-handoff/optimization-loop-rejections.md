@@ -96,3 +96,27 @@
   invisible end to end.
 - Do not retry unless the raster/EDT stage is made much cheaper first, so the
   exact refinement becomes a measurable share of the per-polygon cost.
+
+## Vectorize shapes.ring_area_and_centroid shoelace loop
+
+- Date: 2026-10-19
+- Package: `nornir-buildmanager`
+- Candidate: In `segmentationtraining/shapes.py`, replace the per-vertex
+  shoelace loop in `ring_area_and_centroid` with `np.asarray` + `np.roll` and
+  sequential `np.cumsum(...)[-1]` sums (bit-identical to the loop; 500-example
+  Hypothesis equivalence test passed, incl. -0.0, inf/NaN under `np.errstate`).
+- Benchmark: pyperf, Windows host, idle, `-p 10 --copy-env`; closed wobbly
+  ellipse rings in mosaic coordinates (~120000, 98000) of 20/100/500/2000
+  points, plus `location_shape` end to end on a 500-point POLYGON.
+- Baseline: 2.41 us / 10.9 us / 56.5 us / 247 us; `location_shape_500` 2.51 ms.
+- Candidate: 17.7 us (7.4x slower) / 27.6 us (2.5x slower) / 70.3 us (1.24x
+  slower) / 2000 not significant; `location_shape_500` not significant.
+- Result: Rejected and reverted; no commit. Converting the tuple-of-tuples ring
+  to an array costs as much as the loop (`np.asarray` ~95 ns/point;
+  `np.fromiter(chain.from_iterable(...))` ~35 ns/point by ad hoc timeit) and
+  numpy's fixed overhead (~12 us) dominates the small rings. Even the best
+  variant saves ~20 us of a 2.5 ms `location_shape` (<1%); parse and
+  `simplify_ring` dominate.
+- Do not retry unless rings arrive as numpy arrays from parsing (no per-point
+  conversion), and an end-to-end `location_shape` / `write_location_shapes`
+  bench shows the area/centroid step as a measurable share.
