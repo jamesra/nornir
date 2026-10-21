@@ -8,7 +8,7 @@ All commands run with `$PY` (see SKILL.md Environment) and `NORNIR_HEADLESS=1` (
 
 - **Not protected.** The change edits nothing in Protected areas.
 - **Real callers.** Every generalization serves two or more existing call sites. No code for hypothetical callers.
-- **Net simpler.** For refactoring, production code gets shorter, or a rule that lived in several places now lives in one. Performance changes may add a little code if the measured gain is real and the code stays readable.
+- **Net simpler.** For refactoring, production code gets shorter, or a rule that lived in several places now lives in one. A lower complexity grade alone does not satisfy this gate, and category 9 splits whose new helpers have a single caller are rejected (user decision 2026-10-20). Performance changes may add a little code if the measured gain is real and the code stays readable.
 - **No new flags.** Do not merge functions with a `bool` or mode parameter that picks between old bodies.
 - **Structural, not cosmetic.** Renames, formatting, import sorting, quote style, and annotation-only edits do not count as a wake's change on their own. They may ride along with a structural change in the same lines. **Exception:** bringing code into compliance with documentation skills and rules ([nornir-documentation](../nornir-documentation/SKILL.md), [Documentation-and-monodoc](../../rules/Documentation-and-monodoc.mdc), and related package README/docstring conventions) is a valid reason for a wake's change when the edit is required for that compliance and still meets the other gates.
 - **Semantics traps checked.** Check each caller for the trap that applies:
