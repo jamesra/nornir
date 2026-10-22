@@ -115,7 +115,8 @@ Stack actions
      - ``compose build``
      - via the stack's compose files, when it has them
    * - ``pull``
-     - ``compose pull --ignore-buildable``
+     - ``compose pull --ignore-buildable``, then pulls buildable services whose image is a
+       registry ref (for example ``SEGMENTATION_IMAGE=ghcr.io/...``)
      - ``nornir-build``: ``docker-pull.ps1`` (``nornir:prod`` and ``nornir:cupy`` from GHCR)
    * - ``push``
      - not supported
@@ -235,7 +236,11 @@ here, uses ``-From`` as the source and ``-Target`` as the destination list.
 
    * ``build`` (default): the target builds them (``rebuild`` runs ``compose build --pull``).
    * ``ghcr``: before ``up``, ``restart`` or ``rebuild``, runs ``pull`` on the target (GHCR login on
-     the target required).
+     the target required). Services that also have a ``build:`` section are pulled only when their
+     image names a registry. ``viking-segmentation`` does this when ``SEGMENTATION_IMAGE`` is set in
+     its run env; publish that image with ``docker-push.ps1 -Images segmentation`` (Viking
+     ``deployment/segmentation``, "Prebuilt image"). Use ``up``, not ``rebuild``, because
+     ``rebuild`` builds again after the pull.
    * ``load``: ``docker save`` each image here and ``docker load`` it on the target over SSH; for
      hosts that cannot reach the registry. Images missing locally are skipped with a warning.
 
