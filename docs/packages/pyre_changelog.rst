@@ -12,6 +12,14 @@ Older installers remain on the repository
 `Releases page <https://github.com/jamesra/nornir/releases>`_
 (look for tags ``pyre-*``).
 
+1.8.1
+-----
+
+* Fixed Pyre keeping every CPU core busy for a minute or more after it starts or after you load images. Background worker processes in the installed version were crashing and restarting in a loop.
+* Much lower CPU use while Pyre sits idle. The image windows now redraw only when something on screen changes, such as a blinking selected point or a point being aligned.
+* The STOS folder browser no longer re-scores a whole folder every time Pyre starts. It saves quality scores as it computes them, pauses scoring while it is hidden or minimized, and opens at launch only if it was open when you last quit Pyre. If you use it, reopen it once with **File → Open STOS Folder Browser** after updating; Pyre remembers it from then on.
+* Menus are reorganized into **File**, **Transform**, **Registration**, **View**, and **Help**. Registration defaults are under **Registration → Transform Settings**, image contrast is under **View → Contrast**, and **Help → Mouse and Keyboard Controls** (F1) shows an updated controls reference. **Help → Online Manual** opens the manual in your browser.
+
 1.7.7
 -----
 
