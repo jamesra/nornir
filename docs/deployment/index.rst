@@ -89,12 +89,14 @@ Open these before anything else; they take the longest. The exact port lists are
 2. Bootstrap the Ubuntu servers (``compute`` and ``web``)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-On each server, as the sudo-capable deploy user. On ``compute``, install the NVIDIA driver first
+On each server, logged in as the account you will deploy as (it must be able to sudo; it becomes
+the deploy user). To use a dedicated account, create it first (``sudo adduser deploy``) and add
+``--user deploy``. On ``compute``, install the NVIDIA driver first
 (``sudo ubuntu-drivers install`` and reboot)::
 
    curl -fsSL https://raw.githubusercontent.com/jamesra/nornir-docker/main/deploy/bootstrap-ubuntu.sh -o bootstrap-ubuntu.sh
-   sudo bash bootstrap-ubuntu.sh --user deploy --gpu          # compute
-   sudo bash bootstrap-ubuntu.sh --user deploy --open-web     # web
+   sudo bash bootstrap-ubuntu.sh --gpu          # compute
+   sudo bash bootstrap-ubuntu.sh --open-web     # web
    # log out and back in (docker group)
 
    git clone --recurse-submodules https://github.com/jamesra/nornir.git /srv/src/nornir
@@ -119,7 +121,7 @@ with the new stacks::
    type $env:USERPROFILE\.ssh\id_ed25519.pub | ssh deploy@web.connectomes.pitt.edu "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
 
 Edit ``D:\Docker\Run\_host\targets.psd1`` (``Ssh``, ``Root``, ``Repos`` per target). Then make
-SSH key-only on both servers (``sudo bash bootstrap-ubuntu.sh --user deploy --harden-ssh``). The
+SSH key-only on both servers (``sudo bash bootstrap-ubuntu.sh --harden-ssh``). The
 ``iis`` host needs Windows OpenSSH with ``pwsh`` as its default shell; see
 :ref:`deploy-windows-openssh`. Only the dev box needs keys and ``targets.psd1``; the servers do
 not need keys on each other.

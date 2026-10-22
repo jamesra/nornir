@@ -37,7 +37,7 @@ Ubuntu (``compute``)
 Steps 2 to 4 of :doc:`index` cover this host. In short::
 
    sudo ubuntu-drivers install && sudo reboot
-   sudo bash bootstrap-ubuntu.sh --user deploy --gpu      # Docker, pwsh, cifs-utils, NVIDIA toolkit
+   sudo bash bootstrap-ubuntu.sh --gpu      # as the deploy account: Docker, pwsh, cifs-utils, NVIDIA toolkit
    # re-login, clone /srv/src/nornir and /srv/src/Viking
    pwsh /srv/src/nornir/nornir-docker/deploy/Initialize-DockerHost.ps1 -Role compute -VikingRepoRoot /srv/src/Viking -SetUserEnv
    echo cifs | sudo tee /etc/modules-load.d/nornir-cifs.conf

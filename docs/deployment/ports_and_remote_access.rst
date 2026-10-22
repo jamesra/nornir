@@ -128,7 +128,7 @@ On the dev box (Windows OpenSSH client, PowerShell)::
 Then turn off password login on each Ubuntu server (the script refuses if ``authorized_keys`` is
 empty)::
 
-   sudo bash bootstrap-ubuntu.sh --user deploy --harden-ssh
+   sudo bash bootstrap-ubuntu.sh --harden-ssh
 
 Optional ``~/.ssh/config`` aliases make ``targets.psd1`` shorter and work for VS Code too::
 
