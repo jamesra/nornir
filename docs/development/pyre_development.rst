@@ -163,7 +163,10 @@ Debugging frozen builds
 
 * ``sys.frozen`` is set by PyInstaller; ``pyre.frozen_paths`` centralizes AppData paths.
 * Missing modules: add hidden imports in ``pyre.spec`` or ``hook-pyre.py``.
-* Smoke test without GUI: ``pyre.exe --smoke-test``
+* Smoke test without GUI: ``pyre.exe --smoke-test`` (imports, then a process-pool round-trip
+  that fails if workers die and respawn)
+* ``pyre.__main__.main`` must call ``multiprocessing.freeze_support()`` first. Without it a
+  frozen pool worker re-runs Pyre, exits on its arguments, and is respawned in a loop.
 
 CI and releases
 ~~~~~~~~~~~~~~~
