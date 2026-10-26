@@ -28,7 +28,29 @@ $\Phi = T_t^{-1} \circ C \circ T_s$.
 Overlap of a carried shape $X$ with the target $T$: $o = |X \cap T| / |X|$ (whole cell, holes excluded); the trainer
 keeps $o \ge 0.60$.
 
+Pyre composite view, display to camera solve (`nornir-pyre/pyre/views/composite_display.py`,
+`lookat_from_display_position`): find the source-space camera centre $\ell$ with $T(\ell) = d$ for a display point $d$
+by $\ell_0 = T^{-1}(d)$, $\ell_{k+1} = \ell_k + T^{-1}(d) - T^{-1}(T(\ell_k))$, keeping the best $\ell_k$ and stopping
+when $\lVert T(\ell_k) - d \rVert_\infty \le 0.01$ px or after 8 steps ($T$ maps source to target).
+
 ## Algorithmic decisions
+
+- **2026-10-26 Save STOS: `ControlImageDim` from the target image, `MappedImageDim` from the source.** Why: Pyre wrote
+  them swapped (in `StosState` the deprecated "Fixed" names hold Source), and `StosFile.Save` keeps preset sizes, so
+  every `.stos` Pyre saved with differently sized images carried swapped sizes. They feed the grid transform's bounds
+  and the refine plausibility check. Files saved before nornir-pyre `6cb309f` with unequal image sizes keep the swap
+  until saved again. Where: `nornir-pyre/pyre/common.py` (`stos_image_dims_from_stos_config`).
+- **2026-10-22 Pyre composite view: solve $T(\ell) = d$ instead of applying $T^{-1}$ once (formula above).** Why: mesh
+  forward and inverse triangulate different point sets and RBF fits two separate functions, so $T(T^{-1}(p))$ missed
+  $p$ by up to 15 px (mesh) and 5 px (RBF) on a jittered 8x8 grid; each registration re-centred through it, and the
+  view crept about 45 px over 40 results. With the solve the worst miss is 0.026 px (mesh, 300 points, mean about 6
+  single-point transforms) and 0.01 px (RBF); the re-centred framing is also pinned so it cannot move. Rejected: 4
+  steps (worst 0.88 px on mesh). Where: `nornir-pyre/pyre/views/composite_display.py`.
+- **2026-10-22 Pyre: a held Space registers each point once per hold.** Why: key auto-repeat (about 30 presses/s)
+  re-registered the hovered point every 100-200 ms, and point alignment is not idempotent at subpixel level: the point
+  moved 0.3-1 px on every repeat indefinitely (process pool, synthetic image). The user chose once per point per hold
+  over once per key press and over continuous re-registration. Where:
+  `nornir-pyre/pyre/controllers/control_point_registration_queue.py` (`SpaceHoldRegistrations`).
 
 - **2026-10-25 Carry at export, not in the trainer.** One implementation of the carry for circles and polygons, matched
   to Viking's production carry, with per-circle provenance so a new correction set or an edited annotation re-carries
