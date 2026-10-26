@@ -10,14 +10,10 @@ description: >-
 
 # CuPy missing API — bugfix order
 
-## Source of truth
+Source of truth: **`.cursor/rules/Numpy-CuPy-compatibility.mdc`**, especially **Bug fixes when CuPy lacks an implementation**; the rest of that file covers `xp`, `get_array_module`, transfers and CuPyX.
 
-Follow **`.cursor/rules/Numpy-CuPy-compatibility.mdc`**, especially **Bug fixes when CuPy lacks an implementation**, plus the rest of that file for `xp`, `get_array_module`, transfers, and CuPyX.
+1. **First**, keep **numpy in → numpy out** and **cupy in → cupy out** where APIs allow: `cp.get_array_module`, `cupyx.scipy.get_array_module`, device-side equivalents, or a small dispatcher.
+2. **Then**, a **narrow host boundary** for only the unsupported step, keeping the rest of the pipeline on the input backend when practical.
+3. **Last**, a **whole-pipeline NumPy / CPU-only** path when no reasonable dual-backend option exists, the work is inherently host-based, or the rule's small-data / environment exceptions apply. **Document** that boundary in code.
 
-## Workflow (short)
-
-1. **First** try a solution that preserves **numpy in → numpy out** and **cupy in → cupy out** where APIs allow: `cp.get_array_module`, `cupyx.scipy.get_array_module`, device-side equivalents, or a small dispatcher.
-2. **Then** consider a **narrow host boundary** for only the unsupported step, with the rest of the pipeline staying on the input backend when practical.
-3. **Last** adopt a **whole-pipeline NumPy / CPU-only** path when there is no reasonable dual-backend option, the work is inherently host-based, or the existing rule’s small-data / environment exceptions apply—**document** that boundary in code.
-
-Do not default to “convert everything to NumPy” as the first fix when a dual-backend or partial-boundary fix is feasible.
+Do not default to "convert everything to NumPy" when a dual-backend or partial-boundary fix is feasible.

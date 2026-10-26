@@ -15,38 +15,45 @@ description: >-
 
 | Situation | Tool | Notes |
 |-----------|------|-------|
-| **Wall-time breakdown across phases** (UI freeze, enqueue, image prep, pool submit) | `nornir_shared.profiling.PhaseProfiler` | NDJSON + optional `.pstats` |
-| **Simple elapsed-time totals** in CLI/pipeline stages | `nornir_shared.tasktimer.TaskTimer` | Prints via `prettyoutput`; no structured log |
-| **Legacy script profiling** | `nornir_shared.misc.RunWithProfiler` | `cProfile.run("code string")`; prefer `PhaseProfiler` for new work |
-| **Wrong value / branch / null at a line** | [debug-live](~/.agents/skills/debug-live/SKILL.md) + DebugMCP | Breakpoints first; avoid guessing runtime state |
-| **Process-pool worker hotspots** | `NORNIR_PROFILE` env (see `nornir_pools`) | Writes per-worker `.pstats` under `.nornir-pools-profile/` |
+| Wall-time breakdown across phases (UI freeze, enqueue, image prep, pool submit) | `nornir_shared.profiling.PhaseProfiler` | NDJSON + optional `.pstats` |
+| Simple elapsed-time totals in CLI/pipeline stages | `nornir_shared.tasktimer.TaskTimer` | Prints via `prettyoutput`; no structured log |
+| Legacy script profiling | `nornir_shared.misc.RunWithProfiler` | `cProfile.run("code string")`; prefer `PhaseProfiler` for new work |
+| Wrong value / branch / null at a line | [debug-live](~/.agents/skills/debug-live/SKILL.md) + DebugMCP (`user-debugmcp` MCP) | Breakpoints first; avoid guessing runtime state |
+| Process-pool worker hotspots | `NORNIR_PROFILE` env (see `nornir_pools`) | Writes per-worker `.pstats` under `.nornir-pools-profile/` |
 
 Default venv: `D:\src\git\nornir\venv\pyre314` (see **Virtual-Env** rule).
+
+Before claiming a speed-up, meet [Performance-evidence](../../rules/Performance-evidence.mdc): measured
+before/after numbers, the step's share of end-to-end time, pyperf `compare_to` JSON plus an old-vs-new
+equivalence test. pyperf on Windows needs `--copy-env` or its workers cannot import the venv. Rejected
+candidates: [optimization-loop-rejections.md](../../issue-handoff/optimization-loop-rejections.md). Confirm
+material perf/architecture changes per [Design-choice-confirmation](../../rules/Design-choice-confirmation.mdc).
 
 ---
 
 ## PhaseProfiler (preferred for agents)
 
-Module: `nornir_shared/profiling.py`  
-Tests: `nornir-shared/tests/test_profiling.py`
+Module: `nornir_shared/profiling.py`; tests: `nornir-shared/tests/test_profiling.py`.
 
-### Quick setup (explicit paths)
+### Setup (explicit paths)
 
 ```python
+import os
 from pathlib import Path
 from nornir_shared.profiling import PhaseProfiler, configure_phase_profiler
 
+out = Path(os.environ["TESTOUTPUTPATH"])  # never the repo root
 configure_phase_profiler(
     PhaseProfiler(
         session_id="my-session",
-        log_path=Path("debug-my-session.log"),          # NDJSON, one object per line
-        profile_path=Path("debug-my-session.pstats"),   # optional cProfile dump
+        log_path=out / "debug-my-session.log",          # NDJSON, one object per line
+        profile_path=out / "debug-my-session.pstats",   # optional cProfile dump
         run_id="pre-fix",
     ),
 )
 ```
 
-### Quick setup (environment variables)
+### Setup (environment variables)
 
 ```text
 NORNIR_LOG_ROOT=d:\logs\nornir
@@ -54,13 +61,13 @@ NORNIR_PHASE_PROFILE_LOG=1
 # or a basename / relative name → lands in NORNIR_LOG_ROOT/<date>/
 # NORNIR_PHASE_PROFILE_LOG=agent-phases.ndjson
 # Absolute path still allowed for an explicit agent override:
-# NORNIR_PHASE_PROFILE_LOG=d:\src\git\nornir\debug.log
+# NORNIR_PHASE_PROFILE_LOG=C:\Temp\Nornir\debug.log   (never the repo root)
 NORNIR_PHASE_PROFILE_PSTATS=1
 NORNIR_PHASE_PROFILE_SESSION=my-session
 NORNIR_PHASE_PROFILE_RUN_ID=pre-fix
 ```
 
-Then `configure_phase_profiler(PhaseProfiler())` — paths come from env (session layout when `NORNIR_LOG_ROOT` is set and the log path is relative or a sentinel).
+Then `configure_phase_profiler(PhaseProfiler())`; paths come from env (session layout when `NORNIR_LOG_ROOT` is set and the log path is relative or a sentinel).
 
 ### Instrument a code path
 
@@ -84,106 +91,77 @@ finally:
     stop_cprofile("hot_path")  # logs top cumtime frames into NDJSON
 ```
 
-Module helpers (`log_event`, `phase_timer`, `start_cprofile`, `stop_cprofile`, `next_seq`) require `configure_phase_profiler(...)` first.
+Module helpers (`log_event`, `phase_timer`, `start_cprofile`, `stop_cprofile`, `next_seq`) require `configure_phase_profiler(...)` first. Hooks in library code must be no-ops when the profiler is not configured or `PhaseProfiler(..., log_path=None)`.
 
-### Pyre session shim pattern
+### Pyre
 
-For a focused investigation, keep a thin package config (example: `nornir-pyre/pyre/debug_shift_space_profile.py`) that only calls `configure_phase_profiler` with session-specific paths. Instrumentation imports the shim, not scattered paths.
-
-**Pyre registration jobs (Refine w/ Grid, rotate/translate, …):** `pyre.phase_profile` configures PhaseProfiler after `SetupLogging` when `NORNIR_LOG_ROOT` is set. cProfile runs **only** inside `RegistrationJobRunner` workers (`profile_registration_job`), not during Qt UI message processing. Opt out with `NORNIR_PHASE_PROFILE_JOBS=0`. Outputs land next to the session log as `nornir-phase-profile-<session>.ndjson` / `.pstats`.
-
-After changing registration code Pyre invokes, follow [pyre-registration-performance](../pyre-registration-performance/SKILL.md) (≤1 s per control-point registration; always read profiler output after a Pyre run).
-
-**Restart the GUI app** after adding or changing profiling hooks — Pyre does not hot-reload instrumented modules.
+- **Session shim:** keep profiler config in a thin app-layer module that only calls `configure_phase_profiler`; instrumentation imports it. Never leave session-specific paths in shared libraries. Current example: `nornir-pyre/pyre/phase_profile.py` (`ensure_configured`, env-driven paths under `NORNIR_LOG_ROOT`). The old hard-coded `pyre/debug_shift_space_profile.py` shim was removed in nornir-pyre `ae4bbdb`.
+- **Display-path timing without NDJSON:** `nornir-pyre/pyre/perf_debug.py` prints `timed(label)` blocks when `PYRE_PERF_DEBUG=1`.
+- **Registration jobs (Refine w/ Grid, rotate/translate, …):** `pyre.phase_profile` configures PhaseProfiler after `SetupLogging` when `NORNIR_LOG_ROOT` is set. cProfile runs **only** inside `RegistrationJobRunner` workers (`profile_registration_job`), not during Qt UI message processing. Opt out with `NORNIR_PHASE_PROFILE_JOBS=0`. Outputs: `nornir-phase-profile-<session>.ndjson` / `.pstats` next to the session log.
+- After changing registration code Pyre invokes, follow [pyre-registration-performance](../pyre-registration-performance/SKILL.md) (≤1 s per control-point registration; always read profiler output after a Pyre run).
+- **Restart the GUI app** after adding or changing profiling hooks; Pyre does not hot-reload instrumented modules.
 
 ---
 
 ## Agent workflow (performance bugs)
 
-1. **State hypotheses** (3–5) before editing — e.g. image prep, command init, enqueue, serial queue, pool overhead.
-2. **Instrument** at phase boundaries with `phase_timer` / `log_event`; map each log to a hypothesis id (`hypothesisId` in NDJSON).
+1. **State 3–5 hypotheses** before editing (e.g. image prep, command init, enqueue, serial queue, pool overhead).
+2. **Instrument** phase boundaries with `phase_timer` / `log_event`; map each log to a hypothesis id (`hypothesisId` in NDJSON).
 3. **Clear the log file** before each run (one session file; do not delete other agents' logs).
-4. **Ask the user to reproduce** once; read NDJSON after.
-5. **Mark each hypothesis** CONFIRMED / REJECTED / INCONCLUSIVE with cited log lines (`elapsed_ms`, counts, `pool_kind`).
-6. **Fix only with evidence**; keep instrumentation for a verification run (`run_id="post-fix"`).
-7. **Remove temporary hooks** after confirmed success or explicit user request.
+4. **Ask the user to reproduce** once; read the NDJSON after.
+5. **Mark each hypothesis** CONFIRMED / REJECTED / INCONCLUSIVE, citing log lines (`elapsed_ms`, counts, `pool_kind`).
+6. **Fix only with timing evidence**; keep instrumentation for a verification run (`run_id="post-fix"`).
+7. **Remove temporary hooks** after confirmed success or on explicit user request.
 
-### Reading NDJSON
-
-Each line is one JSON object. Key fields:
-
-- `hypothesisId` — ties to a hypothesis
-- `message` — often `phase:start` / `phase:end`
-- `data.elapsed_ms` — phase duration
-- `data` — counts, ids, `pool_kind`, queue depth, etc.
-
-### Reading `.pstats`
+NDJSON: one JSON object per line. `hypothesisId` ties to a hypothesis; `message` is often `phase:start` / `phase:end`; `data.elapsed_ms` is phase duration; `data` also carries counts, ids, `pool_kind`, queue depth.
 
 ```bash
-python -m pstats debug-my-session.pstats
-# or: pip install snakeviz && snakeviz debug-my-session.pstats
+python -m pstats "$TESTOUTPUTPATH/debug-my-session.pstats"
+# or: pip install snakeviz && snakeviz "$TESTOUTPUTPATH/debug-my-session.pstats"
 ```
 
 ---
 
-## Nornir-specific tips (from past investigations)
+## Nornir-specific tips
 
 ### Logging policy
 
-- **Do not** add repo-root `debug-*.log` ad hoc sinks in library code.
-- Persistent logs: `nornir_shared.misc.SetupLogging` + `NORNIR_LOG_ROOT` (see **Unified-Logging-Convention** rule).
-- **Temporary agent profiling** belongs in `PhaseProfiler` NDJSON at an explicit path, not mixed into session error logs.
+- **Do not** add repo-root `debug-*.log` ad hoc sinks in library code, or `print()` / ad hoc file logs where `PhaseProfiler` or DebugMCP fits.
+- Persistent logs: `nornir_shared.misc.SetupLogging` + `NORNIR_LOG_ROOT` (**Unified-Logging-Convention** rule).
+- Temporary agent profiling goes in `PhaseProfiler` NDJSON at an explicit path, not mixed into session error logs.
+- No profiling in CI commit paths without a feature flag or env gate.
 
 ### Pyre Shift+Space (control-point registration)
-
-Two different commands by transform type:
 
 | Transform | Shift+Space command | Behavior |
 |-----------|---------------------|----------|
 | **MESH / RBF** | `RegisterControlPointCommand(register_all=True)` | Enqueues **every** control point |
 | **GRID** | `GridRegisterAllCommand` | One-pass grid refine job (not per-point queue) |
 
-Hot paths to profile for MESH/RBF “register all”:
+Hot paths for MESH/RBF "register all":
 
-1. `RegisterControlPointCommand.__init__` — `selected_points.update(range(N))`, `transform_controller.points` snapshot
-2. `execute` — `contrasted_permutation_helper` on source/target (lazy unless contrast non-identity)
-3. `TransformController.enqueue_point_registrations` — index→id, `_sync_register_busy`, `_pump_registration_queue`
-4. **Serial queue** — only **one** alignment in flight; total time ≈ N × (per-point time + UI apply)
-5. **Process pool** — used only when `uses_process_pool_for_point_alignment()` is true (**not** when active backend is CuPy); each point still waits for the previous to finish
+1. `RegisterControlPointCommand.__init__`: `selected_points.update(range(N))`, `transform_controller.points` snapshot
+2. `execute`: `contrasted_permutation_helper` on source/target (lazy unless contrast non-identity)
+3. `TransformController.enqueue_point_registrations`: index→id, `_sync_register_busy`, `_pump_registration_queue`
+4. **Serial queue**: only **one** alignment in flight; total time ≈ N × (per-point time + UI apply)
+5. **Process pool**: only when `uses_process_pool_for_point_alignment()` is true (**not** when the active backend is CuPy); each point still waits for the previous one
 
-Instrument `_pump_registration_queue` with `pool_kind` and log `wait_ms` vs `alignment_seq` to see whether slowness is queue semantics vs pool vs alignment compute.
+Instrument `_pump_registration_queue` with `pool_kind` and log `wait_ms` vs `alignment_seq` to separate queue semantics from pool from alignment compute.
 
 ### Multiprocessing vs threads
 
-- `nornir_pools.GetGlobalLocalMachinePool()` — CPU work in child processes; pickle/submit overhead per task.
-- `GetGlobalThreadPool()` — in-process; GIL-bound but no pickle.
+- `nornir_pools.GetGlobalLocalMachinePool()`: CPU work in child processes; pickle/submit overhead per task.
+- `GetGlobalThreadPool()`: in-process; GIL-bound, no pickle.
 - CuPy Pyre paths stay in-thread for point alignment (CUDA context not shared with pool workers).
 
-Do not assume “multiprocessing” means all points run in parallel — check the **queue design** first.
+"Multiprocessing" does not mean all points run in parallel; check the **queue design** first.
 
-### TaskTimer in pipelines
+### TaskTimer and tests
 
-`nornir_buildmanager` and `nornir_imageregistration` already use `TaskTimer` for stage timing written to volume logs. Reuse that pattern for long batch jobs; use `PhaseProfiler` when you need structured, machine-readable phase logs for an agent or A/B comparison.
-
-### Tests and headless runs
-
-- Set `NORNIR_HEADLESS=1` for imageregistration pytest (see **nornir-headless-unit-tests** skill).
-- Profiling hooks in library code should be no-ops when `PhaseProfiler(..., log_path=None)` or profiler not configured.
-
----
-
-## Anti-patterns
-
-- ❌ Fixing slowness without timing evidence.
-- ❌ `print()` / ad hoc file logs when `PhaseProfiler` or DebugMCP fits.
-- ❌ Profiling in CI commit paths without a feature flag or env gate.
-- ❌ Leaving session-specific `configure_phase_profiler` paths in shared libraries — keep config in app/shim layer.
-- ❌ Forgetting to restart Pyre after adding instrumentation.
-
----
+- `nornir_buildmanager` and `nornir_imageregistration` use `TaskTimer` for stage timing in volume logs; reuse it for long batch jobs. Use `PhaseProfiler` for structured, machine-readable phase logs (agent or A/B comparison).
+- Set `NORNIR_HEADLESS=1` for imageregistration pytest (**nornir-headless-unit-tests** skill).
 
 ## Related
 
-- Policy: [Design-choice-confirmation](../../rules/Design-choice-confirmation.mdc) — confirm material perf/architecture changes
-- Live state: personal **debug-live** skill + `user-debugmcp` MCP
-- Pools: `nornir-docker` / `nornir_pools` — `NORNIR_PROFILE` for worker `.pstats`
+- Real-data refine A/B: [nornir-realworld-refine-benchmark](../nornir-realworld-refine-benchmark/SKILL.md)
+- Pools: `nornir-docker` / `nornir_pools`; `NORNIR_PROFILE` for worker `.pstats`

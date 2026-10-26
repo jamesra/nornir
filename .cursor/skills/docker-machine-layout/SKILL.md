@@ -10,10 +10,10 @@ description: Standardizes the machine-local Docker host layout (D:\Docker on Win
 | Skill | Use when |
 |-------|----------|
 | **deploy-connectomes** | Deploying or debugging the connectomes.pitt.edu hosts with `stack.ps1` |
-| **docker-build-run-phases** | Build vs run scripts, `example.*.env` templates, env layering |
+| **docker-build-run-phases** | Build vs run scripts, `example.*.env` templates, env layering, `docker-build.ps1` invocation directory |
 | **docker-machine-layout** (this) | Where machine-local files live under the layout root |
-| **nornir-docker-images-ci** | Image matrix, OCI/BOM, Dockerfile/CI review |
-| **nornir-docker-devcontainer** | Day-to-day cursor-dev / Dev Containers setup |
+| **nornir-docker-images-ci** | Image matrix, `docker-build.ps1` order, OCI/BOM labels, Dockerfile/CI review |
+| **nornir-docker-devcontainer** | Day-to-day cursor-dev Compose / Dev Containers setup |
 
 Human docs: `docs/deployment/host_layout.rst` (https://nornir.github.io/deployment/host_layout.html).
 
@@ -38,39 +38,37 @@ Every stack gets the same shape, keyed by its kebab-case stack name (= compose p
 
 ## How to apply this
 
-- **Machine-local runtime state** (real env files, secrets, data, certs, host-specific config): under the layout root.
-- **Versioned templates** (`example.*`, sample envs, docs): in the repository next to the Docker assets
+- Real env files, secrets, data, certs and host-specific config go under the layout root; versioned
+  templates (`example.*`, sample envs, docs) go in the repository next to the Docker assets
   (`nornir-docker/deploy/examples/` for deploy templates).
 - **Never commit** real secrets, `Run/` files, or machine-specific resolved env files.
 - Create the tree with `nornir-docker/deploy/Initialize-DockerHost.ps1 -Role compute|web|iis|dev`
   (copies templates only when missing; writes forwarding launchers, never copies of repo scripts).
-- Run stacks with `stack.ps1` (it merges `host.env` → host secrets → `<stack>.run.env` → stack secrets
+- Run stacks with `stack.ps1` (merges `host.env` → host secrets → `<stack>.run.env` → stack secrets
   and exports `STACK_*_DIR`, `DOCKER_CERTS_DIR`, `DOCKER_WORK_DIR` to compose).
-- Override the root with `NORNIR_DOCKER_USER_ROOT` (or `-Root`) and keep the same directory model.
-- Old layouts migrate with `deploy/Move-DockerHostLayout.ps1 -WhatIf` (copies, never deletes).
+- Override the root with `NORNIR_DOCKER_USER_ROOT` (or `-Root`); keep the same directory model.
+- Migrate old layouts with `deploy/Move-DockerHostLayout.ps1 -WhatIf` (copies, never deletes).
 
 ## cursor-dev Compose bridge
 
-Run env for cursor-dev belongs under **`Run\nornir-dev\.env`**, not under `Builds\`.
+cursor-dev run env belongs in **`Run\nornir-dev\.env`**, not `Builds\`. Compose and Cursor Dev
+Containers only auto-load **`nornir-docker/.env`** (the Compose project directory), so bridge it with
+a **hardlink** or **copy**:
 
-Docker Compose and Cursor Dev Containers only auto-load **`nornir-docker/.env`** (Compose project
-directory). Bridge with a **hardlink** or **copy** from the Run file to `nornir-docker/.env`:
-
-- Windows **junctions are directories-only** — do not use them for `.env` files.
+- Windows **junctions are directories-only**; do not use them for `.env` files.
 - **SymbolicLink** needs Developer Mode or an elevated shell.
 - Prefer: `New-Item -ItemType HardLink -Path '...\nornir-docker\.env' -Target 'D:\Docker\Run\nornir-dev\.env'` (same volume) or `Copy-Item`.
 
-`compose.cursor-dev.yaml` also passes that file as `env_file`, so all of its keys reach the container.
+`compose.cursor-dev.yaml` also passes that file as `env_file`, so all its keys reach the container.
 
 Shared CIFS layout and the cursor-dev net-mount override: `Run\nornir-net-mounts\` (legacy
 `Run\nornir-dev\` still works). See `docs/deployment/nornir_build_appliance.rst`.
 
 ## Exception: Cursor worker
 
-`nornir-cursor-worker` still keeps per-run workspaces under
-`mounted-configs\nornir-cursor-worker\` (created by
-`windows-docker-layout/Initialize-NornirCursorWorkerLayout.ps1`). Do not move them without
-updating `start-cursor-worker.ps1` and `Cleanup-CursorWorkerClones.ps1` together.
+`nornir-cursor-worker` keeps per-run workspaces under `mounted-configs\nornir-cursor-worker\`
+(created by `windows-docker-layout/Initialize-NornirCursorWorkerLayout.ps1`). Do not move them
+without updating `start-cursor-worker.ps1` and `Cleanup-CursorWorkerClones.ps1` together.
 
 ## Implementation checklist
 
@@ -82,10 +80,3 @@ updating `start-cursor-worker.ps1` and `Cleanup-CursorWorkerClones.ps1` together
 - [ ] cursor-dev: Run file bridged to `nornir-docker/.env`
 - [ ] Repo contains only templates and examples
 - [ ] Linux: secrets dirs 700, secret files 600
-
-## Related skills
-
-- **deploy-connectomes** — `stack.ps1` deploy/debug procedure
-- **docker-build-run-phases** — build vs run env files and `docker-build.ps1` invocation directory
-- **nornir-docker-images-ci** — image tags, `docker-build.ps1` order, OCI/BOM labels
-- **nornir-docker-devcontainer** — cursor-dev Compose and Dev Containers

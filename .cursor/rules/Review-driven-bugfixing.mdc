@@ -6,35 +6,33 @@ alwaysApply: false
 
 ## Fixing review findings
 
-Read [`.cursor/skills/nornir-review-issue-fixing/SKILL.md`](../skills/nornir-review-issue-fixing/SKILL.md)
-before working an item from `.cursor/nornir-bug-review-master.md` or the `jamesra/nornir-review`
-tracker. The rule below is the non-negotiable core; the skill holds the procedure and the
-accumulated lessons.
+Before working an item from `.cursor/nornir-bug-review-master.md` or the `jamesra/nornir-review`
+tracker, read [`.cursor/skills/nornir-review-issue-fixing/SKILL.md`](../skills/nornir-review-issue-fixing/SKILL.md)
+(procedure and lessons). This rule is the non-negotiable core.
 
 ### Verify before fixing
 
-- Findings were produced by **reading code, not running it**. Treat every one as an **unproven
-  hypothesis** until reproduced or measured.
-- **Do not** edit based on the finding's explanation alone when its symptom can be executed.
-- When evidence contradicts the stated diagnosis, **follow the evidence** and record the
-  correction on the issue. A theory that cannot explain one piece of the evidence is usually the
-  wrong theory.
-- If it cannot be reproduced on this machine, say so and leave it **open as unproven** rather than
-  applying a speculative fix.
+- Findings came from **reading code, not running it**: each is an **unproven hypothesis** until
+  reproduced or measured.
+- **Do not** edit on the finding's explanation alone when its symptom can be executed.
+- When evidence contradicts the diagnosis, **follow the evidence** and record the correction on the
+  issue. A theory that cannot explain one piece of the evidence is usually the wrong theory.
+- If it cannot be reproduced on this machine, say so and leave it **open as unproven**; no
+  speculative fix.
 
 ### Tests
 
-- A regression test **must fail against the previous behaviour**; verify by stashing the fix, and
-  state the count.
-- Before attributing a suite failure to your change, **re-run on a stashed baseline**. Several
+- A regression test **must fail against the previous behaviour**: run it in a detached worktree of
+  `HEAD` (never `git stash`; see Shared-checkout-safety) and state the count.
+- Before blaming a suite failure on your change, **re-run on a `HEAD` worktree baseline**; several
   suites carry known pre-existing and flaky failures.
 
 ### Performance
 
 - Perf claims need **before/after numbers** and the configuration they were measured under.
-- **Measure the layer you change in isolation** — an overlapping larger allocation or cost hides a
+- **Measure the layer you change in isolation**: an overlapping larger allocation or cost hides a
   smaller one, making a correct fix look ineffective.
-- **State the cost of any work you add**, even when it is small. Do not describe it as free.
+- **State the cost of any work you add**, however small. Do not call it free.
 
 ### Scope
 

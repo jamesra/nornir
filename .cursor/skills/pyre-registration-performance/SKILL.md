@@ -13,13 +13,13 @@ description: >-
 
 ## Performance goal (non-negotiable)
 
-When changes are made to registration code invoked by pyre. Check the profiler results after a pyre run to get a sense of the impact. We want to maintain fast performance. A user should get a registration result within 1 second of requesting a registration on a control point.
+After changing registration code Pyre invokes, check the profiler results from a Pyre run. A user
+must get a registration result within **1 second** of requesting it on a control point.
 
-Treat **>1 s request→result for a single control point** as a regression unless the user explicitly accepts a slower path (e.g. huge ROI, many angles, or intentional diagnostics).
+Treat **>1 s request→result for a single control point** as a regression unless the user explicitly
+accepts a slower path (e.g. huge ROI, many angles, intentional diagnostics).
 
-## When this skill applies
-
-Any change that can affect wall time on these paths:
+## Paths covered
 
 | Path | Typical trigger |
 |------|-----------------|
@@ -27,31 +27,42 @@ Any change that can affect wall time on these paths:
 | Register-all (mesh/RBF) | Shift+Space → same queue, N points serial |
 | Grid refine from Pyre | Refine w/ Grid / `GridRegisterAllCommand` → `RegistrationJobRunner` |
 
-Also covers shared math under `nornir-imageregistration` (phase correlation, ROI extract, masks) when Pyre is a caller.
+Also shared math under `nornir-imageregistration` (phase correlation, ROI extract, masks) when Pyre
+is a caller.
 
 ## Required workflow after code changes
 
-1. **Restart Pyre** so the edited modules load (no hot reload).
-2. **Reproduce** the registration the change touches (prefer one control point for the 1 s budget; use Refine Grid only when that path changed).
+1. **Restart Pyre** so edited modules load (no hot reload).
+2. **Reproduce** the registration the change touches (prefer one control point for the 1 s budget;
+   Refine Grid only when that path changed).
 3. **Read profiler output** under `NORNIR_LOG_ROOT/<date>/`:
-   - `nornir-phase-profile-<session>.ndjson` — `worker:end` `elapsed_ms`, `cProfile saved` → `top_cumtime`, `refine_phase_totals` when present
-   - `nornir-phase-profile-<session>.pstats` — optional deeper dump
-4. **Judge impact** before calling the change done:
-   - Single-point: request→result should stay **≤ 1 s** on a normal STOS pair / default alignment area.
-   - If slower, identify the dominant `top_cumtime` / phase bucket and fix or flag before merge-minded wrap-up.
-5. **Do not** leave the task as “code compiles / tests pass” without profiler evidence when registration latency could have changed.
+   - `nornir-phase-profile-<session>.ndjson`:
+     - `message: "worker:end"` + `data.elapsed_ms`: whole job / worker wall time;
+     - `message: "cProfile saved"` + `data.top_cumtime`: hottest frames for that job;
+     - `message: "refine_phase_totals"` (when present): grid-refine phase buckets (`fft`, `prewarp`, …) in seconds.
+   - `nornir-phase-profile-<session>.pstats`: optional deeper dump.
+4. **Judge impact** before calling it done: single-point request→result stays **≤ 1 s** on a normal
+   STOS pair / default alignment area. If slower, find the dominant `top_cumtime` / phase bucket and
+   fix or flag it before wrap-up.
+5. **Do not** finish on "compiles / tests pass" without profiler evidence when registration latency
+   could have changed.
 
-Job-scoped cProfile (not the Qt UI loop) is configured by `pyre.phase_profile` when `NORNIR_LOG_ROOT` is set. Opt out only with `NORNIR_PHASE_PROFILE_JOBS=0` (avoid while checking this budget).
+Job-scoped cProfile (not the Qt UI loop) is configured by `pyre.phase_profile` when `NORNIR_LOG_ROOT`
+is set. `NORNIR_PHASE_PROFILE_JOBS=0` opts out; avoid it while checking this budget.
 
-## How to read the NDJSON quickly
+Single-point work that bypasses `RegistrationJobRunner` may leave the job NDJSON empty; then
+instrument enqueue → align → apply with `phase_timer` / `log_event`
+([nornir-debug-profiling](../nornir-debug-profiling/SKILL.md)). The 1 s budget still applies.
 
-- `message: "worker:end"` + `data.elapsed_ms` — whole registration job / worker wall time.
-- `message: "cProfile saved"` + `data.top_cumtime` — hottest frames for that job.
-- `message: "refine_phase_totals"` — grid-refine phase buckets (`fft`, `prewarp`, …) in seconds.
-- For **single-point** work that does not go through `RegistrationJobRunner`, use [nornir-debug-profiling](../nornir-debug-profiling/SKILL.md) (`phase_timer` / `log_event` on enqueue → align → apply) if job NDJSON is empty; still enforce the 1 s user-visible budget.
+## Benchmarks outside Pyre
+
+Isolated benchmarks of the math Pyre calls follow [Performance-evidence](../../rules/Performance-evidence.mdc)
+(step's share of the registration first, then pyperf `compare_to` JSON plus an old-vs-new
+equivalence test; pyperf on Windows needs `--copy-env`). A micro-benchmark win does not replace the
+profiler check above. Grid refine changes also need the real-data A/B in
+[nornir-realworld-refine-benchmark](../nornir-realworld-refine-benchmark/SKILL.md).
 
 ## Related
 
-- Tooling detail: [nornir-debug-profiling](../nornir-debug-profiling/SKILL.md)
-- Serial queue / register-all semantics: same profiling skill (Shift+Space section)
+- Tooling and serial queue / register-all semantics (Shift+Space section): [nornir-debug-profiling](../nornir-debug-profiling/SKILL.md)
 - Batched/serial math parity: [nornir-serial-batched-primitives](../nornir-serial-batched-primitives/SKILL.md)

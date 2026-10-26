@@ -1,0 +1,35 @@
+---
+description: Answer questions without editing; do not call a fix done without evidence; stop circling after repeated failed attempts; clean up debug instrumentation
+alwaysApply: true
+---
+
+## Questions are not change requests
+
+- Answer questions ("what causes...", "why does...", "is there...", "verify that..."); propose a
+  change if useful. Edit files only when the user asks for a change.
+- "Report findings" / "make no changes" means read-only for the whole task, follow-ups included,
+  until the user says otherwise.
+
+## Prove it before calling it fixed
+
+- Call a bug fixed only after **reproducing the original failure** and showing it **gone** (test,
+  script, log line). For UI and performance work, give the **measured number** (ms per drag, s per
+  control point, peak RSS) before and after.
+- If you could not run the reproduction (needs the GUI, real data, a server), say so, give the exact
+  steps to confirm it, and do not write "fixed".
+
+## Stop circling
+
+- After **two** failed attempts at the same symptom, stop editing: list hypotheses with evidence for
+  and against each, and pick the next measurement that separates them. Ask the user if that evidence
+  needs their eyes or data.
+- Before a new implementation, find the **existing sibling** doing the same job (another trainer,
+  TEM vs SEM path, Windows vs WSL/Linux script), mirror its structure, and update every counterpart
+  that must change with it.
+
+## Temporary instrumentation
+
+- Gate debug logging, dump folders, and timing probes behind an environment variable or the logger
+  level; never on by default.
+- Remove them and their output folders before committing unless the user asks to keep them; list any
+  kept in the commit message.

@@ -11,15 +11,14 @@ description: >-
 
 # Refine-grid trust review
 
-Paired rule: [`.cursor/rules/Refine-grid-trust-questions.mdc`](../../rules/Refine-grid-trust-questions.mdc).
+Read the paired rule first:
+[`.cursor/rules/Refine-grid-trust-questions.mdc`](../../rules/Refine-grid-trust-questions.mdc). It holds
+the trust principle (only trusted cells shape the field; untrusted cells never enter the mesh; where
+nothing is trusted the input transform stands), the six trust questions, the retired
+"limit the damage" patterns, the relative-constants rule, and the verification bar.
 
 Inventory (current steps, flow, trust questions):
 [`nornir-imageregistration/docs/refine_grid_step_inventory.md`](../../../nornir-imageregistration/docs/refine_grid_step_inventory.md).
-
-**Principle:** only trusted cells shape the field. A cell is trusted when its
-own measurement is unique (`peak_ratio`) and prominent (ZNCC) **and** it agrees
-with trusted neighbours or converges under the field it helped build. Untrusted
-cells never enter the mesh; where nothing is trusted the input transform stands.
 
 ## Checklist
 
@@ -36,67 +35,49 @@ Trust review:
 
 ## Step 1 — Locate the change in the inventory flow
 
-Read the inventory mermaid (section 1) and the numbered table (section 2).
-Name the step number, module, and branch (`Track A`, `Track B`, roles, ZNCC,
-best_effort, anchor-smooth, travel filter, `_build_mesh_transform_or_keep`,
-sparse-mesh preserve, finalize).
-
-If the change is a new step, say where it sits in that flow **before** writing
-code. If a step is added or removed, update the inventory in the same change.
+From the inventory mermaid (section 1) and numbered table (section 2), name the step number, module,
+and branch (`Track A`, `Track B`, roles, ZNCC, best_effort, anchor-smooth, travel filter,
+`_build_mesh_transform_or_keep`, sparse-mesh preserve, finalize). For a new step, say where it sits in
+that flow **before** writing code. If a step is added or removed, update the inventory in the same change.
 
 ## Step 2 — Three trust-question answers
 
-Write these in the plan or commit message:
+In the plan or commit message, write:
 
-1. **Trust question** (exactly one):
-   - "is there tissue to measure"
-   - "is this peak unique"
-   - "does this peak beat its local null"
-   - "does this cell agree with trusted neighbours"
-   - "has this cell converged under the current field"
-   - "is there anything trusted at all (seeding)"
+1. **Trust question**: exactly one from the rule's list.
 2. **Existing step** that already answers it (inventory #).
 3. **Why that answer is insufficient**, with a measurement from a **named pair**.
 
-If the honest answer to (1) is "the mesh contains untrusted cells and this change
-limits the damage", **stop**. Fix mesh membership instead. That is the retired
-pattern: global residual translation applied without a uniqueness gate;
-sparse-mesh preserve with absolute floors; anchor-smooth with raw-preserve;
-best-effort promotion of ambiguous peaks; field-level branding modes.
+If the honest answer to (1) is "the mesh contains untrusted cells and this change limits the damage",
+**stop** and fix mesh membership instead (Step 3).
 
-Constants must be relative (fraction of `n_grid`, quantile of the pass
-distribution, multiple of `max_travel` or cell size), never absolute counts.
-State the pair and the measured distribution that set any new constant.
+New constants must be relative (fraction of `n_grid`, quantile of the pass distribution, multiple of
+`max_travel` or cell size), never absolute counts; state the pair and measured distribution that set them.
 
 ## Step 3 — Mesh membership path
 
-Grep `_build_mesh_transform_or_keep` in
-`nornir_imageregistration/local_distortion_correction.py`. Today there are two
-callers in the per-pass loop:
+Grep `_build_mesh_transform_or_keep` in `nornir_imageregistration/local_distortion_correction.py`.
+Today it has two callers in the per-pass loop:
 
 | Path | How records reach the mesh |
 |------|----------------------------|
 | Anchor-smooth | `smooth_peaks_from_locked_anchors` then `_build_mesh_transform_or_keep` (no `fixed_points`). Raw-preserve IDs keep unvetted peaks. |
 | Travel / REJECT filter | `filter_records_for_mesh_inclusion` then `exclude_reject_mesh_records` (`min_keep=0`), then `_build_mesh_transform_or_keep` with locked `fixed_points`. |
 
-After either caller, `should_keep_prior_sparse_mesh` may discard the mesh and
-log `Keeping prior transform`.
+After either caller, `should_keep_prior_sparse_mesh` may discard the mesh and log `Keeping prior transform`.
 
-Ask: **how could an untrusted record reach `_build_mesh_transform_or_keep`?**
-Typical leaks: best-effort promotion of ambiguous peaks into FREE; raw-preserve
-on disc / unique-large / coherent-front cells; relaxed travel limits; Track A/B
-`TranslateFixed` that moves the whole field without a uniqueness gate. If the
-change only "limits the damage" of those records, reject it.
+Ask: **how could an untrusted record reach `_build_mesh_transform_or_keep`?** Typical leaks:
+best-effort promotion of ambiguous peaks into FREE; raw-preserve on disc / unique-large /
+coherent-front cells; relaxed travel limits; Track A/B `TranslateFixed` that moves the whole field
+without a uniqueness gate. Reject a change that only "limits the damage" of those records.
 
-Fewer than three points keeps the prior transform (`Insufficient points for mesh
-update`). That is correct when nothing is trusted; do not emergency-fill with
-rejects.
+Fewer than three points keeps the prior transform (`Insufficient points for mesh update`). That is
+correct when nothing is trusted; do not emergency-fill with rejects.
 
 ## Step 4 — Fixture pairs and metrics
 
-Verify on **at least one pair that motivated an existing mechanism** plus
-**one healthy pair**. A change that lowers the healthy pair's lock fraction is
-not accepted.
+Verify on **at least one pair that motivated an existing mechanism** plus **one healthy pair**. A
+change that lowers the healthy pair's lock fraction is not accepted.
 
 | Pair | Why it exists (inventory) |
 |------|---------------------------|
@@ -111,8 +92,8 @@ not accepted.
 **Report both:**
 
 - **lock fraction** — final `len(finalized_points) / n_grid` (and per-pass)
-- **unique-fraction-over-passes** — unique peaks / `n_grid` each pass (do not
-  collapse to a single end-of-run number)
+- **unique-fraction-over-passes** — unique peaks / `n_grid` each pass (do not collapse to a single
+  end-of-run number)
 
 Healthy Grid16 pairs settle near ~31% locks; see
 [`grid16_rc2_refine_baseline.md`](../../../nornir-imageregistration/docs/grid16_rc2_refine_baseline.md).
@@ -136,9 +117,8 @@ Also useful: `Reverted residual translation after remeasure`,
 `Dropped N REJECT free points from mesh inclusion`,
 `Dropped N free points from mesh inclusion (peak travel`.
 
-Unique fraction ≈ `n_unique / n_grid` from the residual lines, or
-`(n_grid - peak_amb) / n_grid` from `field_mode=` (same pass). Lock fraction is
-the `Y of Z are locked` ratio.
+Unique fraction ≈ `n_unique / n_grid` from the residual lines, or `(n_grid - peak_amb) / n_grid` from
+`field_mode=` (same pass). Lock fraction is the `Y of Z are locked` ratio.
 
 ## Worked example — RC2 Grid16 1215-1214
 

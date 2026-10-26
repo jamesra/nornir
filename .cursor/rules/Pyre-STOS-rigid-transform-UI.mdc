@@ -20,12 +20,10 @@ alwaysApply: false
 
 ## Pyre STOS rigid transform UI
 
-Before changing rigid translate, rotate, zoom, or composite/warped alignment display in
-`nornir-pyre`, read `.cursor/skills/pyre-stos-rigid-transform-ui/SKILL.md`.
+Before changing rigid translate, rotate, zoom, or composite/warped alignment display in `nornir-pyre`,
+read `.cursor/skills/pyre-stos-rigid-transform-ui/SKILL.md`. It is authoritative for:
 
-That skill is the authoritative description of:
-
-- Expected behavior per view (fixed / warped / composite)
+- Expected behavior per view (source / target / composite; see Pyre-coordinate-spaces)
 - **Rigid rotation is Composite-only** (`rigid_rotation_locked`)
 - **Model-authoritative display** via `RigidDisplayStrategy.resolve_draw_state`
 - Interactive-edit layer freeze (gesture snapshot, not overlay matrices)

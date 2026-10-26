@@ -6,17 +6,17 @@ alwaysApply: false
 
 ## Nornir Docker conventions
 
-Human docs: `docs/deployment/` (published at https://nornir.github.io/deployment/). Keep this rule
-and those pages consistent.
+Human docs: `docs/deployment/` (https://nornir.github.io/deployment/). Keep this rule and those
+pages consistent.
 
 ### Entry point
 
 - **`nornir-docker/deploy/stack.ps1`** is the one entry point for starting, stopping, inspecting and
-  deploying every stack (nornir and Viking), locally or with `-Target <host>` over SSH. New stacks go
-  in a registry (`nornir-docker/deploy/stacks.psd1`, or `<Viking>/deploy/stacks.psd1`), not in a new
-  ad hoc launcher.
-- Host setup is **`deploy/Initialize-DockerHost.ps1 -Role compute|web|iis|dev`**. Launchers it writes
-  under the layout root are **forwarding** scripts; never copy repo scripts into the layout (they
+  deploying every stack (nornir and Viking), locally or with `-Target <host>` over SSH. Register new
+  stacks in `nornir-docker/deploy/stacks.psd1` (or `<Viking>/deploy/stacks.psd1`), not in a new ad hoc
+  launcher.
+- Host setup: **`deploy/Initialize-DockerHost.ps1 -Role compute|web|iis|dev`**. The launchers it writes
+  under the layout root **forward** to the checkout; never copy repo scripts into the layout (they
   dot-source siblings and break).
 
 ### Where Docker assets live
@@ -40,9 +40,9 @@ Root **`NORNIR_DOCKER_USER_ROOT`**: **`D:\Docker`** on Windows, **`/srv/docker`*
 - Env merge order (later wins): `host.env`, `Run/_host/secrets/secrets.env`, `Run/<stack>/<stack>.run.env`,
   `Run/<stack>/secrets/secrets.env`. Compose files use the contract variables (`STACK_RUN_DIR`,
   `STACK_SECRETS_DIR`, `STACK_DATA_DIR`, `STACK_LOGS_DIR`, `DOCKER_CERTS_DIR`, `DOCKER_WORK_DIR`,
-  `NORNIR_REPO_ROOT_HOST`, `VIKING_REPO_ROOT_HOST`, `VIKING_HOSTNAME_*`, `TLS_CERT_NAME`) instead of
+  `NORNIR_REPO_ROOT_HOST`, `VIKING_REPO_ROOT_HOST`, `VIKING_HOSTNAME_*`, `TLS_CERT_NAME`), not
   hard-coded host paths.
-- **Compose bridge (cursor-dev):** Compose / Dev Containers only read **`nornir-docker/.env`**. It is a
+- **Compose bridge (cursor-dev):** Compose / Dev Containers only read **`nornir-docker/.env`**, a
   hardlink (or copy) of `Run/nornir-dev/.env`; `compose.cursor-dev.yaml` also passes it as `env_file`.
 
 ### Naming
@@ -65,22 +65,21 @@ Root **`NORNIR_DOCKER_USER_ROOT`**: **`D:\Docker`** on Windows, **`/srv/docker`*
 
 ### Network exposure
 
-- On Linux, Docker-published ports bypass ufw. **Do not** publish internal ports (MQTT 1883, dashboard
+- Docker-published ports bypass ufw on Linux. **Do not** publish internal ports (MQTT 1883, dashboard
   8087, debuggers 4024/5678, Docker API) on anything but `127.0.0.1`. Cross-host ports are filtered
   in the `DOCKER-USER` chain.
 
 ### Submodule workflow
 
-- When `nornir-docker` is a submodule: commit Docker changes **inside the submodule**, then bump the
-  parent monorepo submodule pointer. Do not assume parent-repo commits include submodule file changes
-  unless the pointer was updated.
+- Commit Docker changes **inside the `nornir-docker` submodule**, then bump the parent submodule
+  pointer. Parent-repo commits do not include submodule file changes unless the pointer was updated.
 
 ### CuPy, CUDA, and GPU
 
-- Dev and CuPy prod images ship a **`CUPY_PACKAGE`** wheel (default `cupy-cuda13x`); the **host** still
-  needs a compatible NVIDIA driver and GPU passthrough (`--gpus all` or compose reservations; NVIDIA
-  container toolkit on Linux) for device use at **run** time.
-- Do not imply GPU works in docs or scripts without stating the run-time GPU requirement.
+- Dev and CuPy prod images ship a **`CUPY_PACKAGE`** wheel (default `cupy-cuda13x`); for device use at
+  **run** time the **host** still needs a compatible NVIDIA driver and GPU passthrough (`--gpus all` or
+  compose reservations; NVIDIA container toolkit on Linux).
+- Do not imply GPU works in docs or scripts without stating that run-time requirement.
 
 ### Compose and `/workspace`
 
@@ -88,15 +87,14 @@ Root **`NORNIR_DOCKER_USER_ROOT`**: **`D:\Docker`** on Windows, **`/srv/docker`*
   the same target).
 - **`cursor-dev`** (default): bind-mounted monorepo root; entry script uses
   **`NORNIR_WORKSPACE_STRATEGY=mounted`** — no forced branch checkout unless **`NORNIR_SYNC_REMOTE=1`**.
-- **`cursor-dev-clone`**: named volume + clone strategy; use the separate devcontainer config when a
+- **`cursor-dev-clone`**: named volume + clone strategy; use its separate devcontainer config when a
   fresh in-container tree is intended.
 
 ### Logging
 
 - Do **not** add ad hoc debug log files in entry scripts or Docker-run paths (repo-root `debug-*.log`,
-  per-project log dirs). Persistent logging follows the unified Nornir convention
-  (`nornir_shared.misc.SetupLogging`, `NORNIR_LOG_ROOT`) in application code, not in shell entrypoints;
-  host-side log folders are `Logs/<stack>/`.
+  per-project log dirs). Persistent logging uses the unified convention (`nornir_shared.misc.SetupLogging`,
+  `NORNIR_LOG_ROOT`) in application code, not shell entrypoints; host-side log folders are `Logs/<stack>/`.
 
 ### Related skills
 

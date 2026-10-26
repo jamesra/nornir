@@ -27,24 +27,21 @@ alwaysApply: false
 
 ## Serial + batched primitives
 
-Before merging changes to phase correlation or serial+batched registration math, follow the
-`.cursor/skills/nornir-serial-batched-primitives/SKILL.md` skill: grep all callers, keep
-serial/batched mirrors aligned, and run the verification matrix for affected pathways.
+Before merging changes to phase correlation or serial+batched registration math, follow
+`.cursor/skills/nornir-serial-batched-primitives/SKILL.md`: grep all callers, keep serial/batched
+mirrors aligned, and run the verification matrix for affected pathways.
 
 **Final performance sign-off** must use a **real section with ≥100 tiles** (default: RPC3 0195 per
-`.vscode/launch.json`), with downsample and refine parameters matching launch configs — not the
-grid refine input section fixture (4 tiles).
+`.vscode/launch.json`) with downsample and refine parameters matching launch configs, not the
+4-tile grid refine input section fixture.
 
 ### Keep the skill in sync
 
-If this change **adds, removes, or renames** a script or pytest module that benchmarks, profiles,
-compares, verifies, or gates phase correlation / serial+batched registration behavior, update
-`.cursor/skills/nornir-serial-batched-primitives/SKILL.md` in the **same commit**:
+The rule triggers review discipline; the skill holds the authoritative list of scripts and tests.
+Stale inventories cause missed perf regressions on untouched pathways. If a change **adds, removes,
+or renames** a script or pytest module that benchmarks, profiles, compares, verifies, or gates phase
+correlation / serial+batched registration behavior, update the skill in the **same commit**:
 
 - Script inventory tables (by pathway)
 - Verification matrix and recommended minimum sweep
 - Known-gaps section (add when creating new coverage; remove when a gap is filled)
-
-This rule and the skill are paired: the rule triggers review discipline; the skill holds the
-authoritative list of scripts and tests. Stale inventories cause missed perf regressions on
-untouched pathways.

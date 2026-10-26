@@ -6,21 +6,21 @@ alwaysApply: false
 
 ## Monodoc layout
 
-- Narrative and API documentation for the whole Nornir umbrella live under **`docs/`** with a single root **`index.rst`** and one coherent toctree.
-- **Do not** edit the built HTML in the separate **`nornir.github.io`** repository by hand; that repo receives **deploy output** from CI (see **`docs/development/publishing_documentation.rst`**).
+- All Nornir narrative and API docs live under `docs/`, with one root `index.rst` and one coherent toctree.
+- **Do not** hand-edit the built HTML in the `nornir.github.io` repository; it receives CI deploy output (`docs/development/publishing_documentation.rst`).
 
 ## reStructuredText vs Markdown
 
-- Prefer **`.rst`** for new manual pages (directives, toctrees, cross-references).
-- Use **`.md`** when content is short or requires no special formatting; enable via **`myst_parser`** (see **`docs/conf.py`**). Example: **`docs/development/markdown_in_sphinx.md`**.
+- Prefer `.rst` for new manual pages (directives, toctrees, cross-references).
+- Use `.md` for short content without special formatting, via `myst_parser` (`docs/conf.py`). Example: `docs/development/markdown_in_sphinx.md`.
 
 ## Package `README.md` (or `README.rst`)
 
-- Each **`nornir-*`** package keeps a **short** landing file: what the package does, links to **https://nornir.github.io/**, links to that package’s section and **API** pages.
-- **Do not** duplicate long guides or hand-maintained API listings in READMEs; link to Sphinx autodoc instead.
-- **Pyre exception:** in-app Help (`Help → Mouse and Keyboard Controls`, F1) reads **`nornir-pyre/pyre/README.txt`**, not the short root `README.rst`. Keep mouse/keyboard control text in that packaged file (and in `package-data`) when changing controls; update `docs/guides/pyre_use.rst` for the public manual. Do not remove `CONTROLS_HELP_ANCHOR` (`Mouse Controls`) without updating `pyre/resource_paths.py` and `tests/test_help_text.py`.
+- Each `nornir-*` package keeps a **short** landing file: what it does, a link to https://nornir.github.io/, and links to its section and API pages.
+- **Do not** duplicate long guides or hand-maintained API listings in READMEs; link to Sphinx autodoc.
+- **Pyre exception:** in-app Help (`Help → Mouse and Keyboard Controls`, F1) reads `nornir-pyre/pyre/README.txt`, not the root `README.rst`. When changing controls, keep the control text in that packaged file (and in `package-data`) and update `docs/guides/pyre_use.rst`. Do not remove `CONTROLS_HELP_ANCHOR` (`Mouse Controls`) without updating `pyre/resource_paths.py` and `tests/test_help_text.py`.
 
 ## Publishing
 
-- Cross-repo deploy uses **`NORNIR_ORG_GITHUB_IO_DEPLOY_TOKEN`** (see publishing doc). Never commit tokens.
-- If the secret is missing, CI **builds** HTML and **skips** publish with a warning — configure the secret on `jamesra/nornir` before expecting Pages updates.
+- Cross-repo deploy uses `NORNIR_ORG_GITHUB_IO_DEPLOY_TOKEN` (see publishing doc). Never commit tokens.
+- Without the secret, CI builds HTML and skips publish with a warning; set it on `jamesra/nornir` before expecting Pages updates.

@@ -6,41 +6,37 @@ alwaysApply: false
 
 ## Streaming and memory-bounded processing
 
-### Core principle
-
-**Bound peak memory by design.** Treat full-dataset loads as the exception. Prefer pipelines where a producer emits work units (paths, tiles, slabs, records) and consumers process them with bounded in-flight buffers.
+**Bound peak memory by design**; full-dataset loads are the exception. A producer emits work units (paths, tiles, slabs, records); consumers process them with bounded in-flight buffers.
 
 ### Required behavior
 
-- **Stream work, don't hoard it.** Use generators/iterators (`yield`, `yield from`, `Iterator`) to enumerate files, tiles, sections, or records. Buildmanager stages return generators saved incrementally by `PipelineManager._SaveNodes`. Prefer per-item processing over `list(...)` / list comprehensions over large inputs unless size is provably small.
-- **Chunk large arrays and images.** Process in tiles or slabs (`ImageToTilesGenerator`, tile loops in `TransformImage`, chunked transforms). Expose chunk/tile size as a parameter or derive from available memory (`EstimateMaxTempImageArea`).
-- **Spill to disk when outputs are large.** Use `np.memmap`, temp files, or `memmap_metadata` for buffers that would exceed RAM. Pass **paths or metadata** across process boundaries; avoid pickling large arrays (`npArrayToSharedArray` falls back to file-backed memmap when shared memory is too small).
-- **Parallelize I/O with bounded concurrency.** Use `nornir_pools` thread pools for I/O-bound work; process pools for CPU-bound stages. Apply **backpressure** when queueing—do not enqueue unbounded tasks (gate on queue depth or wait per row/column). Call `ReleaseStagePools()` at stage boundaries.
-- **Overlap I/O and compute.** Prefetch or copy inputs locally for network paths before many small reads. Queue the next read/transform while the current unit is processed.
+- **Stream, don't hoard.** Enumerate files, tiles, sections, or records with generators (`yield`, `yield from`, `Iterator`); buildmanager stages return generators that `PipelineManager._SaveNodes` saves incrementally. No `list(...)` / list comprehensions over large inputs unless size is provably small.
+- **Chunk large arrays and images** into tiles or slabs (`ImageToTilesGenerator`, tile loops in `TransformImage`, chunked transforms). Make chunk/tile size a parameter or derive it from available memory (`EstimateMaxTempImageArea`).
+- **Spill large outputs to disk** (`np.memmap`, temp files, `memmap_metadata`). Pass **paths or metadata** across process boundaries, not pickled large arrays (`npArrayToSharedArray` falls back to file-backed memmap when shared memory is too small).
+- **Bound concurrency.** `nornir_pools` thread pools for I/O-bound work, process pools for CPU-bound stages. Apply **backpressure** (gate on queue depth or wait per row/column); never unbounded `pool.add_task` loops. Call `ReleaseStagePools()` at stage boundaries.
+- **Overlap I/O and compute.** Prefetch or copy network inputs locally before many small reads; queue the next read/transform while the current unit is processed.
 
 ### When full in-memory load is acceptable
 
-Document the reason:
+Document the reason. Acceptable cases:
 
-- Input is **provably small** (metadata, config, single tile)—use a configurable threshold, not a magic number.
-- Algorithm requires a global pass with no practical streaming alternative (rare; call out in review).
+- Input is **provably small** (metadata, config, single tile), by a configurable threshold, not a magic number.
+- A global pass with no practical streaming alternative (rare; call out in review).
 - Prototype/debug code (must not ship to production pipelines without revisiting).
+
+Loading an entire dataset into memory for a production pipeline stage is a **material** design choice requiring explicit user confirmation (Design-choice-confirmation).
 
 ### Anti-patterns
 
 - `read()` or `np.array(...)` of an entire volume, mosaic, or file list when sequential access suffices.
 - Accumulating all results in a list/dict before writing any output.
-- Unbounded `pool.add_task` loops without queue-depth or row/column gates.
-- Repeated `.get()` / host copies inside loops (see NumPy/CuPy rule).
 - Loading remote datasets entirely into RAM to avoid temp/cache dirs when level-based temp dirs are the established pattern.
+- Repeated `.get()` / host copies inside loops (transfer rules: [Numpy-CuPy-compatibility.mdc](Numpy-CuPy-compatibility.mdc)).
+- Ad hoc debug dumps of full datasets to repo-local files (Unified logging).
 
-### Cross-rule references
+NAS latency, `/tmp` cache budgets, RAM per core: [Nornir-performance-envelope.mdc](Nornir-performance-envelope.mdc).
 
-- **NumPy/CuPy:** keep array work on the input backend; minimize host↔device transfers in chunked pipelines.
-- **Unified logging:** no ad hoc debug dumps of full datasets to repo-local files.
-- **Design-choice confirmation:** loading an entire dataset into memory for a production pipeline stage is a **material** design choice requiring explicit user confirmation.
-
-### Examples
+### Example
 
 ```python
 # Good — generator pipeline stage

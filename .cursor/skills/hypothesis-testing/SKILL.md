@@ -12,28 +12,27 @@ description: >-
 
 ## When to use Hypothesis
 
-- Use **`@given` and strategies** when inputs are **high-dimensional**, **combinatorial**, **structured** (nested dicts, trees, records), or **hard to enumerate** without missing cases.
-- Use Hypothesis for **data structures** when **invariants**, **round-trips** (encode/decode, serialize/parse), or **validity constraints** matter more than a fixed list of instances.
-- Prefer **plain `pytest.mark.parametrize` (or a tiny hand-written table)** when there are **few discrete cases** and properties would add noise or slow CI without meaningful coverage.
+- Use `@given` and strategies when inputs are high-dimensional, combinatorial, structured (nested dicts, trees, records) or hard to enumerate without missing cases.
+- Use it for data structures when invariants, round-trips (encode/decode, serialize/parse) or validity constraints matter more than a fixed list of instances.
+- Prefer plain `pytest.mark.parametrize` (or a tiny hand-written table) for few discrete cases, where properties would add noise or slow CI without meaningful coverage.
 
 ## Mathematical and numerical code
 
-- Prefer Hypothesis when behavior depends on **ranges of reals**, **several coupled parameters**, **array shape or dtype**, or **known identities** (algebraic or analytic properties you can assert as properties).
-- Combine property checks with **tolerance-based** assertions where appropriate; restrict strategies to the function’s **domain** (e.g. positive arguments where required) and control **`allow_nan` / `allow_infinity`** to match defined behavior.
-- Use **`hypothesis.extra.numpy`** for **array strategies** when testing vectorized or ndarray code; constrain **shape**, **dtype**, and value ranges so tests stay fast and failures are interpretable.
-- Keep **`@example`** or small **parametrize** blocks for **canonical** scalars (0, 1, -1, small integers, π where relevant), **documented** numerical edge cases, and regressions.
+- Prefer Hypothesis when behavior depends on ranges of reals, several coupled parameters, array shape or dtype, or known algebraic/analytic identities you can assert as properties.
+- Use tolerance-based assertions where appropriate; restrict strategies to the function's domain (e.g. positive arguments where required) and set `allow_nan` / `allow_infinity` to match defined behavior.
+- Use `hypothesis.extra.numpy` array strategies for vectorized/ndarray code; constrain shape, dtype and value ranges so tests stay fast and failures are interpretable.
 
 ## Pairing with explicit examples
 
-- Keep a **small** set of **`@example(...)`** and/or **`@pytest.mark.parametrize`** for **documented regressions**, **known edge cases**, and **API contracts** you want visible in the test body.
-- Do not duplicate the same scenario in both Hypothesis and parametrization unless one documents intent and the other explores the space (avoid redundant maintenance).
+- Keep a small set of `@example(...)` and/or `@pytest.mark.parametrize` cases for documented regressions, known edge cases (including canonical scalars: 0, 1, -1, small integers, π where relevant) and API contracts you want visible in the test body.
+- Do not duplicate a scenario in both Hypothesis and parametrization unless one documents intent and the other explores the space.
 
 ## Engineering hygiene
 
-- Tune **`settings`**: `max_examples`, `deadline`; use **`suppress_health_check`** only with a **short comment** explaining why (e.g. unavoidable heavy setup).
-- Rely on **shrinking** for minimal failures; mention **reproducibility** when it matters: **`@reproduce_failure`**, **Hypothesis example database** / CI artifacts for flaky failures.
+- Tune `settings` (`max_examples`, `deadline`); use `suppress_health_check` only with a short comment saying why (e.g. unavoidable heavy setup).
+- Rely on shrinking for minimal failures. For reproducibility of flaky failures: `@reproduce_failure`, the Hypothesis example database / CI artifacts.
 
 ## Anti-patterns
 
 - Over-broad strategies that make tests slow or flaky without tightening invariants.
-- Property tests with no clear **property** or **oracle** (only random smoke).
+- Property tests with no clear property or oracle (only random smoke).

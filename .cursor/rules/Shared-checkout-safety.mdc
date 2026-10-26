@@ -1,0 +1,26 @@
+---
+description: The checkout is shared with the user and other agent sessions; never stash, stage only your own files by path, leave others' changes and pointers alone
+alwaysApply: true
+---
+
+## Shared checkout safety
+
+The user and other agent sessions edit this checkout at the same time. Their uncommitted files,
+unpushed commits and submodule pointers are in-flight work, not mess to clean up.
+
+- **Never `git stash`** (no `stash pop`, `stash -u`, autostash). For a "before" baseline:
+  - one file: `git -C <repo> show HEAD:<path> > <scratch>/<file>` and diff or import from there;
+  - tests on old code: `git -C <repo> worktree add --detach <scratch path> HEAD`, copy the new test in,
+    run it there, then `git -C <repo> worktree remove <scratch path>`.
+- **Stage by path, only files you changed:** `git -C <repo> commit -m "..." -- <paths>`. No `git add -A`,
+  `git add .` or `commit -a` unless the user said to include everything regardless of author.
+- **Before committing**, run `git -C <repo> status` and `git -C <repo> log -3 --oneline`. Leave files,
+  staged entries and commits you did not make alone; mention them in your report.
+- A submodule `+` in `git submodule status` that you did not cause is another session's work: ask
+  before bumping, resetting or updating it. No `git submodule update` / `checkout` / `reset` over it.
+- Pushing a branch pushes every unpushed commit on it; ask before pushing others' commits.
+- Submodule worktrees: `git -C <submodule> worktree add/remove`, not from the umbrella; under scratch
+  (`TESTOUTPUTPATH`), never inside the repo tree.
+- Never discard, revert, `checkout --` or `restore` a file you did not edit without asking.
+
+Commit and push procedure: [nornir-commit-push](../skills/nornir-commit-push/SKILL.md).

@@ -25,6 +25,10 @@ Default virtual environment: `D:\src\git\nornir\venv\pyre314` (see **Virtual-Env
 | [Design-choice-confirmation.mdc](.cursor/rules/Design-choice-confirmation.mdc) | Pause for material design risks; non-negotiable `must not` / `do not` |
 | [Unified-Logging-Convention.mdc](.cursor/rules/Unified-Logging-Convention.mdc) | `SetupLogging`, `NORNIR_LOG_ROOT`, multiprocess queue logging |
 | [Monorepo-submodule-changes.mdc](.cursor/rules/Monorepo-submodule-changes.mdc) | Commit in submodule, bump umbrella pointer; mounted devcontainer preserves submodule branches on recreate |
+| [Shared-checkout-safety.mdc](.cursor/rules/Shared-checkout-safety.mdc) | Checkout is shared with other sessions: never stash, stage by path, leave others' changes and `+` pointers alone |
+| [Line-endings-and-encoding.mdc](.cursor/rules/Line-endings-and-encoding.mdc) | Preserve line endings; ASCII-only `.ps1` for PowerShell 5.1; Windows paths in inline Python |
+| [Workspace-map.mdc](.cursor/rules/Workspace-map.mdc) | Sibling repos, data volumes, training data, scratch roots; live checkouts feed deployments |
+| [Questions-and-proving-fixes.mdc](.cursor/rules/Questions-and-proving-fixes.mdc) | Answer questions without editing; evidence before "fixed"; stop circling after two failed attempts; remove debug instrumentation |
 
 ### Glob-scoped
 
@@ -34,6 +38,9 @@ Default virtual environment: `D:\src\git\nornir\venv\pyre314` (see **Virtual-Env
 | [Numpy-CuPy-compatibility.mdc](.cursor/rules/Numpy-CuPy-compatibility.mdc) | `nornir-imageregistration` | `xp` / CuPyX / host↔device boundaries |
 | [Pyre-host-array-boundary.mdc](.cursor/rules/Pyre-host-array-boundary.mdc) | `nornir-pyre` | `xp` math; `EnsureNumpyArray` only at Qt/GL/SciPy/floats |
 | [Streaming-and-memory-bounded-processing.mdc](.cursor/rules/Streaming-and-memory-bounded-processing.mdc) | buildmanager, imageregistration, pools, shared | Stream work; bound peak memory |
+| [Nornir-performance-envelope.mdc](.cursor/rules/Nornir-performance-envelope.mdc) | `nornir-imageregistration` | NAS latency, `/tmp` SSD cache, ~2-3 GB RAM/core, GPU class |
+| [Performance-evidence.mdc](.cursor/rules/Performance-evidence.mdc) | benchmarks, profiling scripts | Measured before/after on real data; rejected-candidate lessons; pyperf `--copy-env` on Windows |
+| [Pyre-coordinate-spaces.mdc](.cursor/rules/Pyre-coordinate-spaces.mdc) | `nornir-pyre` | Source vs target space, Fixed/Warped naming trap, (Y, X) order, ROI mapping |
 | [Documentation-and-monodoc.mdc](.cursor/rules/Documentation-and-monodoc.mdc) | `docs/**`, READMEs | Monodoc under `docs/`; short package READMEs |
 | [CI-hygiene.mdc](.cursor/rules/CI-hygiene.mdc) | workflows, tests | Recurring Actions footguns after check-in |
 | [powershell-scripts.mdc](.cursor/rules/powershell-scripts.mdc) | `**/*.ps1` | Comment-based help on generated scripts |
@@ -53,6 +60,11 @@ Full catalog: [`.cursor/skills/README.md`](.cursor/skills/README.md).
 
 | Skill | When to use |
 |-------|-------------|
+| [nornir-commit-push](.cursor/skills/nornir-commit-push/SKILL.md) | "Commit (and push) everything incl. submodules", pointer refresh, release, lost-work audit; push order |
+| [nornir-verify-change](.cursor/skills/nornir-verify-change/SKILL.md) | Before claiming done: test commands, known flaky/baseline failures, lint/type delta on touched files |
+| [segmentation-training-export](.cursor/skills/segmentation-training-export/SKILL.md) | `ExportTrainingData` / SAM2 crop export: flags, re-export vs update, OData paging, trainer handoff |
+| [docker-publish-ghcr](.cursor/skills/docker-publish-ghcr/SKILL.md) | Build, push, verify and pull Nornir images on GHCR; "users get the old image" |
+| [nornir-realworld-refine-benchmark](.cursor/skills/nornir-realworld-refine-benchmark/SKILL.md) | Real-data refine-grid A/B: fixture semantics, baseline runner, acceptance criteria |
 | [archive-built-plans](.cursor/skills/archive-built-plans/SKILL.md) | Archive completed Cursor plans |
 | [cupy-missing-api-bugfix](.cursor/skills/cupy-missing-api-bugfix/SKILL.md) | CuPy/NumPy API gaps — dual-backend first |
 | [deploy-connectomes](.cursor/skills/deploy-connectomes/SKILL.md) | Deploying or debugging connectomes.pitt.edu hosts: `stack.ps1 doctor` → `-Sync` → up/rebuild → status; certs |

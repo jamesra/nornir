@@ -1,0 +1,15 @@
+---
+description: Preserve each file's line endings and encoding; edit in place, not by whole-file rewrite; ASCII-only .ps1 for Windows PowerShell 5.1; Windows-safe paths and console output in inline Python
+alwaysApply: true
+---
+
+## Line endings and encoding
+
+`core.autocrlf=true`; many blobs are stored CRLF (`git ls-files --eol <file>` shows `i/crlf`). The "LF will be replaced by CRLF" warning is expected; ignore it.
+
+- **Keep each file's line endings and encoding.** After editing, `git -C <repo> diff --stat <file>`: a change count near the file length means they were lost. Never commit a whole-file rewrite.
+- **Edit with the Edit tool or editor**, not `sed -i`, `Set-Content`, `Out-File` or a whole-file Python read-modify-write. A script that must rewrite a file opens it with `newline=''` and the file's own encoding (`'utf-8-sig'` if it has a BOM), or works on bytes.
+- **`.ps1` run by Windows PowerShell 5.1** (release, installer, host scripts): ASCII only (no em dashes, smart quotes, ellipses) unless saved UTF-8 with BOM. 5.1 reads BOM-less files as ANSI, so `—` becomes `â€”` and parsing fails ("Unexpected token").
+- **Inline Python** (`python -c`, heredocs): Windows paths with forward slashes or raw strings (`"C:\Users\..."` is a `unicodeescape` SyntaxError); better, pass paths as arguments.
+- `PYTHONIOENCODING=utf-8` before printing non-ASCII on a Windows console (else cp1252 `UnicodeEncodeError`).
+- Byte-exact `git show HEAD:<path> > file` needs bash or PowerShell 7; 5.1 writes `>` as UTF-16.

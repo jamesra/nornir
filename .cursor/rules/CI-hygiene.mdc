@@ -1,12 +1,12 @@
 ---
-description: Keep package and umbrella GitHub Actions green after check-ins; avoid known recurring CI footguns
+description: Keep package and umbrella GitHub Actions green after check-ins; avoid known recurring CI footguns; procedure for repairing failing workflows
 globs: **/.github/workflows/**/*.{yml,yaml},**/tests/**/*.py,**/test_*.py
 alwaysApply: false
 ---
 
 ## CI hygiene after check-in changes
 
-Minor submodule or docs edits often turn CI red for reasons unrelated to the feature. Before treating a push as done, check the **package repo** workflow and the **umbrella** workflows that the change can trigger.
+Minor submodule or docs edits often turn CI red for unrelated reasons. Before treating a push as done, check the **package repo** workflow and every **umbrella** workflow the change can trigger.
 
 ### Recurring failure modes (fix these, do not ignore)
 
@@ -14,18 +14,27 @@ Minor submodule or docs edits often turn CI red for reasons unrelated to the fea
 |---------|-------------|------------|
 | Docs **deploy** `not found deploy key or tokens` | Missing `NORNIR_ORG_GITHUB_IO_DEPLOY_TOKEN` on `jamesra/nornir` | Secret must be set for publish; workflow should **skip** publish (not fail) when absent |
 | Docs **build** `neither setup.py nor pyproject.toml` | Checkout without `submodules: recursive` | Keep submodule checkout on docs/unit-test workflows |
-| Umbrella checkout `upload-pack: not our ref` / submodule SHA missing | Recorded submodule commit not on remote, or shallow submodule fetch | **Push submodule commits before** bumping the umbrella pointer; use `fetch-depth: 0` with recursive submodules |
+| Umbrella checkout `upload-pack: not our ref` / submodule SHA missing (seen on `dm4`) | Recorded submodule commit not on remote, or shallow submodule fetch | **Push submodule commits before** bumping the umbrella pointer; use `fetch-depth: 0` with recursive submodules |
 | Package CI `Start directory is not importable: './test'` | Workflow still points at retired `test/` after rename to `tests/` | When renaming test trees, update **that package's** `.github/workflows` in the **same** commit |
 | Tests assert on README / help anchors after monodoc trim | In-app help file and short landing README diverged | Keep packaged help (`pyre/README.txt`) and tests aligned when shortening READMEs |
-| Optional dependency `ModuleNotFoundError` in package-only CI | Test imports a higher package not installed in that repo's workflow | `skipTest` / `create=True` mocks, or install the optional dep only when required |
+| `NameError` at import on a class/type name, green locally | **Every workflow runs Python 3.13**; the local venv and Docker images are 3.14, which defers annotations. 3.13 evaluates a self-referencing annotation while the class body runs | `from __future__ import annotations` (or quoted names) in any module whose annotations name a class before it is defined |
+| `ModuleNotFoundError` for a higher package although the test uses `mock.patch(..., create=True)` | `mock.patch` imports every parent in the dotted path; `create=True` only creates the final attribute | Stub the missing modules with `mock.patch.dict(sys.modules, ...)` when the import fails, or `skipTest`; install the optional dep only when required |
+| Umbrella pytest: relative import or helper not found in a `tests` module | Several packages each have a top-level `tests` package; `--import-mode=importlib` keeps the first one collected | No cross-file relative imports between test packages; load shared helpers by file path (`importlib.util.spec_from_file_location`) |
 
 ### Checklist when editing workflows or test layout
 
-1. Path in the workflow matches the on-disk test directory (`tests/` vs `test/`).
+1. Workflow test path matches the on-disk directory (`tests/` vs `test/`).
 2. Install steps match what the tests import (including optional cross-package deps).
 3. Umbrella workflows that `pip install -e nornir-*` still check out **submodules**.
-4. Submodule SHAs referenced by the umbrella are **pushed** to their remotes before the pointer bump.
+4. Submodule SHAs referenced by the umbrella are **pushed** before the pointer bump.
+5. Code imports on CI's Python (3.13), not only the local 3.14.
 
-### After pushing
+### Repairing failing workflows
 
-Use `gh run list --repo <owner>/<repo> --limit 5` (package and umbrella) and open any failure logs. Do not assume a green local pytest means GitHub Actions is green.
+Repos with workflows: `jamesra/nornir` (`unit-tests.yml`, `docs.yml`, `pyre-windows-release.yml`); `python-app.yml` in `jamesra/nornir-buildmanager`, `nornir-imageregistration`, `nornir-pools`, `nornir-shared` (ubuntu/macos/windows) and `nornir-pyre` (ubuntu). `dm4`, `nornir-builddashboard`, `nornir-docker`, `nornir-volumecontroller`, `nornir-volumemodel`, `nornir-web` have none.
+
+1. List failures: `foreach ($r in 'nornir','nornir-buildmanager','nornir-imageregistration','nornir-pools','nornir-shared','nornir-pyre') { gh run list --repo jamesra/$r --limit 5 }`
+2. For each red run: `gh run view <id> --repo jamesra/<repo> --log-failed`.
+3. Match the error against the table. Reproduce import-time errors under Python 3.13, then fix. Add a table row for any new recurring cause.
+4. Push submodules first (commit and push inside each), then bump and push the umbrella pointer (`git submodule status` shows no `+`).
+5. Re-check with `gh run watch <id>` or step 1. Green local pytest does not mean Actions is green.

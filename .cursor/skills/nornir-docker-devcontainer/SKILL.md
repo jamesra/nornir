@@ -1,15 +1,16 @@
 ---
 name: nornir-docker-devcontainer
 description: >-
-  Sets up the Nornir Docker-based dev container for Cursor and PyCharm: CuPy on a
-  CUDA-capable GPU stack, WSL2-mounted test input as TESTINPUTPATH, optional repro
-  corpus at /data as INPUT_NORNIR_DATA, tmp test output,
-  bind-mounted monorepo at /workspace by default (optional named-volume clone mode),
-  pytest-ready venv, and editable installs. Use when opening Dev Containers,
-  configuring nornir-docker/.env from dev/example.cursor-dev.run.env for cursor-dev,
-  bind-mounting workspace for host
-  recovery, PyCharm Docker interpreter, GPU compose options, or explaining how
-  TESTINPUTPATH maps from Windows/WSL2.
+  Nornir Docker dev container for Cursor and PyCharm: CuPy/CUDA GPU stack,
+  WSL2-mounted TESTINPUTPATH, optional /data repro corpus (INPUT_NORNIR_DATA), tmp
+  test output, /workspace bind mount (or named-volume clone mode), venv and editable
+  installs. Use when opening Dev Containers, configuring nornir-docker/.env from
+  dev/example.cursor-dev.run.env for cursor-dev, bind-mounting workspace for host
+  recovery, PyCharm Docker interpreter, GPU compose options, or how TESTINPUTPATH
+  maps from Windows/WSL2. Also when troubleshooting ("Failed to install Cursor
+  server", /nornir-testdata not mounted, CIFS mounts lost after reboot, launch.json,
+  skills or claude missing after a rebuild) and before any change that must persist
+  across container rebuilds.
 ---
 
 # Nornir Docker dev container (Cursor and PyCharm)
@@ -19,85 +20,67 @@ description: >-
 | Skill | Use when |
 |-------|----------|
 | **docker-build-run-phases** | Build vs run scripts, `example.*.env` templates, env layering |
-| **docker-machine-layout** | Where machine-local files live under `D:\Docker` / `/srv/docker` |
+| **docker-machine-layout** | Where machine-local files live under `D:\Docker` / `/srv/docker` (`Run` / `Builds` / `Data` / `Work`) |
 | **nornir-docker-images-ci** | Image matrix, OCI/BOM, Dockerfile/CI review |
 | **nornir-docker-devcontainer** (this) | Day-to-day cursor-dev / Dev Containers setup |
+| **docker-publish-ghcr** | Push images to GHCR, pull them on clients, "users get the old image" |
 
 ## Source of truth
 
-Dockerfiles, Compose files, and **checked-in env examples** for Nornir live in the **`nornir-docker/`** directory. In the monorepo that directory is the **`nornir-docker` git submodule** (same content as the standalone `nornir/nornir-docker` repository). Overview and script index: [nornir-docker/README.md](../../../nornir-docker/README.md); narrative docs in the monodoc: `docs/deployment/nornir_dev_and_worker.rst` (images: `docs/docker/images.rst`).
+Dockerfiles, Compose files and checked-in env examples live in `nornir-docker/` (the `nornir-docker` git submodule, same content as the standalone `nornir/nornir-docker` repository). Overview and script index: [nornir-docker/README.md](../../../nornir-docker/README.md). Narrative docs: [docs/deployment/nornir_dev_and_worker.rst](../../../docs/deployment/nornir_dev_and_worker.rst) (images: `docs/docker/images.rst`). `stack.ps1 nornir-dev shell` runs the same `run-cursor-dev.ps1`.
 
-For **build vs run scripts** and env layering, see **docker-build-run-phases**. For the `Run` / `Builds` / `Data` / `Work` layout, see **docker-machine-layout**.
+| File | Role |
+|------|------|
+| `nornir-docker/compose.cursor-dev.yaml` | **cursor-dev** (bind-mounted repo root) and **cursor-dev-clone** (named volume + clone) |
+| `nornir-docker/cursor-dev-entry.sh` | Workspace prep (`mounted` vs `clone`) + `install-monorepo-editables.sh` |
+| `nornir-docker/install-monorepo-editables.sh` | `pip install -e --no-deps` for all headless packages (also used by `dev/Dockerfile` and `prod/Dockerfile`) |
+| `nornir-docker/dev/Dockerfile` | Image `nornir:dev-cursor-base`: Python 3.14, git, ImageMagick, CuPy, pytest, venv |
+| `.devcontainer/devcontainer.json` | Default: compose **cursor-dev**, `workspaceFolder` `/workspace` |
+| `.devcontainer/cursor-dev-clone/devcontainer.json` | Optional: compose **cursor-dev-clone** (fresh clone in volume) |
 
-## Examples vs local environment (do not commit secrets)
+The stack matches `.cursor/environment.json`: monorepo at `/workspace`, read-only fixtures at `/nornir-testdata`, optional repro corpus at `/data`, standard test env vars. Cursor Dev Containers and PyCharm (Docker Compose or remote interpreter) use the same container.
 
-- **Committed:** templates such as `nornir-docker/dev/example.cursor-dev.run.env` and the per-image `*/example.<id>.build.env` files. There are **no** root `.env*.example` stubs any more; point people at the template directly.
-- **Not committed:** real `.env` files, tokens, or machine-specific paths. [`nornir-docker/.gitignore`](../../../nornir-docker/.gitignore) ignores `.env`, `build.env`, `.build.*.env`, etc.
-
-**cursor-dev (recommended):**
-
-1. Copy `nornir-docker/dev/example.cursor-dev.run.env` → `$NORNIR_DOCKER_USER_ROOT/Run/nornir-dev/.env` (default root `D:\Docker`).
-2. **Bridge** that file to `nornir-docker/.env` (hardlink or copy) so Compose/Dev Containers substitute `${NORNIR_TESTDATA_HOST}`. Junctions are directories-only; SymbolicLink needs Developer Mode.
-3. `compose.cursor-dev.yaml` also loads `nornir-docker/.env` as **`env_file`** (optional), so every key in it (`NORNIR_SYNC_REMOTE`, `NORNIR_SUBMODULE_UPDATE`, `GITHUB_TOKEN`, `NORNIR_TILE_*`, ...) reaches the container without editing the compose file; the compose `environment:` block still wins for the keys it sets.
-
-## What this is
-
-The repo ships a **cursor-dev** Compose stack (services **cursor-dev** and **cursor-dev-clone**) and image `nornir:dev-cursor-base` that match `.cursor/environment.json`: monorepo at `/workspace`, read-only fixtures at `/nornir-testdata`, optional repro corpus at `/data` with `INPUT_NORNIR_DATA=/data`, and standard test env vars. Same layout works for **Cursor Dev Containers** and **PyCharm** (Docker Compose or remote interpreter against the same container).
-
-**CuPy and CUDA:** the dev image **includes CuPy** (see `CUPY_PACKAGE` in `nornir-docker/dev/Dockerfile`, e.g. `cupy-cuda13x`). Treat the stack as **building on a working CUDA environment**: the **host** must run a compatible NVIDIA driver, Docker must expose GPUs to the container (`--gpus all` or equivalent), and the NVIDIA Container Toolkit (or Docker Desktop GPU support) must be correctly installed so device nodes and libraries are available at runtime. Without GPU passthrough, the container still runs, but CuPy GPU paths are not usable.
-
-Authoritative files:
-
-- `nornir-docker/compose.cursor-dev.yaml` — **cursor-dev** (bind-mounted repo root) and **cursor-dev-clone** (named volume + clone)
-- `nornir-docker/cursor-dev-entry.sh` — workspace prep (`mounted` vs `clone`) + `install-monorepo-editables.sh` (`pip install -e --no-deps` for all headless packages)
-- `nornir-docker/install-monorepo-editables.sh` — shared editable install helper (also used by `dev/Dockerfile` and `prod/Dockerfile`)
-- `nornir-docker/dev/Dockerfile` — image: Python 3.14, git, ImageMagick, CuPy, pytest, venv
-- `.devcontainer/devcontainer.json` — default: compose **cursor-dev** + `workspaceFolder` `/workspace`
-- `.devcontainer/cursor-dev-clone/devcontainer.json` — optional: compose **cursor-dev-clone** (fresh clone in volume)
-- `docs/deployment/nornir_dev_and_worker.rst` — human-oriented walkthrough
+**Secrets:** commit only templates (`nornir-docker/dev/example.cursor-dev.run.env`, per-image `*/example.<id>.build.env`; there are no root `.env*.example` stubs, so point people at the template). Never commit real `.env` files, tokens or machine-specific paths; [`nornir-docker/.gitignore`](../../../nornir-docker/.gitignore) ignores `.env`, `build.env`, `.build.*.env`, etc.
 
 ## Preconditions
 
-- **Docker** with WSL2 backend on Windows (or Linux with NVIDIA Container Toolkit when using GPU).
-- **CUDA stack (for GPU / CuPy):** NVIDIA driver on the host, GPU-enabled Docker, and a CuPy wheel in the image that matches the CUDA generation you rely on (change `CUPY_PACKAGE` at image build time if you must target a different CUDA line).
-- **Test data** on the **WSL2 Linux filesystem** (not `D:\...` via DrvFS) for stable I/O; that host path becomes the bind source for `/nornir-testdata` in the container.
-- **GPU passthrough**: use `--gpus all` (or compose `deploy` reservations) when you want devices visible; omitting GPU flags leaves CuPy installed but GPU code paths without hardware.
+- Docker with WSL2 backend on Windows (or Linux with NVIDIA Container Toolkit for GPU).
+- **CUDA (for CuPy):** the image includes CuPy (`CUPY_PACKAGE` in `nornir-docker/dev/Dockerfile`, e.g. `cupy-cuda13x`; change it at build time to target another CUDA line). The host needs a compatible NVIDIA driver, and the NVIDIA Container Toolkit (or Docker Desktop GPU support) must expose devices and libraries. Without GPU passthrough the container runs but CuPy GPU paths have no hardware.
+- Test data on the **WSL2 Linux filesystem** (not `D:\...` via DrvFS) for stable I/O; that path is the bind source for `/nornir-testdata`.
+
+## Host configuration
+
+1. Set user env `NORNIR_DOCKER_USER_ROOT=D:\Docker` (restart Cursor after changing).
+2. Copy `nornir-docker/dev/example.cursor-dev.run.env` to `$NORNIR_DOCKER_USER_ROOT/Run/nornir-dev/.env` (the run source of truth).
+3. In that file set `NORNIR_TESTDATA_HOST` to the Linux / WSL path (or Docker Desktop UNC) of `nornir-testdata`. Optionally set `NORNIR_REPRO_DATA_HOST` for the repro corpus.
+4. Bridge it to `nornir-docker/.env` (hardlink or copy; junctions are directories-only, SymbolicLink needs Developer Mode). Required for Compose substitution of `${NORNIR_TESTDATA_HOST}`.
+5. Ensure Docker can bind-mount those paths.
+
+`compose.cursor-dev.yaml` also loads `nornir-docker/.env` as optional `env_file`, so every key (`NORNIR_SYNC_REMOTE`, `NORNIR_SUBMODULE_UPDATE`, `GITHUB_TOKEN`, `NORNIR_TILE_*`, ...) reaches the container without editing compose; the compose `environment:` block wins for keys it sets.
+
+Mounts: `${NORNIR_TESTDATA_HOST}` → `/nornir-testdata` (= `TESTINPUTPATH`); when set, `${NORNIR_REPRO_DATA_HOST}` → `/data` (read-only); `${NORNIR_TESTOUTPUT_HOST:-D:/nornir-test-output}` → `/tmp/nornir-test-output` (writable).
 
 ## Environment variables (inside the container)
 
 | Variable | Typical value | Role |
-|----------|-----------------|------|
+|----------|---------------|------|
 | `TESTINPUTPATH` | `/nornir-testdata` | Read-only mount; must match `.cursor/environment.json` and test expectations |
-| `TESTOUTPUTPATH` | `/tmp/nornir-test-output` | Writable scratch for artifacts, Hypothesis DB, plot outputs, etc. Bind-mounted from host `${NORNIR_TESTOUTPUT_HOST:-D:/nornir-test-output}` (use `/mnt/d/nornir-test-output` when Compose runs from WSL). |
-| `INPUT_NORNIR_DATA` | `/data` (cursor-dev compose) | Root of the optional large repro corpus; set to `D:\Data` (or your path) when running pytest on Windows without Docker |
+| `TESTOUTPUTPATH` | `/tmp/nornir-test-output` | Writable scratch (artifacts, Hypothesis DB, plots). Host path `/mnt/d/nornir-test-output` when Compose runs from WSL (mounts above) |
+| `INPUT_NORNIR_DATA` | `/data` (cursor-dev compose) | Optional repro corpus root; set to `D:\Data` (or your path) for pytest on Windows without Docker |
 | `NORNIR_HEADLESS` | `1` (set in image) | Headless matplotlib / CI-style tests |
 | `NORNIR_CLONE_URL` | `https://github.com/jamesra/nornir.git` | Clone source when `/workspace` is empty or for **cursor-dev-clone** refresh |
-| `NORNIR_CLONE_BRANCH` | `dev` | Branch for clone / optional sync (case-sensitive git branch name) |
-| `NORNIR_WORKSPACE_STRATEGY` | `mounted` (default service) / `clone` (**cursor-dev-clone**) | `mounted`: bind-mounted checkout — fetch only unless `NORNIR_SYNC_REMOTE=1`. `clone`: appliance-style refresh to clone branch. |
-| `NORNIR_SYNC_REMOTE` | unset (`0` effective) | Set to `1` on **cursor-dev** to checkout `NORNIR_CLONE_BRANCH` and `git pull --ff-only` on each start |
-| `NORNIR_SUBMODULE_UPDATE` | unset (`0` effective) | Set to `1` on **cursor-dev** (mounted) to run full `git submodule update --init --recursive` on recreate. Default: init missing submodules only; preserve existing checkouts. Warns on `+` in `git submodule status`. See **Monorepo-submodule-changes** rule — always bump umbrella pointers after submodule commits. |
-| `NORNIR_WORKSPACE_HOST` | `..` (default) | Host bind source for **cursor-dev**; relative to `nornir-docker/` compose file dir (parent = monorepo root) |
+| `NORNIR_CLONE_BRANCH` | `dev` | Branch for clone / optional sync (case-sensitive) |
+| `NORNIR_WORKSPACE_STRATEGY` | `mounted` (default) / `clone` (**cursor-dev-clone**) | See entry script below |
+| `NORNIR_SYNC_REMOTE` | unset (`0`) | `1` on **cursor-dev**: sync to `NORNIR_CLONE_BRANCH` on each start (entry step 2) |
+| `NORNIR_SUBMODULE_UPDATE` | unset (`0`) | `1` on **cursor-dev**: full submodule update on recreate (entry step 3). Always bump umbrella pointers after submodule commits (**Monorepo-submodule-changes** rule). |
+| `NORNIR_WORKSPACE_HOST` | `..` | Host bind source for **cursor-dev**, relative to the `nornir-docker/` compose dir (parent = monorepo root) |
 
-Compose sets `TESTINPUTPATH` / `TESTOUTPUTPATH` on **cursor-dev**; keep PyCharm run configs aligned with the same values.
-
-## Host configuration (WSL test data)
-
-1. Set user env `NORNIR_DOCKER_USER_ROOT=D:\Docker` (restart Cursor after changing).
-2. Copy `nornir-docker/dev/example.cursor-dev.run.env` to `$NORNIR_DOCKER_USER_ROOT/Run/nornir-dev/.env`.
-3. Set `NORNIR_TESTDATA_HOST` in that file to the **Linux / WSL path** (or Docker Desktop UNC) where `nornir-testdata` lives.
-4. Bridge: hardlink or copy Run `.env` → `nornir-docker/.env` (required for Compose substitution).
-5. Optionally set `NORNIR_REPRO_DATA_HOST` for the large repro corpus at `/data`.
-6. Ensure Docker can bind-mount those paths.
-
-Compose binds `${NORNIR_TESTDATA_HOST}` → `/nornir-testdata`; the container exposes that path as the value of `TESTINPUTPATH`. When set, `${NORNIR_REPRO_DATA_HOST}` → `/data` (read-only). `${NORNIR_TESTOUTPUT_HOST:-D:/nornir-test-output}` → `/tmp/nornir-test-output` (writable test output).
+Compose sets `TESTINPUTPATH` / `TESTOUTPUTPATH` on **cursor-dev**; keep PyCharm run configs aligned.
 
 ## Build and run
 
-**Build (images):** `nornir-docker/docker-build.ps1` from the monorepo root (see docker-build-run-phases).
-
-**Run (cursor-dev container):** `nornir-docker/run-cursor-dev.ps1` (optional `-Gpu`, `-Clone`), or raw Compose:
-
-From monorepo root:
+- Build images: `nornir-docker/docker-build.ps1` from the monorepo root (see docker-build-run-phases).
+- Run: `nornir-docker/run-cursor-dev.ps1` (optional `-Gpu`, `-Clone`), or raw Compose from the monorepo root:
 
 ```bash
 docker compose -f nornir-docker/compose.cursor-dev.yaml build cursor-dev
@@ -105,70 +88,79 @@ docker compose -f nornir-docker/compose.cursor-dev.yaml run --rm --gpus all curs
 docker compose -f nornir-docker/compose.cursor-dev.yaml run --rm cursor-dev-clone
 ```
 
-- **`--gpus all`**: pass on every run if you want **all GPUs visible by default** (matches the expectation for GPU development). For Dev Containers, add equivalent GPU settings (see below) so you do not rely on remembering the CLI flag.
-- Without `--gpus all`, the container still starts; CuPy/GPU code paths need the flag (or compose-level `deploy` reservations) to see devices.
+Pass `--gpus all` on every run (or use compose `deploy` reservations) to see GPUs; without it the container starts but CuPy has no devices. For Dev Containers, make GPU the default with NVIDIA reservations on the **cursor-dev** service (Compose v2 + Docker Engine) or devcontainer `runArgs` / features ([VS Code GPU docs](https://code.visualstudio.com/remote/advancedcontainers/add-gpu-support)), so you do not rely on the CLI flag.
 
 ## Entry script behavior
 
-On container start, **`cursor-dev-entry.sh`** runs before your shell:
+`cursor-dev-entry.sh` runs on container start, before your shell.
 
-**Service `cursor-dev` (`NORNIR_WORKSPACE_STRATEGY=mounted`):**
+**`cursor-dev` (`mounted`):**
 
-1. If `/workspace` is empty: shallow `git clone` from `NORNIR_CLONE_URL` / `NORNIR_CLONE_BRANCH` (first-time empty bind only).
-2. If `/workspace` is already a git repo: `git fetch`; **only** if `NORNIR_SYNC_REMOTE=1`: checkout clone branch and `git pull --ff-only`.
-3. Submodule sync via **`submodule-sync.sh`**: **default** init missing submodules only (preserves host checkout branches); warns when a submodule is ahead of the umbrella pointer (`+` in `git submodule status`). Set **`NORNIR_SUBMODULE_UPDATE=1`** for full `git submodule update --init --recursive` after pointer bumps.
-4. **`install-monorepo-editables.sh`**: `pip install -e --no-deps` for `nornir-shared`, `nornir-pools`, `nornir-imageregistration`, `dm4`, `nornir-buildmanager` (``--no-deps`` avoids git sibling deps overwriting local editables).
+1. `/workspace` empty: shallow `git clone` of `NORNIR_CLONE_URL` / `NORNIR_CLONE_BRANCH` (first-time empty bind only).
+2. `/workspace` is a git repo: `git fetch`; only with `NORNIR_SYNC_REMOTE=1`, checkout the clone branch and `git pull --ff-only`.
+3. `submodule-sync.sh`: by default init missing submodules only (preserves host checkout branches) and warn on `+` in `git submodule status` (submodule ahead of the umbrella pointer). `NORNIR_SUBMODULE_UPDATE=1` runs full `git submodule update --init --recursive` after pointer bumps.
+4. `install-monorepo-editables.sh`: `pip install -e --no-deps` for `nornir-shared`, `nornir-pools`, `nornir-imageregistration`, `dm4`, `nornir-buildmanager` (`--no-deps` stops git sibling deps overwriting local editables).
 
-**Dev Containers:** `.devcontainer/*/devcontainer.json` sets `postAttachCommand` to rerun the same editable install when the editor attaches (covers persistent containers that skip container entry). Reattach does **not** run submodule update.
+**`cursor-dev-clone` (`clone`):** clone when empty; when `.git` exists, fetch/checkout/pull to `NORNIR_CLONE_BRANCH`. `NORNIR_CLONE_REFRESH=1` wipes `/workspace` before clone (parity with cursor worker). Then full submodule update and the same editable installs.
 
-**Service `cursor-dev-clone` (`NORNIR_WORKSPACE_STRATEGY=clone`):** clone when empty; when `.git` exists, fetch/checkout/pull to `NORNIR_CLONE_BRANCH`. Optional `NORNIR_CLONE_REFRESH=1` wipes `/workspace` before clone (parity with cursor worker). Then **full** submodule update and the same editable installs.
+**Dev Containers:** `postAttachCommand` in `.devcontainer/*/devcontainer.json` reruns the editable install on attach (persistent containers skip entry). Reattach does **not** update submodules.
 
-**Submodules:** shallow clone may omit full submodule trees; use `NORNIR_CLONE_DEPTH=0` or `full` for a full clone if needed. Some submodule URLs are SSH (`git@github.com:...`); HTTPS-only environments need URL rewrites or SSH keys inside the container.
+**Submodules:** a shallow clone may omit full submodule trees; use `NORNIR_CLONE_DEPTH=0` or `full`. Some submodule URLs are SSH (`git@github.com:...`); HTTPS-only environments need URL rewrites or SSH keys in the container.
 
-After entry completes, **`pytest`** from `/workspace` is the supported path for unit tests; no extra image configuration is required for a basic run (headless stack is preinstalled).
+After entry, run `pytest` from `/workspace`; the headless stack is preinstalled.
 
-## `/workspace`: bind default vs named volume clone
+## `/workspace` and Cursor Dev Containers
 
-**Default (`cursor-dev`):** `/workspace` is a **bind mount** of the monorepo root (`${NORNIR_WORKSPACE_HOST:-..}` relative to the `nornir-docker/` compose file). Edits on the host appear in the container.
-
-**Clone (`cursor-dev-clone`):** `/workspace` is the **named volume** `cursor-dev-work`. Data survives container removal but is not a normal host folder. Use **cursor-dev-clone**, `run-cursor-dev.ps1 -Clone`, or the **Nornir (cursor-dev clone)** Dev Container configuration.
-
-## Cursor Dev Containers
-
-Default **`.devcontainer/devcontainer.json`** uses compose service **`cursor-dev`** and `workspaceFolder` `/workspace`. Open the **monorepo root** and use **Reopen in Container**.
-
-For a **fresh clone inside Docker** (named volume), use **Dev Containers: Reopen in Container** (or reopen with configuration) and select **Nornir (cursor-dev clone)** — **`.devcontainer/cursor-dev-clone/devcontainer.json`**, service **`cursor-dev-clone`**.
-
-To make **GPU the default** for Dev Containers, add NVIDIA-style reservations to the **cursor-dev** service in compose (Compose v2 + Docker Engine), or use the devcontainer `runArgs` / features approach [documented by VS Code for GPU](https://code.visualstudio.com/remote/advancedcontainers/add-gpu-support) so every attach gets GPU without manual `docker compose run` flags.
+| Mode | `/workspace` | Open with |
+|------|--------------|-----------|
+| **cursor-dev** (default) | Bind mount of the monorepo root (`${NORNIR_WORKSPACE_HOST:-..}`); host edits appear in the container | Open the monorepo root, **Reopen in Container** (`.devcontainer/devcontainer.json`) |
+| **cursor-dev-clone** | Named volume `cursor-dev-work`: survives container removal, not a normal host folder | **Dev Containers: Reopen in Container** → **Nornir (cursor-dev clone)** (`.devcontainer/cursor-dev-clone/devcontainer.json`), or `run-cursor-dev.ps1 -Clone` |
 
 ## PyCharm
 
-- **Docker Compose** interpreter: select `nornir-docker/compose.cursor-dev.yaml`, service **cursor-dev** (bind mount) or **cursor-dev-clone** (named volume clone), Python **`/opt/venv/bin/python`** (image venv).
-- Map project dir to **`/workspace`** so paths match the container.
-- Set env vars in run/debug templates to match `TESTINPUTPATH` / `TESTOUTPUTPATH` if PyCharm does not inherit them from Compose.
-
-PyCharm does not use `.devcontainer/devcontainer.json`; it consumes the same Compose file and env files.
+- Docker Compose interpreter: `nornir-docker/compose.cursor-dev.yaml`, service **cursor-dev** or **cursor-dev-clone**, Python `/opt/venv/bin/python`.
+- Map the project dir to `/workspace`.
+- Set `TESTINPUTPATH` / `TESTOUTPUTPATH` in run/debug templates if PyCharm does not inherit them from Compose.
+- PyCharm ignores `.devcontainer/devcontainer.json`; it uses the same Compose and env files.
 
 ## Git commit and push
 
-The image includes **git**. For **push**, configure credentials inside the persistent workspace or mount:
-
-- Mount **SSH agent** or `~/.ssh` read-only, **or**
-- Use HTTPS with a credential helper / personal access token (avoid baking secrets into the image).
-
-Set `user.name` / `user.email` in the container (or via repo-local git config) before committing.
+The image includes git. For push, mount the SSH agent or `~/.ssh` read-only, or use HTTPS with a credential helper / PAT (never bake secrets into the image). Set `user.name` / `user.email` in the container or repo-local config before committing.
 
 ## Quick verification checklist
 
 - [ ] `$NORNIR_DOCKER_USER_ROOT/Run/nornir-dev/.env` is the run source of truth; `nornir-docker/.env` is a hardlink/copy bridge with `NORNIR_TESTDATA_HOST` set
 - [ ] Optional: `NORNIR_REPRO_DATA_HOST` set for a real `/data` repro mount (otherwise placeholder empty `/data`)
-- [ ] `docker compose ... run` includes **`--gpus all`** (or compose-level GPU) when GPU access is required
+- [ ] `docker compose ... run` includes `--gpus all` (or compose-level GPU) when GPU access is required
 - [ ] In container: `echo $TESTINPUTPATH` → `/nornir-testdata`, `echo $TESTOUTPUTPATH` → under `/tmp`, `echo $INPUT_NORNIR_DATA` → `/data`
 - [ ] `/workspace` contains the monorepo; `pip list` shows editable installs for Nornir packages
 - [ ] `git status` works; remote push tested with your chosen auth method
 - [ ] `pytest` runs from `/workspace` for the packages you care about
-- [ ] When using GPU: inside the container, `import cupy` works and a trivial GPU array (e.g. `cupy.arange(3)`) runs without CUDA runtime errors
+- [ ] With GPU: `import cupy` works and `cupy.arange(3)` runs without CUDA runtime errors
 
-## Additional documentation
+## Persistent container changes
 
-For narrative docs, see [docs/deployment/nornir_dev_and_worker.rst](../../../docs/deployment/nornir_dev_and_worker.rst). `stack.ps1 nornir-dev shell` runs the same `run-cursor-dev.ps1`.
+A change made in the running container is lost on **Rebuild Container**; put it in the image or Compose.
+
+| Change | Put it in |
+|--------|-----------|
+| Tools, CLIs, apt/pip packages (for example Claude Code) | `nornir-docker/dev/Dockerfile`; rebuild `nornir:dev-cursor-base` |
+| Mounts, env vars, named volumes for state (logins, config) | `nornir-docker/compose.cursor-dev.yaml` (both services) and `dev/example.cursor-dev.run.env` |
+| Editor extensions and settings | `.devcontainer/devcontainer.json` (and `cursor-dev-clone/devcontainer.json`) |
+
+Do not install tools from the bind-mounted entry scripts (`cursor-dev-entry.sh`, `install-monorepo-editables.sh`); they run on every start and are for workspace prep. Do not run `docker compose down -v` casually: it deletes the `claude-config` and `cursor-dev-work` volumes. Interpreter in every image: `/opt/venv/bin/python`.
+
+## Troubleshooting (by error message)
+
+First check state: `docker ps -a --filter name=cursor-dev`, then `docker logs <name>`. `cursor-dev-entry.sh` runs with `set -euo pipefail`, so a failed step stops the container.
+
+| Message / symptom | Verified cause and fix |
+|-------------------|------------------------|
+| **Failed to install Cursor server** (every rebuild, after reboot) | Container `Exited`: entry script failed; read `docker logs` (`mount-network-shares: FAILED` = CIFS row below). Container running: **unknown, investigate**; save the Dev Containers log and the container's network state, and record the cause here. |
+| Compose error: `.../Run/nornir-dev/compose.net-mounts.override.yaml` not found | `.devcontainer/devcontainer.json` requires `${localEnv:NORNIR_DOCKER_USER_ROOT}/Run/nornir-dev/compose.net-mounts.override.yaml` (legacy location; `run-cursor-dev.ps1` prefers `Run/nornir-net-mounts/`). Set the user env var, restart Cursor, copy `dev/example.compose.net-mounts.override.yaml` there. |
+| `/nornir-testdata` empty or missing, `TESTINPUTPATH` tests fail | `nornir-docker/.env` missing or a stale copy of `Run/nornir-dev/.env`, so `NORNIR_TESTDATA_HOST` misses Compose. Recreate the bridge; check the bind source with `docker compose -f nornir-docker/compose.cursor-dev.yaml config`; then **Rebuild Container** (substitution happens at create, not reattach). The path must exist where Docker resolves it (WSL path or `\\wsl$` UNC). |
+| CIFS / `/storage4` gone after host reboot | Only the entry script mounts, at start; `CAP_SYS_ADMIN` is then dropped, so shell remounts fail by design. `wsl grep cifs /proc/filesystems`; if empty, `wsl -u root modprobe cifs` and restart the container. Persist with `dev/example.modules-load.net-shares.conf` (needs `systemd=true`) or a `[boot] command` in `/etc/wsl.conf` (`docs/deployment/nornir_build_appliance.rst`). Still lost after that: **unknown, investigate** (maybe the distro holding the config boots after Docker starts the container). |
+| `launch.json` configurations not shown | `.vscode/launch.json` is tracked: `/workspace/.vscode/launch.json` (clone mode: only if committed on `NORNIR_CLONE_BRANCH`). Entries are `"type": "debugpy"`: `ms-python.debugpy` must be installed **in the container** (listed in `devcontainer.json`; check Extensions), and the folder opened at `/workspace`. Both hold: **unknown, investigate.** Its `PYTHONPATH` uses `;` and `D:/` (Windows-only); the container relies on editable installs. |
+| Skills or rules not found inside the container | Project skills: `/workspace/.cursor/skills/` (read per `CLAUDE.md` / `AGENTS.md`). Claude Code discovers only `/workspace/.claude/skills/` (currently just `nornir-improve-loop`). Host user-level skills and rules (`%USERPROFILE%\.claude\skills`, `~/.cursor/rules`) are absent: `/root/.claude` is the `claude-config` volume. A Compose bind mount would fix it persistently. **Unknown, investigate**: confirm the design with the user first. |
+| `claude: command not found` after rebuild | Image predates `dev/Dockerfile` installing Claude Code (`/root/.local/bin/claude`; login kept on the `claude-config` volume). Rebuild the image (`docker compose -f nornir-docker/compose.cursor-dev.yaml build cursor-dev` or `docker-build.ps1 -Images dev-cursor-base`), then **Rebuild Container**. |
+| `NORNIR_TESTDATA_HOST` / `libnvrtc` / `\\wsl.localhost` socket errors | See "Programmer shell" in `docs/deployment/troubleshooting.rst`. |

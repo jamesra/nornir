@@ -14,18 +14,22 @@ description: Archives completed Cursor agent plan files into `.cursor/Built Plan
 | `.cursor/Built Plans/README.md` | Deliverables index — **update when archiving** |
 | `.cursor/plans/README.md` | Points to archive; lists active plans |
 
-Plan **deliverables** (code, rules, docs under `docs/`, package READMEs) stay in their normal paths. Only the `.plan.md` file moves.
+Only the `.plan.md` file moves. Deliverables (code, rules, `docs/`, package READMEs) stay where they are;
+never move deliverable `.md` files (checklists, assessment reports) into Built Plans.
 
-Plans may also exist outside the repo in the Cursor IDE plans directory (e.g. `~/.cursor/plans/`). Move those into `.cursor/Built Plans/` when fully built so they are version-controlled with the monorepo.
+Plans in the Cursor IDE plans directory (e.g. `~/.cursor/plans/`) also move into `.cursor/Built Plans/`
+when fully built, so they are version-controlled with the monorepo. Check `~/.cursor/plans/*.plan.md`
+when the user mentions IDE plans outside the workspace.
 
 ## When a plan is "built"
 
-A plan is ready to archive when **every todo in its YAML frontmatter is `status: completed`** and there are **no** `pending` or `in_progress` todos.
+Its YAML frontmatter todos have at least one `completed` and zero `pending` / `in_progress`
+(`cancelled` todos do not block archiving; this is what the check below tests).
 
 Do **not** archive if:
-- Any todo is `pending` or `in_progress`
-- Todos list is empty and work was never tracked (treat as open unless the user confirms completion)
-- The user explicitly says the plan is still active
+- any todo is `pending` or `in_progress`;
+- the todo list is empty and work was never tracked (open unless the user confirms completion);
+- the user says the plan is still active.
 
 ## Workflow
 
@@ -39,15 +43,10 @@ Task Progress:
 - [ ] Verify no duplicate filenames in destination
 ```
 
-### Step 1 — Classify plans
+### 1. Classify
 
-Scan `.cursor/plans/` and, if relevant, the Cursor IDE plans directory for `*.plan.md`.
-
-Parse frontmatter todo lines: `status: completed|pending|in_progress|cancelled`.
-
-**Built:** at least one `completed` todo and zero `pending` / `in_progress`.
-
-Quick check (adjust paths as needed):
+Scan `.cursor/plans/` (and the IDE plans directory if relevant) for `*.plan.md`; parse frontmatter
+`status: completed|pending|in_progress|cancelled`. Quick check (adjust paths):
 
 ```bash
 python3 <<'PY'
@@ -63,23 +62,18 @@ for p in sorted(pathlib.Path(".cursor/plans").glob("*.plan.md")):
 PY
 ```
 
-Also check `~/.cursor/plans/*.plan.md` when the user mentions IDE plans outside the workspace.
+### 2. Document before moving
 
-### Step 2 — Document before moving
+- Add a row per newly archived plan to `.cursor/Built Plans/README.md` (`| Plan | Primary deliverables |`):
+  link the plan filename; list concrete deliverable paths (pipelines, modules, tests, rules, scripts,
+  docs) that exist (check with Glob). One line per plan.
+- Remove the plan from that README's "Plans still open" section if listed.
+- In `.cursor/plans/README.md`, remove archived entries from the active table; rows only for plans
+  still in `.cursor/plans/`.
+- Do **not** edit plan file bodies unless asked; frontmatter and notes are historical record (never
+  mark todos complete retroactively).
 
-For each newly archived plan, add a row to `.cursor/Built Plans/README.md`:
-
-| Plan | Primary deliverables |
-
-Deliverables = concrete paths (pipelines, modules, tests, rules, scripts, docs). One line per plan; link the plan filename.
-
-Remove the plan from the "Plans still open" section of that README if it was listed there.
-
-Update `.cursor/plans/README.md`: remove archived entries from the active table; add a row only for plans still in `.cursor/plans/`.
-
-Do **not** edit plan file bodies unless the user asks — frontmatter and notes are historical record.
-
-### Step 3 — Move files
+### 3. Move
 
 ```bash
 mkdir -p ".cursor/Built Plans"
@@ -87,34 +81,21 @@ mv ".cursor/plans/<name>.plan.md" ".cursor/Built Plans/"
 # repeat for each built plan; same for ~/.cursor/plans/ when applicable
 ```
 
-Use `mv`, not copy-only, to avoid duplicates.
+Use `mv`, not copy, to avoid duplicates. Do not create the archive outside `.cursor/Built Plans/`
+without a user request.
 
-### Step 4 — Verify
+### 4. Verify
 
-- `.cursor/Built Plans/` contains the moved files + README
-- `.cursor/plans/` holds only active plans (+ its README)
-- Every new archive row in Built Plans README has deliverable paths that exist in the repo
+- `.cursor/Built Plans/` contains the moved files + README.
+- `.cursor/plans/` holds only active plans (+ its README).
+- Every new archive row's deliverable paths exist in the repo.
 
 ## Examples
 
-**Archive after finishing a feature plan**
-
-1. Confirm all todos `completed` in `pipeline_command_chaining_b922dc68.plan.md`
-2. Add row: chaining → `build.py --then`, `tests/pipeline/test_chain.py`, `TEMBuild.cmd`
-3. Move file to `.cursor/Built Plans/`
-4. Remove from active table in `.cursor/plans/README.md`
-
-**Partial plan — do not archive**
-
-`fix_grid690_python_parity.plan.md` has pending todos → stays in `.cursor/plans/` even if Phase 0 docs exist at `docs/refine-grid-cpp-parity-checklist.md`.
-
-**Batch archive**
-
-User says "move all built plans": classify all candidates, update README once with all new rows, then move all built files in one pass.
-
-## Anti-patterns
-
-- Moving deliverable `.md` files (checklists, assessment reports) into Built Plans — those belong in `docs/` or package trees
-- Archiving plans with open todos
-- Editing archived plan files to mark todos complete retroactively
-- Creating the archive outside `.cursor/Built Plans/` without user request
+- **Finished feature plan:** all todos `completed` in `pipeline_command_chaining_b922dc68.plan.md` →
+  add row: chaining → `build.py --then`, `nornir-buildmanager/scripts/TEMBuild.cmd` → move to
+  `.cursor/Built Plans/` → remove from the active table in `.cursor/plans/README.md`.
+- **Partial plan:** `fix_grid690_python_parity.plan.md` has pending todos, so it stays in
+  `.cursor/plans/` even though Phase 0 docs exist at `docs/refine-grid-cpp-parity-checklist.md`.
+- **Batch ("move all built plans"):** classify all candidates, update the README once with all new
+  rows, then move all built files in one pass.

@@ -5,9 +5,7 @@ description: Build and deploy the umbrella Sphinx monodoc under docs/; align pac
 
 # Nornir documentation
 
-Use when editing **`docs/`**, changing GitHub Pages deploy, or adjusting package **`README.md`** / **`README.rst`** files that point at the public manual.
-
-**Policy** (short READMEs, no hand-edit of `nornir.github.io`, RST vs Markdown): see [`.cursor/rules/Documentation-and-monodoc.mdc`](../../rules/Documentation-and-monodoc.mdc). This skill is **build/deploy procedure** only.
+Use when editing `docs/`, changing GitHub Pages deploy, or adjusting package `README.md` / `README.rst` files that point at the public manual. This skill is build/deploy procedure only; policy (short READMEs, no hand-edit of `nornir.github.io`, RST vs Markdown, Pyre in-app help) is in [`.cursor/rules/Documentation-and-monodoc.mdc`](../../rules/Documentation-and-monodoc.mdc).
 
 ## Build locally
 
@@ -22,12 +20,12 @@ pip install -e nornir-buildmanager --no-deps && pip install "validators>=0.23" "
 sphinx-build -b html docs docs/_build/html
 ```
 
-Open **`docs/_build/html/index.html`**. On Unix you can run **`make -C docs html`** if **`make`** is available.
+Open `docs/_build/html/index.html`. On Unix with `make`: `make -C docs html`.
 
 ## Where things live
 
-- **Sources:** **`docs/`** (RST primary; **MyST** for `.md`).
-- **Version banner:** repo-root **`VERSION`** (read in **`docs/conf.py`**).
-- **CI:** **`.github/workflows/docs.yml`** — builds on PRs; on **`main`/`master`** push, deploys to **`nornir/nornir.github.io`** when secret **`NORNIR_ORG_GITHUB_IO_DEPLOY_TOKEN`** is set (otherwise publish is skipped with a warning).
-- **Human-facing publish instructions:** **`docs/development/publishing_documentation.rst`**.
-- **Pyre in-app controls:** keep mouse/keyboard text in **`nornir-pyre/pyre/README.txt`** (Help dialog); public narrative in **`docs/guides/pyre_use.rst`**; root **`README.rst`** stays a short landing page.
+- Sources: `docs/` (RST primary; MyST for `.md`).
+- Version banner: repo-root `VERSION` (read in `docs/conf.py`).
+- CI: `.github/workflows/docs.yml` builds on PRs; on `main`/`master` push it deploys to `nornir/nornir.github.io` when secret `NORNIR_ORG_GITHUB_IO_DEPLOY_TOKEN` is set (otherwise publish is skipped with a warning).
+- Human-facing publish instructions: `docs/development/publishing_documentation.rst`.
+- Pyre controls: mouse/keyboard text in `nornir-pyre/pyre/README.txt` (Help dialog); public narrative in `docs/guides/pyre_use.rst`; root `README.rst` stays a short landing page.

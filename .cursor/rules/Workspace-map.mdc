@@ -1,0 +1,30 @@
+---
+description: Where things live outside this repo - sibling repos, data volumes, training data, scratch and output roots - so they are not rediscovered each session
+alwaysApply: true
+---
+
+## Workspace map (Windows workstation)
+
+| What | Where | Notes |
+|------|-------|-------|
+| SAM2 trainer (consumes exported training sets) | `D:\src\git\Sam2Trainer` | Has own `CLAUDE.md` and `.cursor/rules/`; read them before editing there |
+| Older trainer copy | `D:\src\git\VikingSlackUsersAI\Sam2SegmentationTrainer` | Confirm with the user which trainer a task means |
+| Viking (viewer, OData/gRPC servers, Identity) | `D:\src\git\Viking` | Has own `CLAUDE.md` and `.cursor/rules/` (incl. `coordinate-spaces.mdc`, `odata-conventions.mdc`) |
+| connectomes.pitt.edu deploy repo | `D:\src\git\connectomes-deploy` | `deploy-connectomes` skill |
+| Improvement-loop reports | `D:\src\git\Nornir Automatic Improvement Reports` | `nornir-improve-loop` output root |
+| Volumes (real data) | `Y:\Volumes` (e.g. `RC2`, `SmallMouse`) | NAS-backed; read-only for tests; copy small sections into test data |
+| Exported training sets | `Y:\SAM2TrainingData` | Naming: `Training-set-naming` rule |
+| NAS share | `\\192.168.0.199\Data` | |
+| Unit test data | `TESTINPUTPATH` = `D:\nornir-testdata` (`/nornir-testdata` in the dev container) | `TEST_DATA_SETUP.md` |
+| Test output / scratch | `TESTOUTPUTPATH` = `C:\Temp\Nornir` | Never the repo root |
+| Docker host layout | `D:\Docker` (`/srv/docker` on Linux) | `docker-machine-layout` skill |
+| Python | Windows `venv\pyre314`; dev container `/opt/venv` | `Virtual-Env` rule |
+
+If a path above no longer exists, say so and update this table; do not guess a replacement.
+
+### Live checkouts feed deployments
+
+`rebuild-and-start*.ps1` / `build.ps1` under `D:\Docker\Builds\<service>` build from the **live
+checkouts** (`D:\src\git\Viking`, `D:\src\git\Sam2Trainer`, `D:\src\git\nornir\nornir-docker`), so
+committing or switching branches there changes what the next rebuild deploys. Ask first when a
+deployment may be pending.

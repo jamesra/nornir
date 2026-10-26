@@ -13,17 +13,15 @@ alwaysApply: false
 
 ## Refine-grid: only trusted cells shape the field
 
-A cell is trusted when its own measurement is unique (`peak_ratio`) and prominent
-(ZNCC) **and** it agrees with trusted neighbours or converges under the field it
-helped build. Untrusted cells never enter the mesh; where nothing is trusted the
-input transform stands.
+A cell is trusted when its own measurement is unique (`peak_ratio`) and prominent (ZNCC) **and** it
+agrees with trusted neighbours or converges under the field it helped build. Untrusted cells never
+enter the mesh; where nothing is trusted the input transform stands.
 
-Read [`.cursor/skills/refine-grid-trust-review/SKILL.md`](../skills/refine-grid-trust-review/SKILL.md)
-before adding, changing, or tuning any gate, threshold, recovery step, preserve
-rule, smoothing, or promotion. The inventory of current steps and their trust
-questions is
-[`nornir-imageregistration/docs/refine_grid_step_inventory.md`](../../nornir-imageregistration/docs/refine_grid_step_inventory.md).
-Update that inventory in the **same change** when a step is added or removed.
+Before adding, changing, or tuning any gate, threshold, recovery step, preserve rule, smoothing, or
+promotion, read [`.cursor/skills/refine-grid-trust-review/SKILL.md`](../skills/refine-grid-trust-review/SKILL.md).
+Current steps and their trust questions:
+[`nornir-imageregistration/docs/refine_grid_step_inventory.md`](../../nornir-imageregistration/docs/refine_grid_step_inventory.md);
+update it in the **same change** when a step is added or removed.
 
 ### Before the change: three answers in the plan or commit message
 
@@ -37,26 +35,20 @@ Update that inventory in the **same change** when a step is added or removed.
 2. Which **existing step** already answers that question.
 3. Why the existing answer is **insufficient**, with a measurement from a **named pair**.
 
-If the honest answer to (1) is "the mesh contains untrusted cells and this change
-limits the damage", **reject the change** and fix the mesh membership rule instead.
-
-### Retired examples (recognise the pattern)
-
-- global residual translation applied without a uniqueness gate
-- sparse-mesh preserve with absolute floors
-- anchor-smooth with raw-preserve
-- best-effort promotion of ambiguous peaks
-- field-level branding modes
+If the honest answer to (1) is "the mesh contains untrusted cells and this change limits the damage",
+**reject the change** and fix the mesh membership rule instead. Retired examples of that pattern:
+global residual translation applied without a uniqueness gate; sparse-mesh preserve with absolute
+floors; anchor-smooth with raw-preserve; best-effort promotion of ambiguous peaks; field-level
+branding modes.
 
 ### Constants
 
-Must be **relative**: fraction of `n_grid`, quantile of the pass distribution, or
-a multiple of `max_travel` or cell size — never absolute counts. Any constant
-introduced must state the pair and the measured distribution that set it.
+Must be **relative** (fraction of `n_grid`, quantile of the pass distribution, or a multiple of
+`max_travel` or cell size), never absolute counts. Any new constant must state the pair and the
+measured distribution that set it.
 
 ### Verification
 
-Every refine-grid change must be verified on **at least one pair that motivated
-an existing mechanism** plus **one healthy pair**, reporting **lock fraction**
-and **unique-fraction-over-passes**. A change that lowers the healthy pair's lock
-fraction is **not accepted**.
+Verify every refine-grid change on **at least one pair that motivated an existing mechanism** plus
+**one healthy pair**, reporting **lock fraction** and **unique-fraction-over-passes**. A change that
+lowers the healthy pair's lock fraction is **not accepted**.

@@ -5,22 +5,10 @@ alwaysApply: true
 
 ## Design-choice confirmation
 
-### When to speak up
+**When:** before implementing (or when a plan embeds) an approach with a **material** concern: security or data-safety risk; hard-to-revert APIs or structure; **violation of a rule** in `.cursor/rules/`; an obvious maintenance trap; or a "clever" shortcut that trades clarity for brevity. Do not nitpick minor style.
 
-Before implementing—or when a plan embeds it—flag **material** concerns if the approach involves: security or data-safety risk; APIs or structure that are hard to revert; **violation of established rules** in `.cursor/rules/`; obvious maintenance traps; or “clever” shortcuts that trade clarity for brevity.
+**How:** name the concern, state the main tradeoff, and offer one or two reasonable alternatives when practical.
 
-### What to do
+**Confirm:** do not implement the questionable path until the user **explicitly confirms** (e.g. "yes, proceed with X despite Y"). If they already clearly chose it **after** the warning, proceed.
 
-Briefly name the concern, state the **main tradeoff**, and offer **one or two** reasonable alternatives when practical.
-
-### Confirmation
-
-**Do not** implement the questionable path until the user **explicitly confirms** they want it (for example: “yes, proceed with X despite Y”). If they already clearly chose that path **after** the warning, you may proceed.
-
-### Non-negotiable project rules
-
-Requirements in other `.cursor/rules/` files (for example **must not** or **do not**) are **default non-negotiable**. Do not treat “confirm override” as permission to skip them **unless** the user **explicitly states in writing** that they accept overriding that rule for this change. Illegal or clearly unsafe requests remain out of scope for silent compliance—warn and refuse if appropriate.
-
-### What not to do
-
-Do not nitpick minor style preferences. Reserve this for **material** design impact.
+**Non-negotiable rules:** `must not` / `do not` requirements in other `.cursor/rules/` files are non-negotiable by default. "Confirm override" does not waive them; only the user's **explicit written statement** that they accept overriding that rule for this change does. Do not silently comply with illegal or clearly unsafe requests: warn, and refuse if appropriate.

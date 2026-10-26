@@ -20,14 +20,11 @@ description: >-
 | **nornir-docker-images-ci** (this) | Image matrix, OCI/BOM, Dockerfile/CI review |
 | **nornir-docker-devcontainer** | Day-to-day cursor-dev / Dev Containers setup |
 
-## Source of truth (do not duplicate long guides here)
+## Source of truth (link; do not duplicate long guides here)
 
 - Image catalogue and build commands: [docs/docker/images.rst](../../../docs/docker/images.rst)
 - Script index: [nornir-docker/README.md](../../../nornir-docker/README.md)
 - Monodoc index: <https://nornir.github.io/docker/index.html>
-- Build/run env layering: **docker-build-run-phases** skill
-- Dev shell / Dev Containers: **nornir-docker-devcontainer** skill
-- Windows `D:\Docker` layout: **docker-machine-layout** skill
 
 ## Image matrix
 
@@ -39,13 +36,13 @@ description: >-
 | `nornir:prod` | `prod/Dockerfile` | `INSTALL_CUPY=0` (default) | Baked | Image |
 | `nornir:cupy` | `prod/Dockerfile` | `INSTALL_CUPY=1`, `CUPY_PACKAGE` | Baked | Image |
 
-**Compose stacks (run phase, not separate image tags):** `cursor-dev` / `cursor-dev-clone` (`compose.cursor-dev.yaml`), `nornir-cursor-worker` (`compose.cursor-worker.yaml`), `nornir` / `nornir-prod` / `nornir-cupy` (`compose.yaml`).
+**Compose stacks (run phase, not image tags):** `cursor-dev` / `cursor-dev-clone` (`compose.cursor-dev.yaml`), `nornir-cursor-worker` (`compose.cursor-worker.yaml`), `nornir` / `nornir-prod` / `nornir-cupy` (`compose.yaml`).
 
 Shared constraints: `nornir-docker/constraints-headless.txt` (dev + prod pip installs).
 
 ## `docker-build.ps1` build order
 
-From the **invocation directory** (script `cd`s to monorepo root for context `.`). Default builds all five in this order; `-Images` filters the set (same order):
+Run from the **invocation directory** (the script `cd`s to the monorepo root for context `.`). Default builds all five in this order; `-Images` filters the set, keeping the order:
 
 1. `nornir:dev`
 2. `nornir:dev-cursor-base` (`INSTALL_MONOREPO_EDITABLES=0`)
@@ -53,11 +50,11 @@ From the **invocation directory** (script `cd`s to monorepo root for context `.`
 4. `nornir:prod`
 5. `nornir:cupy`
 
-Examples: `.\docker-build.ps1 -Help`; `.\docker-build.ps1 -List`; `.\docker-build.ps1 -Images prod,cupy` (appliance only). `-Tags` is an alias of `-Images`. `-NoCache` passes `--no-cache`. `-DryRun` prints docker commands and does not build. Accepts `cupy`, `nornir:cupy`, or `nornir-cupy`. Empty `-Images`/`-Tags` builds the whole catalogue.
+Examples: `.\docker-build.ps1 -Help`; `.\docker-build.ps1 -List`; `.\docker-build.ps1 -Images prod,cupy` (appliance only). `-Tags` aliases `-Images`, which accepts `cupy`, `nornir:cupy`, or `nornir-cupy`; empty builds the whole catalogue. `-NoCache` passes `--no-cache`. `-DryRun` prints docker commands without building.
 
 Reads **`VERSION`**, git `HEAD` → `SOURCE_REVISION`, UTC `BUILD_DATE`, and `release/docker_package_versions_json.py` + `release/package-versions.yaml` → `PACKAGE_VERSIONS_JSON_B64`. Sets OCI labels (`org.opencontainers.image.*`, `org.nornir.variant`, `org.nornir.package_versions.json.base64`). Tags `nornir:<suffix>-<VERSION>` after each successful build.
 
-Optional per-invocation overrides: `build.env`, `.build.<id>.env` where `<id>` is tag with `:` → `-` (e.g. `.build.nornir-dev.env`). Committed `example.*.build.env` files are **templates only**—copy values into invocation-dir files if needed.
+Per-invocation overrides: `build.env`, `.build.<id>.env` (`<id>` = tag with `:` → `-`, e.g. `.build.nornir-dev.env`). Committed `example.*.build.env` files are **templates only** (see **docker-build-run-phases**).
 
 ## When to change what
 
@@ -79,8 +76,8 @@ Optional per-invocation overrides: `build.env`, `.build.<id>.env` where `<id>` i
 ## Dockerfile / Compose review checklist
 
 - [ ] Build context remains **monorepo root** (`context: ..` from `nornir-docker/` compose files).
-- [ ] `COPY` order: expensive layers (ImageMagick compile, pip installs) before frequently changing `COPY` of source.
-- [ ] `ARG` scope: args used in `RUN` must be declared before that `RUN`; document intentional defaults in `example.*.build.env`.
+- [ ] `COPY` order: expensive layers (ImageMagick compile, pip installs) before frequently changing source `COPY`.
+- [ ] `ARG` scope: args used in `RUN` are declared before that `RUN`; intentional defaults documented in `example.*.build.env`.
 - [ ] No secrets in `ARG`/`ENV`/`LABEL`; runtime secrets only via `--env-file` / Compose env files (gitignored).
 - [ ] Compose: `${NORNIR_TESTDATA_HOST}` and other required vars documented in `example.*.run.env`; unset vars produce empty bind sources (fail loudly in docs, not silently in production).
 - [ ] No duplicate `/workspace` mounts between Compose and devcontainer.json.
@@ -91,7 +88,7 @@ Optional per-invocation overrides: `build.env`, `.build.<id>.env` where `<id>` i
 
 - Prefer **`docker-build.ps1`** (or `build.cmd`) over raw `docker build` when OCI labels and BOM JSON must match release artifacts.
 - Inspect labels: `docker image inspect nornir:dev --format '{{json .Config.Labels}}'`
-- Decode BOM: see [docs/docker/images.rst](../../../docs/docker/images.rst) (base64 label `org.nornir.package_versions.json.base64`).
+- Decode BOM (base64 label `org.nornir.package_versions.json.base64`): see [docs/docker/images.rst](../../../docs/docker/images.rst).
 - Release checklist: `release/README.md`; tag policy `v` + `VERSION` file.
 
 ## Anti-patterns
@@ -99,4 +96,3 @@ Optional per-invocation overrides: `build.env`, `.build.<id>.env` where `<id>` i
 - Baking monorepo into `dev-cursor-base` / worker images (`INSTALL_MONOREPO_EDITABLES=0` is intentional).
 - Committing `nornir-docker/.env`, `.env.cursor-worker`, or personal `build.env` with secrets.
 - Using `GetComputationModule()`-style global backend choices in Docker docs (unrelated but common confusion): image Python is `/opt/venv/bin/python`.
-- Duplicating long operational prose in this skill—link to monodoc and README instead.

@@ -8,7 +8,7 @@ description: >-
 
 # Bump Nornir versions
 
-Two different version ids exist. Do not treat them as the same number.
+Two different version ids exist; do not treat them as the same number.
 
 | Id | Canonical file | Used for |
 |----|----------------|----------|
@@ -21,21 +21,18 @@ BOM mirror (must match each package’s pyproject): `release/package-versions.ya
 
 1. Edit **only** `nornir-<pkg>/pyproject.toml` (`version = "..."`).
 2. Set the same string under that package in `release/package-versions.yaml`.
-3. Do **not** edit:
-   - `nornir-pyre/setup.py` (reads pyproject)
-   - `nornir-pyre/packaging/windows/pyre-installer.iss` (requires `/DMyAppVersion` from the build script)
-   - root `VERSION` (unless you are also cutting a monorepo release)
-4. Verify from monorepo root:
+3. Do **not** edit `nornir-pyre/setup.py` (reads pyproject), `nornir-pyre/packaging/windows/pyre-installer.iss` (requires `/DMyAppVersion` from the build script), or root `VERSION` (unless also cutting a monorepo release).
+4. Verify from the monorepo root:
 
 ```bash
 python release/verify_package_versions.py
 ```
 
-5. Commit inside the **submodule**, then bump the **umbrella pointer** (see Monorepo-submodule-changes rule). Include the yaml + docs changes in the umbrella commit when those files changed.
+5. Commit inside the **submodule**, then bump the **umbrella pointer** (Monorepo-submodule-changes rule), including the yaml and docs changes in the umbrella commit when those changed.
 
 ### Pyre installer after a package bump
 
-1. Add a curated ``## X.Y.Z`` section to ``nornir-pyre/CHANGELOG.user.md`` (user-facing notes only).
+1. Add a curated ``## X.Y.Z`` section (user-facing notes only) to ``nornir-pyre/CHANGELOG.user.md``.
 2. From the monorepo root:
 
 ```powershell
@@ -58,17 +55,15 @@ git tag pyre-X.Y.Z
 git push origin pyre-X.Y.Z
 ```
 
-`build-installer.ps1` reads `nornir-pyre/pyproject.toml`. Override only when needed: `-Version x.y.z`.
+`build-installer.ps1` reads `nornir-pyre/pyproject.toml`; override only when needed with `-Version x.y.z`.
 
-Docs always link **latest** via
-`https://github.com/jamesra/nornir/releases/latest/download/Pyre-Setup.exe`.
-Versioned installers remain on prior `pyre-*` releases.
+Docs always link the latest installer, `https://github.com/jamesra/nornir/releases/latest/download/Pyre-Setup.exe`; versioned installers stay on prior `pyre-*` releases.
 
 ## Cut a monorepo release
 
-1. Bump any packages that changed (steps above).
-2. Bump root `VERSION` to the new release id (may equal pyre’s version, but that is coincidence — Docker/docs use `VERSION`, the installer uses pyre’s pyproject).
+1. Bump any changed packages (steps above).
+2. Bump root `VERSION` to the new release id. It may equal pyre’s version only by coincidence: Docker/docs use `VERSION`, the installer uses pyre’s pyproject.
 3. Run `python release/verify_package_versions.py`.
-4. Commit, tag `v$(Get-Content VERSION)` / `git tag v$(cat VERSION)`, push the tag (triggers Pyre Windows release workflow on `v*`).
+4. Commit, tag `v$(Get-Content VERSION)` / `git tag v$(cat VERSION)`, push the tag (triggers the Pyre Windows release workflow on `v*`).
 
 Human docs: `docs/development/release.rst`.
