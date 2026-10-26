@@ -48,7 +48,7 @@ Alignment keys
 --------------
 
 * **Rigid:** Space runs a local brute-force refine (±5° at 1° steps) and keeps scale. Shift+Space also refines scale. Both are also in the **Registration** menu.
-* **Mesh / RBF:** Space auto-aligns the selected control points and the point under the cursor. Shift+Space auto-aligns all points.
+* **Mesh / RBF:** Space auto-aligns the selected control points and the point under the cursor. Shift+Space auto-aligns all points. Holding Space aligns each point once: sweep the cursor over points to align them in turn, and release and press again to re-align one.
 * **Grid:** Space auto-aligns like Mesh. Shift+Space runs one grid-refine pass (settings dialog, then a live preview). **Registration → Refine w/ Grid** runs the chosen number of iterations as one job and updates the view after each pass. Several Shift+Space presses are not the same as that multi-pass job.
 * **Esc** (or **Registration → Cancel Registration**, or the status-bar Cancel) cancels queued point alignments and any running refine or rotate job. Points already moved stay moved. While you are creating a point or dragging a selection box, Esc cancels that instead.
 
