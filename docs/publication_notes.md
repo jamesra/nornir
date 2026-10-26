@@ -74,6 +74,7 @@ when $\lVert T(\ell_k) - d \rVert_\infty \le 0.01$ px or after 8 steps ($T$ maps
   over once per key press and over continuous re-registration. Where:
   `nornir-pyre/pyre/controllers/control_point_registration_queue.py` (`SpaceHoldRegistrations`).
 
+- **2026-10-26 Pyre point registration: send CPU transforms to pool workers; one hovered point per press.** Why: on a real STOS pair (3248 points, CuPy) a point took 3.4-10.1 s because the GPU grid/mesh transform was pickled to each cold worker, which started CUDA and compiled kernels (2.6-2.9 s per worker); a CPU rebuild of the transform brings it to about 0.12 s warm and 0.5-0.6 s on a worker's first task. Hover-and-Space also added the hovered point to the shared selection, so press N aligned N points; each press now aligns one. The CPU and GPU snapshots differ by a median of 0.7 px (max about 3 px on 30 points), within the run-to-run variation of about 0.9 px, and both are equally accurate against a synthetic ground truth. Rejected: killing in-flight pool workers on cancel (the pool is shared; results are discarded instead). Where: `nornir-pyre/pyre/controllers/transformcontroller.py`.
 - **2026-10-25 Carry at export, not in the trainer.** One implementation of the carry for circles and polygons, matched
   to Viking's production carry, with per-circle provenance so a new correction set or an edited annotation re-carries
   only what changed. All linked circles are exported with their overlap; the trainer filters (threshold changes need no
