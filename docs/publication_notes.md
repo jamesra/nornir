@@ -35,6 +35,28 @@ when $\lVert T(\ell_k) - d \rVert_\infty \le 0.01$ px or after 8 steps ($T$ maps
 
 ## Algorithmic decisions
 
+- **2026-10-26 Pyre holds images deeper than 8 bits as float32; 8-bit images stay float16.** Why: float16 keeps 11
+  significant bits, so a 16-bit image loses about 5 bits in Pyre. Save Warped Image of a real 16-bit TEM tile
+  (`nornir-testdata/Images/16-bit/10000.tif`, identity transform) matched the source at 34.3% of pixels with errors up
+  to 16 levels when held as float16, and at 100% as float32. float16 represents every 8-bit level exactly, so 8-bit
+  images keep it. Cost: 16-bit images use twice the memory (4080 x 4080: 32 to 64 MiB). Rejected: changing the library
+  default `default_image_dtype()` (doubles memory in the build pipeline too); re-reading the source file at export
+  time (registration would still see the reduced precision). Where: `nornir-pyre/pyre/viewmodels/imageviewmodel.py`
+  (`working_float_dtype`), `nornir-pyre/pyre/state/imageloader.py`.
+- **2026-10-26 Integer images to float16 are scaled in float32.** Why: `ImageParamToImageArray` cast to float16 and
+  then divided by the integer maximum, but that maximum (65535 for uint16) is above float16's largest value, 65504.
+  Every 16- or 32-bit image raised an overflow (the package sets `np.seterr(over='raise')`) or, without that setting,
+  would load as all zeros, so Pyre could not open 16-bit images (the 1.8.1 installer included). Only that case now
+  divides in float32, one row slab at a time; 8-bit images and float32/float64 conversions keep the original expression
+  and are pixel-identical to before on real 8-bit mosaic and Blob images and on 16-bit TEM/SEM tiles; 16-bit to float16
+  is within 2.4e-4 of a float64 reference. Where: `nornir-imageregistration/nornir_imageregistration/core/_core.py`
+  (`_int_image_to_unit_float`, `4358e8d`).
+- **2026-10-26 Save Warped Image warps the source image into target space, at the source file's bit depth.** Why: it
+  warped the target image onto a source-sized canvas. On a real StosBrute64 pair
+  (`100-101_ctrl-TEM_Blob_map-TEM_Blob.stos`) the export now matches `TransformStos` (correlation 0.998, target shape
+  683 x 682). The default "PNG 16-bit" choice also wrote 8-bit sources as 16-bit PNGs; the export depth is now capped
+  at the source file's depth. Where: `nornir-pyre/pyre/common.py` (`warped_image_export`),
+  `nornir-pyre/pyre/ui/windows/stoswindow.py` (`onSaveWarpedImage`), `4eb7418`.
 - **2026-10-26 Save STOS: `ControlImageDim` from the target image, `MappedImageDim` from the source.** Why: Pyre wrote
   them swapped (in `StosState` the deprecated "Fixed" names hold Source), and `StosFile.Save` keeps preset sizes, so
   every `.stos` Pyre saved with differently sized images carried swapped sizes. They feed the grid transform's bounds
@@ -65,6 +87,9 @@ when $\lVert T(\ell_k) - d \rVert_\infty \le 0.01$ px or after 8 steps ($T$ maps
 
 ## Discussion points
 
+- Registered (warped) images exported from Pyre's Save Warped Image before nornir-pyre `4eb7418` (2026-10-26) are
+  the target image warped by the source-to-target transform, not the source image in target space; they should be
+  re-exported. When the swap was introduced is not established (verify).
 - Linked annotations across sections are sparse in the exports so far; link coverage, not model capacity, limits how much
   adjacent-section prompting can be trained.
 
