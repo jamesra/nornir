@@ -20,6 +20,13 @@ nornir-testdata/
 └── VolumeMetaData/   # Volume metadata for testing
 ```
 
+`PlatformRaw/MRC/` (added 2026-10-29, ~1 GB): `SmallMouse/0001/1.mrc` and `0002/2.mrc`, two raw
+SerialEM sections copied from `Y:\Volumes\SmallMouse`, plus `SmallMouse_2014Build/` with a few
+outputs of the 2014 build of that volume (`.mosaic` transforms, `histogram.txt`, 8-bit pyramid at
+downsample 16 and 64). Used by `nornir-buildmanager/tests/importers/test_mrc_smallmouse.py`, which
+skips when they are absent. Not yet in `nornir-testdata.zip`; copy them from the NAS until the
+archive is refreshed.
+
 ## Environment Variables
 
 Tests require two environment variables to be set:
