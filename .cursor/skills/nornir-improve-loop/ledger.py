@@ -15,6 +15,7 @@ Usage (run with ``$PY -I``)::
     ledger.py LEDGER update KEY FIELD=VALUE JSON_OBJECT    # merge into list entries whose FIELD equals VALUE
     ledger.py LEDGER upsert KEY FIELD=VALUE[,FIELD=VALUE] JSON_OBJECT   # update the match, else append
     ledger.py LEDGER remove KEY FIELD=VALUE                # drop list entries whose FIELD equals VALUE
+    ledger.py LEDGER unset KEY                             # delete a key (fails if absent)
 
 KEY may be dotted (``runner.heartbeatAt``); a ``null`` on the way becomes ``{}``. JSON may be ``@path`` (read
 from a file) or ``-`` (stdin), which avoids PowerShell quoting. VALUE ``null`` matches a JSON null. ``update``
@@ -186,6 +187,10 @@ def main(argv: list[str]) -> None:
         return
     if command == "set":
         node[last] = parse_json(args[0])
+    elif command == "unset":
+        if last not in node:
+            sys.exit(f"no key {key}")
+        del node[last]
     elif command == "append":
         node.setdefault(last, []).append(parse_json(args[0]))
     elif command == "incr":
