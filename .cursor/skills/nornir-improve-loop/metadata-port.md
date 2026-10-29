@@ -6,6 +6,8 @@ Read by the scout and implementer on port wakes (Category 15). General gates: [g
 
 Move Nornir volume metadata (today `VolumeData.xml` plus sharded `*_Link` files, owned by `nornir-buildmanager`) to SQLite by **dual-write with XML authoritative**: write SQLite alongside XML and check parity, then switch reads per volume behind a flag. Making SQLite the default reader and retiring XML writes are the user's decisions (stage 6), not the loop's.
 
+**Stage 6 status (user, 2026-10-29):** the shadow write is **on by default** (`NORNIR_VOLUME_METADATA_SHADOW_SQLITE=0` turns it off); reads stay on XML (`NORNIR_VOLUME_METADATA_READ_SQLITE` off). Network-share evidence: stage 4 concurrency tests pass from the Windows host (SMB) and the dev container (CIFS). Cross-machine writers are unsupported (`VolumeData.db.lock` is not exclusive across machines with `nobrl`, and XML saves collide); builds run one machine per volume. The remaining stage 6 choices (SQLite reads by default, XML as export only, downstream XML readers, a query layer) are still the user's; raise them as a decision only when the user asks.
+
 Why staged: pipelines (`config/Pipelines.xml`, `PipelineManager`) query the tree with ElementTree XPath (`find`/`findall` on `Block/Section`, `Filter[@Name='...']/TilePyramid`), `XElementWrapper` subclasses `ElementTree.Element`, and nothing locks `VolumeData.xml` across processes. A one-step cutover would touch all of that at once.
 
 ## What exists today (verify before relying on it)

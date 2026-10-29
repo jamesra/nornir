@@ -73,7 +73,10 @@ What goes where
        ``/certs/<TLS_CERT_NAME>/{fullchain,privkey}.pem``. ``cert.pfx`` is for IIS.
    * - ``Work/``
      - Disposable ``nornir-build`` session folders. Clean with ``stack.ps1 prune``
-       (:doc:`stacks_and_commands`). Replaces the old ``mounted-configs/``.
+       (:doc:`stacks_and_commands`). Replaces the old ``mounted-configs/``. Build a given volume
+       from **one machine at a time**: volume metadata saves (``VolumeData.xml`` and
+       ``VolumeData.db``) are not locked across machines, so two hosts saving the same volume on a
+       share can fail or diverge.
    * - ``Logs/<stack>/``
      - Host-side log folders. ``nornir-build`` mounts ``Logs/nornir-build`` at
        ``/var/log/nornir`` and sets ``NORNIR_LOG_ROOT=/var/log/nornir``. Exported to compose as
