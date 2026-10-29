@@ -30,13 +30,14 @@ Start the loop only because the user launched this skill. If a wake is already p
 
 Shared files, read by the subagent that needs them (never pasted into prompts):
 
-- `$SHARED\SKILL.md`: read **only** Arguments, Environment, Scope, Sync from the remote, Time box, Steering, Decisions, Ledger, and "Choosing between the port and the rotation". **Ignore its Launch, Each wake, Compactness hygiene, and Model routing sections** (Cursor-specific); this file replaces them.
+- `$SHARED\SKILL.md`: read **only** Arguments, Environment, Scope, Sync from the remote, Time box, Steering, Decisions, Ledger, and "Choosing between the port and the rotation". **Ignore its Launch, Each wake, Compactness hygiene, and Model routing sections** (Cursor-specific); this file replaces them, except where a step below points to a numbered shared Launch step.
+- `$SHARED\ledger.py`: the only way to read or edit the ledger (Ledger in `$SHARED\SKILL.md`).
 - `$SHARED\protected.md`, `categories.md`, `gates.md`, `reports.md`: apply unchanged. `metadata-port.md`: port wakes only.
 - `$SKILL\main-session.md`: the wake playbook for the **main** session only.
 
 ## Differences from Cursor that affect the policy files
 
-- **Rules and skills are not auto-loaded.** Cursor attaches `.cursor/rules/*.mdc` by glob; Claude Code does not. Before editing, the implementer reads the rules in `$ROOT\.cursor\rules\` matching the files it touches (`python-standards`, `Numpy-CuPy-compatibility`, `Stable-path-output-parity`, `Monorepo-submodule-changes`, `CI-hygiene`, `Streaming-and-memory-bounded-processing`, `Serial-batched-primitives`, `Unified-Logging-Convention`, `powershell-scripts`, as `gates.md` "Nornir rules respected" lists). Skills linked from the shared files (`nornir-review-issue-fixing`, `hypothesis-testing`, `nornir-headless-unit-tests`, `nornir-debug-profiling`, ...) are plain markdown under `$ROOT\.cursor\skills\`; read them by path when a gate points to one.
+- **Rules and skills are not auto-loaded.** Cursor attaches `.cursor/rules/*.mdc` by glob; Claude Code does not. `.claude\rules\` mirrors the glob-scoped ones (loaded when a matching file is read or edited), but the implementer still reads, before editing, the rules in `$ROOT\.cursor\rules\` matching the files it touches: those `gates.md` "Nornir rules respected" lists, plus `Stable-path-output-parity`, `Monorepo-submodule-changes`, `Shared-checkout-safety`, `CI-hygiene`, `Unified-Logging-Convention`, and `powershell-scripts`. Skills linked from the shared files (`nornir-review-issue-fixing`, `hypothesis-testing`, `nornir-headless-unit-tests`, `nornir-debug-profiling`, ...) are plain markdown under `$ROOT\.cursor\skills\`; read them by path when a gate points to one.
 - **Windows host only** (`environment: windows`); do not use the Environment table's container column. `mutationMode` is `container` if the `cursor-dev` container is reachable, else `manual` (see `gates.md`).
 - **Unattended.** Never call `AskUserQuestion` or enter plan mode inside the loop. A question for the user becomes a `decisions` entry plus the Windows toast, per Decisions in `$SHARED\SKILL.md`.
 - **Commits are authorized by launching this skill.** Follow `gates.md` commit rules: stage by path only (never `git add -A`/`.`), never push, never `git submodule update`; submodule commit first, then the umbrella pointer bump. Each commit ends with the `Improvement-Loop: <category>` trailer, then the attribution trailer Claude Code is configured to add.
@@ -47,12 +48,12 @@ Shared files, read by the subagent that needs them (never pasted into prompts):
 
 ## Launch
 
-1. Parse `$ARGUMENTS` per Arguments in `$SHARED\SKILL.md` (X = run length, default 24h; Y = sleep, default 10m; deadline = launch time + X). `ScheduleWakeup` accepts 60-3600 s, so **cap Y at 60 minutes** and tell the user if capped.
+1. Parse `$ARGUMENTS` per Arguments in `$SHARED\SKILL.md` (X = run length, default 24h; Y = sleep, default 10m; deadline = launch time + X). `ScheduleWakeup` accepts 60-3600 s: for Y over 60 minutes, write `nextWakeAt` to the ledger and arm 60-minute wakes that do no work until it is due.
 2. Set `environment: windows`. One-runner rule: if the ledger `runner.heartbeatAt` is newer than `max(3 * Y minutes, 30 minutes)`, do not start; say which runner holds it.
-3. Create `$LOOP_ROOT`, `.loop\ledger.json`, and `STEERING.md` (short commented template) if missing. Record each repo's branch and `git status --short` as `branches` / `launchDirty`; a submodule on a detached HEAD is not editable. Run **Sync from the remote** once (main may Sync at launch only).
-4. Install missing dev tools into `$PY` as listed in Launch step 3 of `$SHARED\SKILL.md` (never into a `pyproject.toml` or constraints file). Check `cursor-dev` reachability and set `mutationMode`.
+3. Create `$LOOP_ROOT`, `.loop\ledger.json`, and `STEERING.md` (short commented template) if missing; archive an earlier run's ledger and start a fresh one as shared Launch step 2 says. Record each repo's branch and `git status --short` as `branches` / `launchDirty`; a submodule on a detached HEAD is not editable. Run **Sync from the remote** once (main may Sync at launch only).
+4. Install missing dev tools into `$PY` and record `toolCommands` as shared Launch step 3 says (never into a `pyproject.toml` or constraints file). Check `cursor-dev` reachability and set `mutationMode`.
 5. Build `hotspots` and run the tiered test baseline (seeding known flakes) per `categories.md` / `gates.md`; these may run inside the first scout to keep main small.
-6. Run one wake immediately (Each wake, below).
+6. Run one wake immediately (Each wake, below). Tell the user the deadline, the interval, and that `STEERING.md` is read every wake (say so if it already contains `pause`).
 7. Arm the next wake (see **Scheduling**).
 
 ## Each wake
@@ -62,15 +63,15 @@ Main only schedules, relays, and talks to the user, following `$SKILL\main-sessi
 1. **Scout**, prompt: `Run the scout step of skill nornir-improve-loop (Claude Code port). Skill folder: <$SKILL>. Ledger: <ledger>.`
    Reads this file, the allowed sections of `$SHARED\SKILL.md`, `protected.md`, `categories.md`, the ledger, `STEERING.md`; `metadata-port.md` on port wakes; `reports.md` and the `gates.md` Test baseline only when a report or baseline is due. In order:
    1. Sync; write `lastSync` / `syncSkips`; refresh `runner.heartbeatAt`;
-   2. read `$LOOP_ROOT\STEERING.md` (absolute path, not the working directory; if missing, recreate the template and treat it as no steering) and the ledger;
-   3. on `stop`, the deadline, or `emptyWakes` reaching 3: write the `final` report and stop;
-   4. 24 hours after `lastReportAt` (or `startedAt`): write the `daily` report, rebuild `hotspots`, re-run the baseline, check reworked commits;
-   5. on `pause`, end the wake;
+   2. run `$PY -I $SHARED\ledger.py <ledger> brief`: it prints the wake state and the `$LOOP_ROOT\STEERING.md` directives, or `MISSING <path>` (recreate the template and treat it as no steering). Open `STEERING.md` only when `brief` reports guidance lines; `get` other keys as needed;
+   3. on `stop`, a wake starting after the deadline (`startedAfterDeadline`), or `emptyWakes` reaching 3: write the `final` report (unless `stop` is already true and this run's `final` exists), set `stop: true`, and stop;
+   4. on `pause`, end the wake (no daily report, hotspot rebuild, or baseline; an owed daily report is written on the first unpaused wake);
+   5. 24 hours after `lastReportAt` (or `startedAt`): write the `daily` report, rebuild `hotspots`, re-run the baseline, check reworked commits;
    6. otherwise write one candidate to `candidate` (category or port stage, package, files, one-paragraph plan, risk `low|high`). Edit no production code. A protected or unmeasurable candidate becomes a proposal or decision and the wake ends.
-   Return at most four lines.
+   Return only the scout block from Each wake in `$SHARED\SKILL.md` (`candidate:`, `risk:`, `decisions:`, `report:`, `stop:`).
 2. **Implementer**, prompt: `Run the implement step of skill nornir-improve-loop (Claude Code port) for the candidate in the ledger. Skill folder: <$SKILL>. Ledger: <ledger>.`
-   Reads this file, Scope and Time box from `$SHARED\SKILL.md`, `protected.md`, `gates.md`, the ledger, `metadata-port.md` on port wakes, and the `.cursor/rules` files matching what it touches. Runs the gates, tests, mutation check, and benchmark when needed; if green, commits in the owning submodule and bumps the umbrella pointer; publishes if due; clears `candidate`. If the change is riskier than the scout said, stop without committing and set risk `high`. Return at most four lines.
-3. **Reviewer, high-risk commits only**, prompt: `Review commit <sha> in <submodule> against the gates in <$SHARED>. Report problems only.` Reads `protected.md` and `gates.md`. On a violation, run the implementer once (`Follow-up after review of <sha>. Skill folder: <$SKILL>. Ledger: <ledger>.`) or revert the commit and its pointer bump; record the outcome.
+   Reads this file, Scope and Time box from `$SHARED\SKILL.md`, `protected.md`, `gates.md`, the ledger, `metadata-port.md` on port wakes, and the `.cursor/rules` files matching what it touches. Runs the gates, tests, mutation check, and benchmark when needed; if green, commits in the owning submodule and bumps the umbrella pointer; publishes if due; clears `candidate`. If the change is riskier than the scout said, stop without committing and set risk `high`. Return only the implementer block from Each wake in `$SHARED\SKILL.md` (`outcome:`, `decisions:`, `publish:`, `countsSincePublish:`).
+3. **Reviewer, high-risk commits only**, prompt: `Review commit <sha> in <submodule> against the gates in <$SHARED>. Report problems only.` Reads `protected.md` and `gates.md`; gets only the commit, not the implementer's reasoning, and reruns its mutation check (`gates.md` Mutation check, reviewer rerun). On a violation, run the implementer once (`Follow-up after review of <sha>. Skill folder: <$SKILL>. Ledger: <ledger>.`) or revert the commit and its pointer bump; record the outcome.
 4. Main posts a one- or two-sentence summary (see `main-session.md`) and arms the next wake, or nothing on stop.
 5. User asks for a report: the scout writes a `requested` report immediately; the loop continues. User stop: `ScheduleWakeup` with `stop: true`, the scout writes `final`, arm nothing.
 
@@ -101,5 +102,7 @@ Pass as the Agent `model`. Record the model used per commit in the ledger, and a
 | Low-risk implementer | `sonnet` | dead weight (11), resolvable debt notes (12), hand-rolled helpers (7), test-only (14), within one package and away from protected areas |
 | High-risk implementer | `opus` | everything else, plus any low-risk category touching `nornir-shared` or `nornir-pools`, more than one package, a numeric dtype, a file next to a protected area, `volumemanager`, or any metadata-port stage |
 | Reviewer (high-risk commits only) | `fable` | deliberately a different model from the implementer |
+
+If an Agent call rejects a model, retry once with `sonnet` (for a rejected `fable` reviewer, use `opus` in a fresh subagent) and record it in `modelSubstitutions`.
 
 Claude Code has no per-agent equivalent of the Cursor version's `-high` variants, `composer`, or GPT reviewer that the loop may set, so those are dropped. Retune this table here, not in the shared files.

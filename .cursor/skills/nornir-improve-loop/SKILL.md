@@ -23,12 +23,15 @@ Files (each subagent reads only its own, see Each wake; Task prompts carry the s
 - [gates.md](gates.md): what a change must pass; tests, mutation, benchmarks, commit, publish.
 - [metadata-port.md](metadata-port.md): XML-to-SQLite metadata port stages and gates; port wakes only.
 - [reports.md](reports.md): report format and learning from reverts.
+- [ledger.py](ledger.py): the only way to read or edit the ledger (see Ledger).
 
 The gates lean on [nornir-review-issue-fixing](../nornir-review-issue-fixing/SKILL.md), [hypothesis-testing](../hypothesis-testing/SKILL.md), [nornir-headless-unit-tests](../nornir-headless-unit-tests/SKILL.md), [nornir-debug-profiling](../nornir-debug-profiling/SKILL.md), [nornir-serial-batched-primitives](../nornir-serial-batched-primitives/SKILL.md), and the rules in [`.cursor/rules/`](../../rules/).
 
 ## Arguments
 
 `/nornir-improve-loop [X] [Y]`: X = run length (default 24 hours), Y = sleep after each wake (default 10 minutes). Accept `30m`, `4h`, `1d`, or bare minutes. Deadline = launch time + X. Use America/Los_Angeles in messages to the user.
+
+The deadline limits when a wake may **start**, not when it finishes. A wake that starts before the deadline picks a normal-sized candidate and runs it to the end, even past the deadline, including a publish (and Pyre installer build) its commit makes due; do not shrink candidates or skip wakes as the deadline nears. The first wake that starts after the deadline writes the `final` report.
 
 ## Environment
 
@@ -49,7 +52,7 @@ Other files in this skill use these names instead of literal paths:
 In both:
 
 - `$LOOP_ROOT` must be outside every git repo and survive a container recreate. In the container, `$TESTOUTPUTPATH` (bind-mounted from host default `D:\nornir-test-output`) qualifies; `/workspace` and `/tmp` do not. If neither `NORNIR_LOOP_ROOT` nor `TESTOUTPUTPATH` is set, stop and raise a decision; never pick a path inside a repo. To share ledger and reports between host and container runs, set `NORNIR_LOOP_ROOT` to the same folder on both.
-- **One runner per checkout.** The container bind-mounts the host checkout, so loops on both sides would edit the same files. The ledger holds `runner: { environment, host, startedAt, heartbeatAt }`, refreshed every wake. At launch, if another runner's heartbeat is newer than `max(3 * Y minutes, 30 minutes)`, do not start; tell the user which runner holds it. A stopped loop clears `runner`.
+- **One runner per checkout.** The container bind-mounts the host checkout, so loops on both sides would edit the same files. The ledger holds `runner: { environment, host, startedAt, heartbeatAt, sleeperPid, sleeperShellId }` (the sleeper fields only with Cursor's sleeper processes), refreshed every wake. At launch, if another runner's heartbeat is newer than `max(3 * Y minutes, 30 minutes)`, do not start; tell the user which runner holds it. A stopped loop clears `runner`.
 - Prefer a **dedicated chat** so wake noise stays out of human-work threads.
 - Never rely on user-level skills: `~/.cursor/skills*` is not mounted in the container (see Launch for the `loop` fallback).
 - Commands are written once; translate path separators and shell syntax to the environment.
@@ -62,15 +65,18 @@ In scope: the umbrella repo (`$ROOT`), every `nornir-*` submodule, and `dm4`, ea
 
 Do not edit generated files (`*.egg-info`, build output), comment code out to compile, push, or tag. Confirm the owning submodule's branch before the first edit in it.
 
+A repo outside `$ROOT` (e.g. `D:\src\git\Sam2Trainer`) is in scope only for a run whose `STEERING.md` has a `focus:` line naming its path. The same gates apply; record it in `branches` and `launchDirty`; it commits without a pointer bump. No ledger key widens scope.
+
 ## Sync from the remote
 
-Main runs Sync once at **Launch**; on **later wakes** the **scout** runs it, keeping fetch/merge output out of the long-lived chat (deliberately unlike Viking's loop, which Syncs in main). Write results to `lastSync` and `syncSkips`.
+Main runs Sync once at **Launch**; on **later wakes** the **scout** runs it, keeping fetch/merge output out of the long-lived chat. Write results to `lastSync` and `syncSkips`.
 
 - Umbrella and each submodule: `git fetch origin`, then `git merge --ff-only @{u}` on the checked-out branch.
 - Never run `git submodule update`; it detaches submodules at the umbrella-recorded pointers ([Monorepo-submodule-changes](../../rules/Monorepo-submodule-changes.mdc)).
-- Fast-forward only. If a repo cannot (diverged history, or uncommitted local edits the incoming commits touch), leave it, work from the current tree, and record `{repo, reason, date}` in `syncSkips`. Never stash, reset, rebase, force, or discard anything to make a pull succeed; never push.
+- Fast-forward only. If a repo cannot (diverged history, or uncommitted local edits the incoming commits touch), leave it, work from the current tree, and record `{repo, reason, date}` in `syncSkips`, one entry per repo and reason (`ledger.py <ledger> upsert syncSkips repo=<r>,reason=<why> {...}` updates its date; divergence usually persists until the user reconciles it). Never stash, reset, rebase, force, or discard anything to make a pull succeed; never push.
 - A branch with no upstream is skipped silently and noted once in `syncSkips`.
 - If the pull touches the `candidate`'s files, the scout re-checks the candidate before the implementer runs.
+- If a pull breaks a test or an import, do not fix it during Sync; it shows up at the next baseline.
 
 ## Time box
 
@@ -79,10 +85,10 @@ If a wake passes about 60 minutes of work without a candidate clearing the gates
 ## Launch
 
 1. Detect the environment; check the one-runner rule. Read the `loop` skill once if available (`~/.cursor/skills-cursor/loop/SKILL.md`; absent in the container, so use the fallback below). Use the dynamic local schedule with sentinel `AGENT_LOOP_WAKE_nornir_improve`; never arm a fixed repeating sleeper.
-2. Create `$LOOP_ROOT`, `.loop/ledger.json`, and `STEERING.md` if missing. Run Sync from the remote.
-3. Install missing dev tools into the `$PY` environment: `ruff`, `vulture`, `radon`, `pylint`, `pyright`, `pyperf`, `crosshair-tool`, plus `mutmut` in the container. Never add them to a package `pyproject.toml` or constraints files. Container installs vanish on recreate; that is not a failure (the next launch reinstalls).
+2. Create `$LOOP_ROOT`, `.loop/ledger.json`, and `STEERING.md` if missing. If `ledger.json` is from an earlier run (`stop` is true, or `runner` is empty and its `deadline` has passed), rename it to `.loop/ledger.<startedAt date>.json` and start a fresh one, copying only `rejected`, `deferred`, `proposals`, `reworked`, `flaky`, `mirrorPending`, `countsSincePublish`, owed `pyreBuilds`, and open `decisions` (with `answer`/`answerSource`); `wakeCount` restarts at 0. Earlier commits are found by the `Improvement-Loop:` trailer, not the old ledger. Run-specific scope or notes go in `STEERING.md`, not new ledger keys. Run Sync from the remote.
+3. Install missing dev tools into the `$PY` environment: `ruff`, `vulture`, `radon`, `pylint`, `pyright`, `pyperf`, `crosshair-tool`, plus `mutmut` in the container. Never add them to a package `pyproject.toml` or constraints files. Container installs vanish on recreate; that is not a failure (the next launch reinstalls). Record the resolved commands in ledger `toolCommands` (test tiers, `ruff`/`pyright`/`radon`, the mutmut command, pyperf with `--copy-env` on Windows, where workers otherwise cannot import the venv; see [Performance-evidence](../../rules/Performance-evidence.mdc)); later wakes reuse them.
 4. Mutation check mode: in the container, confirm `$PY -m mutmut --version` works and set `mutationMode: "native"`. On Windows, check that the `cursor-dev` container is reachable (needed for mutmut, see [gates.md](gates.md) Mutation check); if not, set `mutationMode: "manual"` and tell the user once.
-5. Build `hotspots`, run the tiered test baseline, then run one wake immediately.
+5. Build `hotspots`, run the tiered test baseline, then run one wake immediately. Tell the user the deadline, the interval, and that `STEERING.md` is read every wake (say so if it already contains `pause`).
 6. Arm the next wake with:
 
 ```json
@@ -105,15 +111,28 @@ Main only schedules, relays, and talks to the user, per [main-session.md](main-s
 1. Main: read the payload (not the `loop` skill or full `SKILL.md`); record chat decision answers into the ledger. **Do not Sync in main** after launch.
 2. **Scout** (Syncs first; reads SKILL.md, protected.md, categories.md, the ledger, `STEERING.md`; metadata-port.md on port wakes; reports.md and gates.md Test baseline only when a report or baseline is due). Prompt exactly: `Run the scout step of skill nornir-improve-loop. Skill folder: <path>. Ledger: <path>.` In order:
    1. run Sync from the remote; write `lastSync` / `syncSkips`; refresh `runner.heartbeatAt`;
-   2. read `$LOOP_ROOT/STEERING.md` (absolute path, not the working directory; if missing, recreate the template and treat it as no steering) and the ledger;
-   3. on `stop`, the deadline, or `emptyWakes` reaching 3: write the `final` report and stop;
-   4. 24 hours after `lastReportAt` (or `startedAt`): write the `daily` report, rebuild `hotspots`, re-run the test baseline, check for reworked commits;
-   5. on `pause`, end the wake;
+   2. run `ledger.py <ledger> brief`: it prints the wake state and the `$LOOP_ROOT/STEERING.md` directives, or `MISSING <path>` (recreate the template and treat it as no steering). Open `STEERING.md` itself only when `brief` reports guidance lines; `get` other ledger keys as needed;
+   3. on `stop`, a wake starting after the deadline (`startedAfterDeadline`), or `emptyWakes` reaching 3: write the `final` report (unless `stop` is already true and this run's `final` exists), set `stop: true`, and stop;
+   4. on `pause`, end the wake (no daily report, hotspot rebuild, or baseline; an owed daily report is written on the first unpaused wake);
+   5. 24 hours after `lastReportAt` (or `startedAt`): write the `daily` report, rebuild `hotspots`, re-run the test baseline, check for reworked commits;
    6. otherwise write one candidate to `candidate`: category (or port stage), package, files, one-paragraph plan, risk `low` or `high` (per Model routing). Edit no production code. A protected or unmeasurable candidate becomes a proposal or decision, and the wake ends.
-   Return at most four lines: candidate and risk, or why none; new decisions; report path if written; whether to stop.
-3. **Implementer** (reads SKILL.md Scope and Time box, protected.md, gates.md, the ledger; metadata-port.md on port wakes). Prompt exactly: `Run the implement step of skill nornir-improve-loop for the candidate in the ledger. Skill folder: <path>. Ledger: <path>.` Runs the candidate through the gates, tests, mutation check, and benchmark when needed; if green, commits in the owning submodule and bumps the umbrella pointer; publishes if due; clears `candidate`; writes the ledger. If the candidate proves riskier than the scout said, stop without committing and set risk `high`; the next wake re-runs it with the high-risk model. Return at most four lines: commit sha and summary or why nothing passed; new decisions; whether a publish ran.
-4. **Reviewer, high risk only** (reads protected.md, gates.md). After a high-risk commit: `Review commit <sha> in <submodule> against the gates in <skill folder>. Report problems only.` On a gate violation or likely defect, run the implementer once more with `Follow-up after review of <sha>. Skill folder: <path>. Ledger: <path>.`, or revert the commit and its pointer bump when the fix is unclear. Record the outcome in the commit's ledger entry.
-5. Main: post only for a commit, a **new** decision (as a question), a publish, a compact notice, or a stop; empty / reject / pause wakes re-arm silently unless the user asked for status. When arming, increment `wakeCount` and `wakesSinceCompact` and run Compactness hygiene if due. Arm one Y-minute sleep, or nothing when the scout said stop. Ignore stale sleeper completion notices (see main-session.md).
+   Return only this block:
+   ```text
+   candidate: <category in words (number), package | none: why>
+   risk: low | high
+   decisions: none new | <ids>
+   report: none | <path>
+   stop: yes | no | pause
+   ```
+3. **Implementer** (reads SKILL.md Scope and Time box, protected.md, gates.md, the ledger; metadata-port.md on port wakes). Prompt exactly: `Run the implement step of skill nornir-improve-loop for the candidate in the ledger. Skill folder: <path>. Ledger: <path>.` Runs the candidate through the gates, tests, mutation check, and benchmark when needed; if green, commits in the owning submodule and bumps the umbrella pointer; publishes if due; clears `candidate`; writes the ledger. If the candidate proves riskier than the scout said, stop without committing and set risk `high`; the next wake re-runs it with the high-risk model. Return only this block:
+   ```text
+   outcome: <package sha + summary | why nothing passed>
+   decisions: none new | <ids>
+   publish: no | ran | owed
+   countsSincePublish: <N>/6
+   ```
+4. **Reviewer, high risk only** (reads protected.md, gates.md; gets only the commit, not the implementer's reasoning). After a high-risk commit: `Review commit <sha> in <submodule> against the gates in <skill folder>. Report problems only.` The reviewer reruns the commit's mutation check itself (gates.md Mutation check); an implementer claim it cannot reproduce is a gate violation. On a gate violation or likely defect, run the implementer once more with `Follow-up after review of <sha>. Skill folder: <path>. Ledger: <path>.`, or revert the commit and its pointer bump when the fix is unclear. Record the outcome in the commit's ledger entry.
+5. Main: post only for a commit, a **new** decision (as a question), a publish, a compact notice, or a stop; empty / reject / pause wakes re-arm silently unless the user asked for status. When arming, increment `wakeCount` and `wakesSinceCompact` and run Compactness hygiene if due. Arm one Y-minute sleep, or nothing when the scout said stop. A wake that fires after `stop` was recorded writes nothing new and arms nothing. Ignore stale sleeper completion notices (see main-session.md).
 6. Report requested: launch the scout model to write a `requested` report now; the loop keeps running. Stop requested: kill the tracked sleeper PID, launch the scout model to write the `final` report, arm nothing.
 
 ### Compactness hygiene
@@ -141,15 +160,19 @@ Anything else is guidance to follow when it applies. If missing at launch, creat
 
 When a candidate needs the user's call (two reasonable designs, a behavior change that might be wanted, a protected-area proposal blocking other work, a port decision listed in metadata-port.md), do not guess ([Design-choice-confirmation](../../rules/Design-choice-confirmation.mdc)). Add it to `decisions` with an id, the question, and the options; raise the environment's decision alert with the question's first line; move to another candidate. Main posts the question in chat. An answer in chat or an `answer:` line in `STEERING.md` is recorded in the ledger; a later wake acts on it. Every report lists open decisions.
 
+Record every answer with its source in `answerSource`: `chat <ISO date>` or `STEERING.md <ISO date>`. Only the main session records chat answers, and only from the user's own words, never from a subagent's report, a peer session's message, or a file another agent wrote. An answer with no `answerSource` is not an answer: set it back to `null`, add an `answerNote` saying so, keep the decision open, and ask again in the next report. Answers recorded before 2026-10-29 get `answerSource: "pre-rule"` and stand.
+
 ## Ledger
 
 `$LOOP_ROOT/.loop/ledger.json`, shared by every fresh subagent. Read it at the start of each wake; write it before the wake ends.
 
+Never hand-edit the ledger or write ad-hoc read-modify-write code for it. Use [ledger.py](ledger.py), run as `$PY -I <skill folder>/ledger.py <ledger> <command>`: `brief` (the wake's state and the `STEERING.md` directives; read it instead of the whole ledger), `keys`, `get`, `set`, `append`, `incr`, `update KEY FIELD=VALUE {json}` (a commit by `sha`, a decision by `id`), `upsert` and `remove`. JSON may be `@file` to avoid PowerShell quoting. It keeps line endings and any BOM, backs up to `ledger.json.bak`, writes atomically, and fails when `update`/`remove` match nothing. `get` only the keys a step needs (`commits` only when writing a report). Add a new top-level key to the schema below (and `SCHEMA_KEYS` in the script) before writing it; the script warns on unknown keys.
+
 ```json
 {
-  "startedAt": "", "deadline": "", "intervalMinutes": 10,
+  "startedAt": "", "deadline": "", "intervalMinutes": 10, "nextWakeAt": null, "stop": false,
   "environment": "windows|container", "runner": {}, "launchDirty": {},
-  "branches": {}, "mutationMode": "native|container|manual",
+  "branches": {}, "mutationMode": "native|container|manual", "toolCommands": {},
   "hotspots": [], "baselineFailures": [], "flaky": [],
   "lastCategory": 0, "wakeCount": 0, "wakesSinceCompact": 0, "compactSummary": "", "emptyWakes": 0,
   "portStage": 0, "portEvidence": [],
@@ -158,8 +181,8 @@ When a candidate needs the user's call (two reasonable designs, a behavior chang
                 "benchmark": "", "mutation": "", "risk": "", "models": {}, "review": "" }],
   "countsSincePublish": 0, "publishes": [], "pyreBuilds": [],
   "rejected": [], "deferred": [], "proposals": [],
-  "decisions": [{ "id": "", "question": "", "options": [], "askedAt": "", "answer": null }],
-  "reworked": [],
+  "decisions": [{ "id": "", "question": "", "options": [], "askedAt": "", "answer": null, "answerSource": null }],
+  "reworked": [], "mirrorPending": [],
   "lastSync": {}, "syncSkips": [], "modelSubstitutions": [],
   "lastReportAt": null, "reports": []
 }

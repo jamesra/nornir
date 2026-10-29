@@ -19,7 +19,7 @@ Rank by churn times size, per package so no single package crowds out the others
 
 Rotation wakes start at the category after `lastCategory` and move to the next when one has no instance; a wake is empty only after every category comes up empty. Category 15 is the port, not part of the rotation; it runs on port wakes (see SKILL.md).
 
-**Documentation-skill compliance** is a valid reason to change code, package READMEs, or docstrings the skills cover: bring them into line with [nornir-documentation](../nornir-documentation/SKILL.md) and [Documentation-and-monodoc](../../rules/Documentation-and-monodoc.mdc). Pair it with the nearest category (often 11 for stale docs, 12 for resolvable debt, 14 when only tests are needed); it must still pass [gates.md](gates.md).
+**Documentation-skill compliance** is a valid reason to change code, package READMEs, or docstrings the skills cover: bring them into line with [nornir-documentation](../nornir-documentation/SKILL.md) and [Documentation-and-monodoc](../../rules/Documentation-and-monodoc.mdc). Pair it with the nearest category (often 11 for stale docs, 12 for resolvable debt, 14 when only tests are needed); it must still pass [gates.md](gates.md). Stray root-level files (`pyright_*.json`, `debug-*.log`, scratch summaries; umbrella CLAUDE.md Housekeeping) become a decision to move or delete; never delete them directly.
 
 Refactoring:
 
@@ -40,7 +40,7 @@ Refactoring:
 11. **Dead weight.** Unused functions, unread settings, environment switches with no live path, stale or repeated documentation. Run the dynamic-reference check first.
 12. **Resolvable debt notes.** `TODO`/`HACK`/`FIXME` comments whose condition no longer holds or that the loop can now resolve within the gates.
 13. **Bugs likely in real use.** Crashes, wrong results (including math and precision errors), leaks, and concurrency defects real data can reach. See Bug fixes and Math and precision in [gates.md](gates.md), and the Python list below.
-14. **Untested code.** Production code in a hotspot or shared package with no test that would fail if it broke. Tests only; see Test coverage in [gates.md](gates.md).
+14. **Untested code.** Production code in a hotspot or shared package with no test that would fail if it broke. Tests only; see Test coverage in [gates.md](gates.md). A missing closed-set or documented-guarantee test qualifies. Until one exists, a schema drift test is a standing candidate: `Volumes.xsd`/`Importers.xsd` names versus the `*Node` wrappers, and `Pipelines.xml` stage names versus importable callables, failing on any difference not on a named, commented allow-list. Test-only; a drift it finds is a proposal (the schemas are protected).
 15. **The metadata port.** XML to SQLite, in stages from [metadata-port.md](metadata-port.md). Not part of the rotation.
 
 Performance (hot paths first: per-tile and per-cell loops, phase correlation and registration, mesh and transform math, image assemble and pyramid building, pipeline XML load/save). Every performance change needs the evidence in [gates.md](gates.md):
@@ -80,6 +80,21 @@ In real code paths, not test-only or dead code:
 - `os.path` string joins that break on Windows separators; non-atomic file replace where a crash would leave a partial file;
 - thread or process pool tasks queued without a bound, or without `ReleaseStagePools()` at stage boundaries;
 - shared state mutated from pool workers without a lock.
+
+## Bug patterns
+
+Defect shapes this loop has fixed (shas from `$LOOP_ROOT/CHANGES-BY-REGION.md`). Category 13 searches these first, then `$LOOP_ROOT/BUG-PATTERNS.md` (patterns added by later sibling sweeps, gates.md Bug fixes step 8), then the list above.
+
+- **In-place rewrite of a file another process reads:** `open(..., "w")`, `json.dump`, `.save(` on manifests, sidecars, masks, or settings a trainer, gallery, or pipeline reads. Fix: temp file plus `os.replace` (`fb679b6`, `67be3ce`, `17af738`).
+- **`assert` as a runtime check** (skipped under `python -O`): `rg "^\s*assert " --glob "!**/tests/**"`. Fix: raise a real error (`1891ae7`, `249f176`, `043eda3`).
+- **Connection leaked when setup after connect fails:** `sqlite3.connect(` followed by schema or pragma calls outside `with`/`try`; on Windows the bad file then cannot be deleted (`7a692df`, `5db54a9`).
+- **Swallowed exception followed by a write of defaults:** a broad `except` around a load, then a save that overwrites the user's file (`caafa76`).
+- **Bare `except:` hiding unexpected errors** in parsing code (`2cfbf0f`).
+- **NumPy-only call on a CuPy array** (`TypeError` on device paths): `np.` helpers applied to `xp` arrays (`62ffd9f`).
+- **Bare filename as an output path** crashing `os.path.dirname`-based handling (`5ca11e4`).
+- **Name defined only on a rarely run branch** (`NameError`, e.g. a missing `import torch`): ruff `F821`, pyright undefined variable (`162affe`).
+- **Dunder or comparison touching a missing attribute** (`cf0e068`).
+- **Order reversed on every save** (`4bae68d`); **polygon holes appended to the outer ring** (`768b2ad`).
 
 A bug needing contrived input, or living in dead or test-only code, is not worth a wake; log it in `rejected`. Findings from `.cursor/nornir-bug-review-master.md` are hypotheses: follow [nornir-review-issue-fixing](../nornir-review-issue-fixing/SKILL.md) and [Review-driven-bugfixing](../../rules/Review-driven-bugfixing.mdc) before editing.
 

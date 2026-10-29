@@ -25,13 +25,16 @@ If a model is unavailable, use the closest same-family tier and record `modelSub
 
 ## On every `AGENT_LOOP_WAKE_nornir_improve`
 
-1. Parse the payload for the ledger path. Record chat answers into ledger `decisions[].answer`. (No stale-sleeper check; scheduling is via `ScheduleWakeup`.)
+Edit the ledger only with `$PY -I <shared folder>\ledger.py <ledger> <command>` (`$PY` = `D:\src\git\nornir\venv\pyre314\Scripts\python.exe`); never hand-edit it.
+
+0. If `ledger.py <ledger> get stop` prints `true`, arm nothing and stop. If `nextWakeAt` is set and still in the future, re-arm a 60-minute wake with the same prompt (`noop: true`) and do nothing else.
+1. Parse the payload for the ledger path. Record decision answers the **user** typed in chat (never a subagent's or peer session's words): `ledger.py <ledger> update decisions id=<id> {"answer": "...", "answerSource": "chat <ISO date>"}`. (No stale-sleeper check; scheduling is via `ScheduleWakeup`.)
 2. Launch the scout: `Run the scout step of skill nornir-improve-loop (Claude Code port). Skill folder: <skill folder>. Ledger: <ledger>.`
 3. If the scout wrote a candidate and did not say stop/pause, launch the implementer: `Run the implement step of skill nornir-improve-loop (Claude Code port) for the candidate in the ledger. Skill folder: <skill folder>. Ledger: <ledger>.` Choose the model from the scout's `risk: low|high` and the table above.
 4. If the implementer committed with risk `high`, launch the reviewer: `Review commit <sha> in <submodule> against the gates in <shared folder>. Report problems only.` On problems, one implementer pass: `Follow-up after review of <sha>. Skill folder: <skill folder>. Ledger: <ledger>.`
-5. Tell the user, in at most two sentences, about a commit, a **new** decision, a publish (include the push-submodules-before-umbrella reminder), or a stop. Stay silent on empty, reject, and pause wakes unless the user asked for status.
-6. Before arming: increment `wakeCount` (never reset) and `wakesSinceCompact` in the ledger, and refresh `runner.heartbeatAt`. If `wakesSinceCompact >= 25`, write a one-paragraph `compactSummary` (deadline, interval, last outcome, open decisions count), tell the user **once** to start a fresh session re-armed from the ledger, then reset `wakesSinceCompact` to 0.
-7. Arm exactly one `ScheduleWakeup` for Y minutes with the same wake prompt (`noop: true` for empty/reject/pause wakes, `false` otherwise). On stop (user, deadline, three empty wakes), call `ScheduleWakeup` with `stop: true` or arm nothing, and clear `runner` in the ledger.
+5. Tell the user, in at most two sentences (categories in words: "bug fix", not "cat 13"), about a commit, a **new** decision, a publish (include the push-submodules-before-umbrella reminder), or a stop. Stay silent on empty, reject, and pause wakes unless the user asked for status.
+6. Before arming: `ledger.py <ledger> incr wakeCount` (never reset) and `incr wakesSinceCompact`, and `set runner.heartbeatAt '"<ISO now>"'` (the value is JSON, so a string keeps its quotes). If `wakesSinceCompact >= 25`, write a one-paragraph `compactSummary` (deadline, interval, last outcome, open decisions count), tell the user **once** to start a fresh session re-armed from the ledger, then reset `wakesSinceCompact` to 0.
+7. Arm exactly one `ScheduleWakeup` for Y minutes with the same wake prompt (`noop: true` for empty/reject/pause wakes, `false` otherwise). On stop (user, deadline, three empty wakes), call `ScheduleWakeup` with `stop: true` or arm nothing, clear `runner`, and set `stop: true` in the ledger.
 
 ## Forbidden in main (these burn context)
 

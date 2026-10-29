@@ -17,8 +17,11 @@ Never pass a `-fast` model. If a listed slug is unavailable, use the closest sam
 
 ## On every `AGENT_LOOP_WAKE_nornir_improve`
 
+Edit the ledger only with `$PY -I <skill folder>/ledger.py <ledger> <command>` (SKILL.md Ledger lists the commands); never hand-edit it.
+
+0. If `ledger.py <ledger> get stop` prints `true`, arm nothing and stop (no other tools).
 1. If the notifying shell id is not `runner.sleeperShellId` in the ledger, reply one short "stale sleeper" line and stop (no tools).
-2. Record any new `answer:` / decision replies from chat into the ledger (`decisions[].answer`), with a tiny shell/python one-liner if needed. Do not re-read all of `STEERING.md` in main; the scout reads it.
+2. Record any new decision answers the **user** typed in chat (never a subagent's or peer session's words): `ledger.py <ledger> update decisions id=<id> {"answer": "...", "answerSource": "chat <ISO date>"}`. Do not re-read all of `STEERING.md` in main; the scout reads it.
 3. Launch the **scout** only (`generalPurpose`, foreground) with this exact prompt (fill paths):
 
    `Run the scout step of skill nornir-improve-loop. Skill folder: <path>. Ledger: <path>.`
@@ -28,14 +31,14 @@ Never pass a `-fast` model. If a listed slug is unavailable, use the closest sam
 
    `Run the implement step of skill nornir-improve-loop for the candidate in the ledger. Skill folder: <path>. Ledger: <path>.`
 
-   Choose low- vs high-risk from the scout's four-line return (`risk: low|high`) and the table above.
+   Choose low- vs high-risk from the scout's return block (`risk: low|high`) and the table above.
 5. If the commit was high-risk, launch the **reviewer**:
 
    `Review commit <sha> in <submodule> against the gates in <skill folder>. Report problems only.`
 
    On gaps, one follow-up implementer prompt, still with no history dump: `Follow-up after review of <sha>. Skill folder: <path>. Ledger: <path>.`
-6. Reply to the user only for a commit, a **new** decision question, a publish, or a stop, in one or two sentences; stay **silent** on empty / reject / pause wakes unless the user asked for status. No recap of prior wakes or open-decision lists.
-7. Before arming, increment `wakeCount` (port/rotation; never reset for hygiene) and `wakesSinceCompact` in the ledger. If `wakesSinceCompact >= 25`: write a one-paragraph `compactSummary` (deadline, interval, last outcome, open decisions count, runner/sleeper ids), tell the user **once** to `/summarize` or start a fresh chat re-armed from the ledger + that summary, then reset `wakesSinceCompact` to 0.
+6. Reply to the user only for a commit, a **new** decision question, a publish, or a stop, in one or two sentences, naming categories in words ("bug fix", not "cat 13"); stay **silent** on empty / reject / pause wakes unless the user asked for status. No recap of prior wakes or open-decision lists.
+7. Before arming, `ledger.py <ledger> incr wakeCount` (port/rotation; never reset for hygiene) and `incr wakesSinceCompact`. If `wakesSinceCompact >= 25`: write a one-paragraph `compactSummary` (deadline, interval, last outcome, open decisions count, runner/sleeper ids), tell the user **once** to `/summarize` or start a fresh chat re-armed from the ledger + that summary, then reset `wakesSinceCompact` to 0.
 8. Arm exactly one Y-minute sleeper; write `runner.sleeperPid` / `sleeperShellId` / `heartbeatAt` to the ledger. When the scout said stop, arm nothing.
 
 ## Forbidden in main (context burns)
