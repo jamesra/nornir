@@ -12,11 +12,17 @@ Older installers remain on the repository
 `Releases page <https://github.com/jamesra/nornir/releases>`_
 (look for tags ``pyre-*``).
 
-1.8.1
+1.8.2
 -----
 
+* **File → Save Warped Image** now saves the source image aligned into the target image's space. Pyre 1.7.7 and earlier saved the wrong image (the target image, warped the wrong way); re-export any warped images saved with those versions. Saving no longer fails with "cannot write mode I as PNG", and the dialog offers an 8-bit or 16-bit PNG. 8-bit images are always saved as 8-bit.
+* **File → Save STOS File** writes the source and target image sizes in the right places. Pyre 1.7.7 and earlier swapped them whenever the two images differed in size, which can affect grid transforms; re-save those files if you use them.
+* 16-bit images open again (they failed to load), and Pyre keeps their full precision, so a 16-bit warped image matches its source exactly. 16-bit images use twice the memory they did.
 * Fixed Pyre keeping every CPU core busy for a minute or more after it starts or after you load images. Background worker processes in the installed version were crashing and restarting in a loop.
 * Much lower CPU use while Pyre sits idle. The image windows now redraw only when something on screen changes, such as a blinking selected point or a point being aligned.
+* Spacebar registration: each press aligns only the point under the cursor or the selected points, not every point from earlier presses. Holding Space aligns each point once, the Composite view stays still while results arrive, and the progress bar clears when the work is done. **Escape** or the **Cancel** button in the status bar stops queued point alignments as well as running jobs.
+* **Registration → Remove Points on Masked Areas** works again and checks each image's mask against that image's points.
+* Images opened with ``-Source`` and ``-Target`` are no longer replaced by the STOS file from your previous session, and a source and target image with the same file name in different folders are no longer aligned against themselves. After Pyre restores a source and target image without a STOS file, Save Warped Image works.
 * The STOS folder browser no longer re-scores a whole folder every time Pyre starts. It saves quality scores as it computes them, pauses scoring while it is hidden or minimized, and opens at launch only if it was open when you last quit Pyre. If you use it, reopen it once with **File → Open STOS Folder Browser** after updating; Pyre remembers it from then on.
 * Menus are reorganized into **File**, **Transform**, **Registration**, **View**, and **Help**. Registration defaults are under **Registration → Transform Settings**, image contrast is under **View → Contrast**, and **Help → Mouse and Keyboard Controls** (F1) shows an updated controls reference. **Help → Online Manual** opens the manual in your browser.
 
