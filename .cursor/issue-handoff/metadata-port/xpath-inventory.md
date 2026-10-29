@@ -15,12 +15,17 @@ the counts.
 ## Coverage of this inventory
 
 Every distinct pattern below has at least one golden case, with `#Variable` and
-`%s`/`{...}` placeholders written as `#v`. No pattern is excluded.
+`%s`/`{...}` placeholders written as `#v`. No VolumeData pattern is excluded; only
+`find` literals that do not query the volume tree are, per file, through
+`NON_VOLUME_FIND_LITERALS` (see the call-sites section).
 `test_every_inventoried_pattern_has_a_golden_case` re-derives the pattern set from
 `Pipelines.xml` (XPath, RowXPath, ColumnXPaths) and from the `find`/`findall`/`iterfind`
 arguments in `operations/` and `volumemanager/`, adds the run-time-built patterns
-listed in `INDIRECT_PATTERNS`, and fails when the set and the case table disagree in
-either direction. A new pattern therefore needs a case (or an entry here and in the
+listed in `INDIRECT_PATTERNS`, drops the `NON_VOLUME_FIND_LITERALS` entries in their own
+file only, and fails when the set and the case table disagree in either direction.
+`test_non_volume_find_literals_still_occur` fails when an exclusion no longer matches a
+call, and `test_non_volume_find_literals_exclude_only_their_file` checks an entry does
+not hide the same pattern elsewhere. A new pattern therefore needs a case (or an entry here and in the
 test explaining why it cannot be exercised). The source scan parses each file with
 `ast`, so calls split across lines and arguments built from string literals by `+`,
 `%`, or f-strings are seen; only an argument that is a bare variable (a template held
@@ -116,7 +121,18 @@ Reporting `PythonCall` arguments (`reporting.GenerateTableReport`):
 
 ## operations/ and volumemanager/ call sites
 
-Literal or formatted XPaths passed to `find`/`findall` (excluding `str.find`):
+Literal or formatted XPaths passed to `find`/`findall`. The scan keeps arguments that
+start with a capital or `*`, which drops most `str.find` calls; two literals that pass
+it but do not query VolumeData are listed in `NON_VOLUME_FIND_LITERALS` and excluded
+in their file only:
+
+- `CIRCULARSTRING` (`operations/segmentationtraining/circles.py`): `str.find` on a WKT
+  string, not an XPath;
+- `Sections` (`operations/segmentationtraining/remote_tiles.py`): `root.find` on a
+  remote Viking volume XML document. That file's `findall('Section')`, `'Tileset'`,
+  and `'Level'` also read VikingXML but share patterns with VolumeData queries, so
+  they stay inventoried.
+
 
 - Tags only: `Block`, `Section`, `Channel`, `Filter`, `TilePyramid`, `Tileset`,
   `ImageSet`, `Histogram`, `Image`, `Data`, `Scale`, `Notes`, `Mapping`, `Transform`,
