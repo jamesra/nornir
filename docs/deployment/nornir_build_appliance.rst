@@ -97,6 +97,14 @@ files live in one shared tree that ``Initialize-DockerHost.ps1`` creates:
 
 The full option set used in the lab is in ``nornir-docker/dev/example.nas-mounts.tsv``.
 
+A share that is offline when the container starts does not stop the container. The mount is skipped
+(a quick TCP check of port 445 or 2049 avoids the kernel's long mount timeout), the other shares
+mount, and the offline mount point gets an empty **read-only** tmpfs, so a build that targets it fails
+at once instead of writing to the container's own disk. ``/run/nornir-offline-mounts`` lists the
+offline targets. Add the option ``x-required`` to a row, or set ``NORNIR_NET_MOUNTS_STRICT=1`` for
+every row, to make the container refuse to start without it. When the server returns, restart the
+container (``stack.ps1 nornir-build restart``) to mount it.
+
 Each ``<id>.cred`` is plain text with LF line endings::
 
    username=svc-nornir
