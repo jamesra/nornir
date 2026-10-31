@@ -46,6 +46,17 @@ when $\lVert T(\ell_k) - d \rVert_\infty \le 0.01$ px or after 8 steps ($T$ maps
 
 ## Algorithmic decisions
 
+- **2026-10-31 Mosaic grid refine measures each vertex with the ir-refine-grid estimator.** Why: with the stop rule
+  matched, Python still trailed the 2022 C++ grids by 4-33% seam MAE on RC3 (0800, 1061, 1300, 1637). The port had
+  replaced the legacy `match_one_pair` with a single-peak phase correlation. The faithful port
+  (`refine_shared/legacy_cell_match.py`): low-pass both spectra and the Girod-Kuo cross-power spectrum (reproducing
+  the legacy `apply_lp_filter` bug that adds $s_y$ for $s_y^2$), threshold the PDF to its top
+  $\min(64/A, \max(5/A, 0.01))$ fraction, cluster 8-connected periodic blobs, keep peaks within 2x of the best,
+  reject the vertex when more than 10 remain, then pick among the zero shift and the four wrap permutations of each
+  peak by $-\mathrm{NCC}$ of the moving cell against the whole fixed tile, a pixel counting as valid when inside the
+  tile buffer. RC3 0800 seam MAE 0.0859 / p90 0.1449 vs C++ 0.0857 / 0.1432 (0.1007 / 0.1509 before); Grid690 0.0824
+  vs golden 0.0901. Rejected: further tuning of the single-peak path. Where:
+  `nornir-imageregistration/docs/refine_grid_step_inventory.md` rows 15-17.
 - **2026-10-30 Mosaic grid refine stops on the legacy mean shift, in full-resolution pixels.** Why: the Python port of
   ir-refine-grid stopped on the max $|s|$ component (non-monotonic, follows the noisiest vertex) and compared
   working-resolution shifts with a threshold the C++ tool applies in full-resolution pixels (`-sp` sets the ITK tile
@@ -53,7 +64,7 @@ when $\lVert T(\ell_k) - d \rVert_\infty \le 0.01$ px or after 8 steps ($T$ maps
   $\bar{s} = \frac{d}{2V}\sum_{v}(|s_{v,x}| + |s_{v,y}|)$ over all $V$ vertices of all tiles, $d$ the downsample;
   refinement stops when $\bar{s} \le \tau$ or $\bar{s}$ fails to fall. RC3 0800: 5 passes, seam MAE 0.1007 (max rule
   0.1000 after 4; working-res mean 0.1061 after 2; C++ 0.0857). RC3 1061: 0.0933 against 0.1011 (C++ 0.0831). The
-  stop explains under half the gap to C++; the rest is in the per-pass update (open question below). Rejected:
+  stop explains under half the gap to C++; the rest was the per-vertex estimator (2026-10-31 entry above). Rejected:
   working-res mean (stops after 2 passes). Where: `nornir-imageregistration/nornir_imageregistration/local_distortion_correction.py`
   (`_refine_tileset`), `nornir-imageregistration/docs/grid_refine_stos_vs_mosaic.md`.
 - **2026-10-30 Grid-refine and translate throughput: process-pool prewarp and pass-wide FFT batches on both
@@ -160,9 +171,8 @@ when $\lVert T(\ell_k) - d \rVert_\infty \le 0.01$ px or after 8 steps ($T$ maps
 ## Open questions for a paper
 
 - Carry accuracy: carried-centre error against Viking's production carry and against the linked polygon, per volume.
-- Mosaic grid refine vs ir-refine-grid: with the stop rule matched, Python still trails C++ seam MAE by ~12% on RC3
-  1061 (0.0933 vs 0.0831). Which per-pass step differs (median filter, gap fill, blur, $1/(1+m)$ blend, cell
-  extraction) and whether matching it closes the gap.
+- ~~Mosaic grid refine vs ir-refine-grid: which per-pass step differs~~ answered 2026-10-31: the per-vertex
+  estimator. Still to measure: whether the legacy estimator closes the gap on RC3 1061, 1300 and 1637 as on 0800.
 - Crushed tiles: effect on mosaic registration (seam MAE and offsets vs `-NoCrush` on the same sections), on SAM2
   training and inference when both use crushed tiles, and visible banding in Leveled/Viking views (only 10-17 codes
   span the tissue). Whether an Anscombe-stabilised crush in electron units (gain from `CountsPerElectron` or a
