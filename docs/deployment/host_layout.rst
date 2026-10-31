@@ -51,8 +51,8 @@ What goes where
    * - Folder
      - Contents and rules
    * - ``stack.ps1``
-     - A small generated launcher that resolves ``NORNIR_REPO_ROOT_HOST`` at run time and calls
-       the real ``stack.ps1`` in the checkout, so it keeps working after ``git pull``. Never copy
+     - A small generated launcher that resolves ``DEPLOY_REPO_ROOT_HOST`` at run time and calls
+       the real ``stack.ps1`` in the connectomes-deploy checkout, so it keeps working after ``git pull``. Never copy
        the real script here; it dot-sources sibling helpers and breaks when copied.
    * - ``Run/_host/``
      - Settings that apply to the whole host: which stacks it runs, the domain, the TLS mode, the
@@ -83,13 +83,15 @@ What goes where
        ``/var/log/nornir`` and sets ``NORNIR_LOG_ROOT=/var/log/nornir``. Exported to compose as
        ``STACK_LOGS_DIR``.
 
-Checkouts are outside the root: ``/srv/src/nornir`` and ``/srv/src/Viking`` on Ubuntu (created by
-``bootstrap-ubuntu.sh``), any path on Windows (for example ``D:\src\git\nornir``).
+Checkouts are outside the root: ``/srv/connectomes-deploy``, ``/srv/src/nornir`` and
+``/srv/src/Viking`` on Ubuntu (``bootstrap-ubuntu.sh`` creates the folders; you clone into them),
+any path on Windows (for example ``D:\src\git\connectomes-deploy`` and ``D:\src\git\nornir``).
 
 Permissions
 -----------
 
-On Ubuntu ``bootstrap-ubuntu.sh`` makes the deploy user own ``/srv/docker`` and ``/srv/src``.
+On Ubuntu ``bootstrap-ubuntu.sh`` makes the deploy user own ``/srv/docker``,
+``/srv/connectomes-deploy`` and ``/srv/src``.
 ``Initialize-DockerHost.ps1`` and ``stack.ps1`` then set:
 
 .. list-table::
@@ -163,9 +165,11 @@ paths. Paths use forward slashes (``D:/Docker/...``), which Docker Desktop accep
      - ``<root>/Certs``
    * - ``DOCKER_WORK_DIR``
      - ``<root>/Work``
+   * - ``DEPLOY_REPO_ROOT_HOST``
+     - connectomes-deploy checkout on this host (from ``host.env``; defaults to the checkout that
+       contains ``stack.ps1``).
    * - ``NORNIR_REPO_ROOT_HOST``
-     - nornir checkout on this host (from ``host.env``; defaults to the checkout that contains
-       ``stack.ps1``).
+     - nornir checkout on this host (from ``host.env``; unset when the host has none).
    * - ``VIKING_REPO_ROOT_HOST``
      - Viking checkout on this host (from ``host.env``).
    * - ``VIKING_HOSTNAME_<SERVICE>``

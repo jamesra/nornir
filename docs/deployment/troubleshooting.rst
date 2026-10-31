@@ -26,7 +26,14 @@ Hosts, SSH, and stack.ps1
      - Push the branch (and submodule commits) first; ``-Sync`` deploys the remote, not your tree.
    * - ``Unknown stack 'viking-...'``
      - ``VIKING_REPO_ROOT_HOST`` is not set in that host's ``host.env``, so the Viking registry is
-       not loaded.
+       not loaded (or ``STACK_EXTRA_REGISTRIES`` is set and does not name it). The same applies to
+       ``nornir-dev`` / ``nornir-cursor-worker`` and ``NORNIR_REPO_ROOT_HOST``.
+   * - ``<root>/stack.ps1``: ``Not found: .../stack.ps1 (set DEPLOY_REPO_ROOT_HOST in
+       Run/_host/host.env)``
+     - The launcher cannot find the connectomes-deploy checkout. Set ``DEPLOY_REPO_ROOT_HOST`` in
+       ``host.env``, or re-run connectomes-deploy's ``Initialize-DockerHost.ps1``. A launcher
+       written by the old ``nornir-docker/deploy`` copy still forwards to that copy
+       (:doc:`migrating_from_old_layout`).
    * - ``up`` fails with ``port is already allocated`` / ``address already in use`` on the dev box
      - The old ``viking`` compose project is still running. ``docker compose -p viking down``
        (``docker ps`` shows what holds the port), then ``stack.ps1 <stack> up`` again.

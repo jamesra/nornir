@@ -6,14 +6,33 @@ The old ``D:\Docker`` tree grew one convention per service (``Builds\IdentitySer
 gives every stack the same shape (:doc:`host_layout`). Moving over is a copy, not a rename: old
 files stay where they are until you delete them.
 
+Hosts set up from ``nornir-docker/deploy``
+-------------------------------------------
+
+The deploy tooling moved from ``nornir-docker/deploy/`` to the `connectomes-deploy
+<https://github.com/jamesra/connectomes-deploy>`__ repository on 2026-10-21; the copy left in
+``nornir-docker/deploy/`` is no longer maintained. On a host whose layout was created from the old
+copy:
+
+1. clone connectomes-deploy (``/srv/connectomes-deploy`` on Ubuntu, next to the other checkouts
+   on Windows);
+2. re-run its ``Initialize-DockerHost.ps1`` with the host's role and ``-SetUserEnv``; it rewrites
+   ``<root>/stack.ps1`` to forward to the new checkout and copies only templates that are missing;
+3. add ``DEPLOY_REPO_ROOT_HOST=<that checkout>`` to ``Run/_host/host.env`` (the script fills the
+   key only when it is already present and empty);
+4. on the dev box, add ``DEPLOY_REPO_ROOT_HOST`` to each target's ``Repos`` in ``targets.psd1``
+   so ``-Sync`` updates it;
+5. compare existing run env files with the current templates, then ``stack.ps1 doctor``.
+
 Copy files with ``Move-DockerHostLayout.ps1``
 ---------------------------------------------
 
-Always run with ``-WhatIf`` first; it prints the old-to-new table without copying::
+The script is in the `connectomes-deploy <https://github.com/jamesra/connectomes-deploy>`_
+repository. Always run with ``-WhatIf`` first; it prints the old-to-new table without copying::
 
-   .\nornir-docker\deploy\Move-DockerHostLayout.ps1 -WhatIf
-   .\nornir-docker\deploy\Move-DockerHostLayout.ps1
-   .\nornir-docker\deploy\Move-DockerHostLayout.ps1 -From D:\Docker -To \\newserver\c$\srv\docker
+   D:\src\git\connectomes-deploy\Move-DockerHostLayout.ps1 -WhatIf
+   D:\src\git\connectomes-deploy\Move-DockerHostLayout.ps1
+   D:\src\git\connectomes-deploy\Move-DockerHostLayout.ps1 -From D:\Docker -To \\newserver\c$\srv\docker
 
 It never deletes or overwrites. Env files that map to one ``<stack>.run.env`` are concatenated
 with a header naming each source; when a destination already exists it writes
@@ -96,7 +115,7 @@ Removed scripts and files
    * - Removed (``nornir-docker/``)
      - Use instead
    * - ``Initialize-NornirBuildAppliance.ps1``
-     - ``deploy/Initialize-DockerHost.ps1 -Role compute``
+     - connectomes-deploy ``Initialize-DockerHost.ps1 -Role compute``
    * - ``link-build-env.ps1``
      - ``nornir-docker\.env``: hardlink to ``Run\nornir-dev\.env`` (:doc:`nornir_dev_and_worker`).
        Build args: run ``docker-build.ps1`` from ``Builds\nornir\``, which reads ``build.env`` /
@@ -120,7 +139,7 @@ Removed scripts and files
    * - ``example._shared.build.env``
      - ``Builds\nornir\build.env`` (per-image templates ``*/example.<id>.build.env`` remain)
    * - ``example.dashboard.run.env``
-     - ``deploy/examples/example.nornir-dashboard.run.env``
+     - connectomes-deploy ``stacks/nornir-dashboard/example.nornir-dashboard.run.env``
 
 Kept on purpose: ``docker-run-nornir-dev.ps1`` (used by ``D:\Docker\Run\nornir-dev\run.ps1``),
 ``Cleanup-CursorWorkerClones.ps1`` (its ``-AgentCloneParent`` default now matches
@@ -139,7 +158,7 @@ Renamed variables
    * - ``NORNIR_MONOREPO_ROOT`` (host scripts, user environment)
      - ``NORNIR_REPO_ROOT_HOST`` (old name still read, with a warning)
    * - ``-MonorepoRoot`` (``Initialize-NornirBuildAppliance.ps1``)
-     - ``-RepoRoot`` (``Initialize-DockerHost.ps1``)
+     - ``-NornirRepoRoot`` (``Initialize-DockerHost.ps1``; ``-RepoRoot`` is an alias)
 
 Viking service keys that changed with the move to ``Run/<stack>/`` are listed in the Viking
 deployment docs.

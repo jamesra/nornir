@@ -38,14 +38,16 @@ Steps 2 to 4 of :doc:`index` cover this host. In short::
 
    sudo ubuntu-drivers install && sudo reboot
    sudo bash bootstrap-ubuntu.sh --gpu      # as the deploy account: Docker, pwsh, cifs-utils, NVIDIA toolkit
-   # re-login, clone /srv/src/nornir and /srv/src/Viking
-   pwsh /srv/src/nornir/nornir-docker/deploy/Initialize-DockerHost.ps1 -Role compute -VikingRepoRoot /srv/src/Viking -SetUserEnv
+   # re-login, clone /srv/connectomes-deploy, /srv/src/nornir and /srv/src/Viking
+   pwsh /srv/connectomes-deploy/Initialize-DockerHost.ps1 -Role compute -NornirRepoRoot /srv/src/nornir -VikingRepoRoot /srv/src/Viking -SetUserEnv
    echo cifs | sudo tee /etc/modules-load.d/nornir-cifs.conf
    sudo modprobe cifs && grep cifs /proc/filesystems
 
-Then edit the site files (next section) and pull the images::
+``bootstrap-ubuntu.sh`` and ``Initialize-DockerHost.ps1`` are in the `connectomes-deploy
+<https://github.com/jamesra/connectomes-deploy>`_ repository. Then edit the site files (next
+section) and pull the images (``ghcr.io/jamesra/nornir:prod`` and ``:cupy`` are public; no login
+needed)::
 
-   docker login ghcr.io -u <github-user>          # token: Packages read
    stack nornir-build pull
 
 Windows (Docker Desktop + WSL2)
@@ -53,9 +55,10 @@ Windows (Docker Desktop + WSL2)
 
 1. Install Docker Desktop with the WSL2 backend, Git, PowerShell 7, and (for ``nornir:cupy``) a
    current NVIDIA driver.
-2. Clone the monorepo with submodules and run, from the checkout::
+2. Clone the monorepo with submodules and `connectomes-deploy
+   <https://github.com/jamesra/connectomes-deploy>`__, then run::
 
-      .\nornir-docker\deploy\Initialize-DockerHost.ps1 -Role compute -SetUserEnv
+      D:\src\git\connectomes-deploy\Initialize-DockerHost.ps1 -Role compute -NornirRepoRoot D:\src\git\nornir -SetUserEnv
 
 3. Load the CIFS driver in the WSL2 kernel (shared by Docker Desktop's containers). In the WSL
    distro, with ``systemd=true`` under ``[boot]`` in ``/etc/wsl.conf``::
@@ -66,7 +69,7 @@ Windows (Docker Desktop + WSL2)
 
    Without systemd, add ``command = /sbin/modprobe cifs nfsv4`` under ``[boot]`` instead. Run
    ``wsl --shutdown`` and check again.
-4. ``docker login ghcr.io`` and ``D:\Docker\stack.ps1 nornir-build pull``.
+4. ``D:\Docker\stack.ps1 nornir-build pull`` (public images; no ``docker login`` needed).
 
 NAS shares (path B, in-container CIFS)
 --------------------------------------

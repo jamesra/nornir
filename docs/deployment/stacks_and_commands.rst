@@ -21,10 +21,14 @@ Stacks
 ------
 
 Stack keys are kebab-case and are also the ``Run/<stack>/`` folder name and the compose project
-name. The registries are ``nornir-docker/deploy/stacks.psd1`` and
-``<VIKING_REPO_ROOT_HOST>/deploy/stacks.psd1`` (Viking stacks appear only when
-``VIKING_REPO_ROOT_HOST`` is set in ``host.env``). ``stack.ps1 list`` prints both, with a
-``ThisHost`` column for the stacks in ``NORNIR_DOCKER_HOST_STACKS``.
+name. The registries are ``stacks.psd1`` in the `connectomes-deploy
+<https://github.com/jamesra/connectomes-deploy>`_ checkout (``nornir-build``,
+``nornir-dashboard``) plus the source-repo registries named by ``STACK_EXTRA_REGISTRIES`` in
+``host.env``. Its default loads ``<VIKING_REPO_ROOT_HOST>/deploy/stacks.psd1`` (the ``viking-*``
+stacks) and ``<NORNIR_REPO_ROOT_HOST>/nornir-docker/dev-stacks.psd1`` (``nornir-dev``,
+``nornir-cursor-worker``); a registry is skipped when its checkout variable is not set, and
+``none`` loads only connectomes-deploy's own. ``stack.ps1 list`` prints the stacks of every loaded
+registry, with a ``ThisHost`` column for the stacks in ``NORNIR_DOCKER_HOST_STACKS``.
 
 .. list-table::
    :header-rows: 1
