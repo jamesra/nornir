@@ -35,10 +35,18 @@ Send this table to Pitt IT. "Campus/VPN" means the Pitt campus network and the P
      - campus/VPN
      - SSH for deploys and tunnels
    * - ``compute``
-     - 40443/tcp, 40444/tcp, 40445-40447/tcp
+     - 40443/tcp; 40444/tcp; 40445/tcp and up
      - ``web`` only
-     - ``viking-segmentation`` servers (default model and demo on 40443-40444; the ``models``
-       profile's v3 / v4 / sem-v1 on 40445-40447), reached by the proxy
+     - ``viking-segmentation`` with published ports (the compose default), reached by the proxy:
+       the default model on 40443, its demo page on 40444 (only when enabled), and one port per
+       ``models.json`` row with ``"network": "published"``, numbered from 40445. Not needed for
+       servers on macvlan or the backend network (:ref:`deploy-segmentation-network`).
+   * - segmentation IP
+     - 443/tcp
+     - ``web`` only
+     - Only when the segmentation server runs on its own MAC and IP (macvlan). A network ACL:
+       the host firewall does not see this traffic. If the server reads local tilesets, also
+       outbound from that IP to the identity and ``websvc`` hosts.
    * - ``compute``
      - 445/tcp outbound
      - to the NAS
@@ -98,14 +106,15 @@ iptables ahead of ufw's rules, so **ufw does not filter them**. Two rules follow
 * Ports another host must reach are filtered in the ``DOCKER-USER`` chain, which Docker evaluates
   before its own rules and never rewrites.
 
-On ``compute``, allow only ``web`` to reach the segmentation ports. Replace the interface name
-(``ip -br link``) and the address of ``web``::
+On ``compute``, allow only ``web`` to reach the published segmentation ports. Replace the
+interface name (``ip -br link``) and the address of ``web``, and widen the port range to the
+highest ``port`` in ``models.json``::
 
    EXT_IF=eno1
    WEB_IP=203.0.113.10
    # Inserted in reverse order: the ACCEPT ends up above the DROP.
-   sudo iptables -I DOCKER-USER -i "$EXT_IF" -p tcp -m conntrack --ctorigdstport 40443:40447 --ctdir ORIGINAL -j DROP
-   sudo iptables -I DOCKER-USER -i "$EXT_IF" -p tcp -s "$WEB_IP" -m conntrack --ctorigdstport 40443:40447 --ctdir ORIGINAL -j ACCEPT
+   sudo iptables -I DOCKER-USER -i "$EXT_IF" -p tcp -m conntrack --ctorigdstport 40443:40449 --ctdir ORIGINAL -j DROP
+   sudo iptables -I DOCKER-USER -i "$EXT_IF" -p tcp -s "$WEB_IP" -m conntrack --ctorigdstport 40443:40449 --ctdir ORIGINAL -j ACCEPT
    sudo iptables -L DOCKER-USER -n -v --line-numbers
 
    # Keep the rules across reboots
@@ -115,6 +124,73 @@ On ``compute``, allow only ``web`` to reach the segmentation ports. Replace the 
 ``--ctorigdstport`` matches the port the client connected to, before Docker's DNAT, so the rule
 holds even if the container port differs from the host port. ``stack.ps1 doctor`` prints a
 reminder when ufw is installed.
+
+.. _deploy-segmentation-network:
+
+How the proxy reaches the segmentation servers
+----------------------------------------------
+
+``viking-segmentation`` (Viking ``Servers/SegmentationServer/docker-compose.yml``) has no compose
+profiles. Its base service ``segmentation-server`` is the default model behind
+``segmentation.<domain>``; every other model is a row of ``Run/viking-segmentation/models.json``,
+added with ``stack viking-segmentation model <prefix> <file.pt>`` on the host that runs it. Each
+server can be reached in one of three ways:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 16 42 42
+
+   * - Mode
+     - Default server (``segmentation``)
+     - ``models.json`` rows (``<prefix>.segmentation``)
+   * - Published ports
+     - The compose default: host port 40443 (``SEGMENTATION_HTTPS_PORT``), demo page 40444
+       (loopback unless ``SEGMENTATION_DEMO_HOST_BIND=0.0.0.0``). The proxy uses
+       ``VIKING_COMPUTE_HOST:40443``.
+     - ``"network": "published"``, the default when ``VIKING_BACKEND_NETWORK`` is unset: host port
+       ``port`` (next free from 40445), reached as ``SEGMENTATION_UPSTREAM_HOST:<port>`` (default
+       ``VIKING_COMPUTE_HOST``). Filter these ports with ``DOCKER-USER`` (above).
+   * - Own MAC and IP (macvlan)
+     - Opt-in with ``STACK_COMPOSE_OVERLAYS=stacks/viking-segmentation/compose.macvlan.yaml`` in the
+       run env (Linux, wired NIC, Docker 25 or newer). The server listens on ``<IP>:443`` and
+       nothing is published; set ``VIKING_UPSTREAM_SEGMENTATION=<IP>:443`` in the ``viking-proxy``
+       run env on ``web``.
+     - ``"network": "macvlan"`` with ``mac``, ``ip`` and ``dhcpHostname`` in the row; it shares
+       the default server's ``SEGMENTATION_MACVLAN_PARENT`` / ``_LAN_SUBNET`` / ``_LAN_GATEWAY``.
+   * - Backend network
+     - not used
+     - ``"network": "backend"``, the default when ``VIKING_BACKEND_NETWORK`` is set: only when
+       ``viking-proxy`` runs on the same host. Nothing is published.
+
+macvlan is how connectomes-deploy's guide for a new segmentation host (``docs/segmentation-host.md``)
+sets up the default server. Its run-env block (template: "Own MAC address and IP" in Viking's
+``deploy/examples/example.viking-segmentation.run.env``)::
+
+   STACK_COMPOSE_OVERLAYS=stacks/viking-segmentation/compose.macvlan.yaml
+   SEGMENTATION_MACVLAN_PARENT=eno1          # or the tagged VLAN sub-interface, e.g. bond0.1811
+   SEGMENTATION_LAN_SUBNET=10.20.30.0/24     # CIDR, never a netmask
+   SEGMENTATION_LAN_GATEWAY=10.20.30.1
+   SEGMENTATION_MAC_ADDRESS=02:5e:10:00:00:01
+   SEGMENTATION_LAN_IP=10.20.30.40
+   SEGMENTATION_DHCP=1                       # 0 for a static IP without a DHCP client
+   SEGMENTATION_DHCP_HOSTNAME=segmentation
+
+The overlay's ``segmentation-net`` container holds the macvlan endpoint and keeps a DHCP lease for
+the MAC; ``segmentation-server`` shares its network. What changes compared with published ports:
+
+* Pitt IT reserves the IP for the MAC, lets the switch port carry a second MAC, and opens 443 to
+  ``<IP>`` from ``web`` with a network ACL. macvlan traffic bypasses ufw and ``DOCKER-USER``.
+* The host itself cannot reach ``<IP>``. Test from ``web``:
+  ``openssl s_client -connect <IP>:443 -servername segmentation.<domain>``.
+* Restart the pair with ``stack viking-segmentation restart``, never ``segmentation-net`` alone.
+  After changing the parent NIC or the subnet, run ``down`` first: an existing network keeps its
+  old settings.
+
+The model command writes ``Data/viking-segmentation/proxy-models.map`` and ``cert-names.names``.
+On the hosts that run them, they go in ``Data/viking-proxy/models.d/segmentation.map`` (restart
+``viking-proxy``) and ``Data/viking-certs/names.d/segmentation.names``; with
+``SEGMENTATION_PROXY_MAP_DIR`` and ``SEGMENTATION_CERT_NAMES_DIR`` set the command writes them there
+itself. Row fields, TLS and the demo pages: :viking:`Viking segmentation <segmentation.html>`.
 
 SSH keys
 --------

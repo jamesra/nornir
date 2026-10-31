@@ -100,7 +100,8 @@ Template ``example.host.env``. Machine settings for every stack on the host; no 
        (``gallery``), ``_TEM_GALLERY`` (``gallery-tem``), ``_SEM_GALLERY`` (``gallery-sem``).
        Keep overrides single-label under the domain so one wildcard certificate still covers them.
        The other segmentation models are rows of ``Run/viking-segmentation/models.json``
-       (``stack.ps1 viking-segmentation model``).
+       (``stack.ps1 viking-segmentation model``), named ``<prefix>.segmentation.<domain>``; the
+       certificate needs ``*.segmentation.<domain>`` (or each name) for them.
    * - ``VIKING_BACKEND_NETWORK``
      -
      -
@@ -129,8 +130,11 @@ Template ``example.host.env``. Machine settings for every stack on the host; no 
    * - ``VIKING_COMPUTE_HOST``
      -
      - ``web``
-     - LAN name or IP of ``compute``; the proxy forwards the segmentation names to it (ports
-       40443-40447).
+     - LAN name or IP of ``compute``; the proxy forwards ``segmentation`` (port 40443) and
+       ``segmentationdemo`` (40444) to it, and it is the default ``SEGMENTATION_UPSTREAM_HOST`` of
+       published ``models.json`` rows. A segmentation server on its own IP (macvlan) is set with
+       ``VIKING_UPSTREAM_SEGMENTATION=<IP>:443`` in the proxy run env instead
+       (:ref:`deploy-segmentation-network`).
    * - ``VIKING_IIS_HOST``
      -
      - ``web``
@@ -479,6 +483,18 @@ Other launcher variables
    * - ``NORNIR_RELEASE``, ``NORNIR_IMAGE_VARIANT``
      - from ``VERSION``
      - ``docker-build.ps1`` build args (``Builds/nornir/build.env``).
+   * - ``STACK_COMPOSE_OVERLAYS``
+     -
+     - ``stack.ps1``, in a compose stack's run env: comma list of extra compose files merged after
+       the registry's, for host-specific variations. Relative paths resolve against
+       connectomes-deploy (``DEPLOY_REPO_ROOT_HOST``). Examples:
+       ``stacks/viking-segmentation/compose.macvlan.yaml`` (:ref:`deploy-segmentation-network`),
+       ``stacks/viking-proxy/compose.backend.yaml``. A missing file stops ``up``.
+       ``Run/<stack>/compose.generated.yaml`` (written by ``model``) is merged after them.
+   * - ``STACK_PROFILES``
+     - the registry's ``Profiles``
+     - ``stack.ps1``, in a stack's run env: replaces the stack's default compose profiles (``none``
+       turns them off). ``-Profile`` adds to the result.
 
 Viking keys that ``stack.ps1`` checks
 -------------------------------------

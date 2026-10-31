@@ -62,16 +62,21 @@ What runs where
      - ``nornir-dashboard`` locally; ``nornir-dev`` and ``nornir-cursor-worker``
        (:doc:`nornir_dev_and_worker`). Deploys to every target with ``-Target <name>``.
 
-Every public name is a single label under ``VIKING_DOMAIN`` (``connectomes.pitt.edu``), so one
-wildcard certificate ``*.connectomes.pitt.edu`` (or one SAN certificate) covers all of them:
+The service names are single labels under ``VIKING_DOMAIN`` (``connectomes.pitt.edu``), so one
+wildcard certificate ``*.connectomes.pitt.edu`` (or one SAN certificate) covers them:
 
 ``identity``, ``websvc``, ``annotation``, ``corrections``, ``segmentation``,
-``segmentationdemo``, ``segmentation-v3``, ``segmentation-v4``, ``segmentation-sem-v1``,
-``gallery``, ``gallery-tem``, ``gallery-sem``.
+``segmentationdemo``, ``gallery``, ``gallery-tem``, ``gallery-sem``.
+
+Each further segmentation model is a row of ``Run/viking-segmentation/models.json`` and is named
+``<prefix>.segmentation.<domain>`` (for example ``v3.segmentation.connectomes.pitt.edu``). That
+name has two labels, so ``*.connectomes.pitt.edu`` does not cover it: the certificate also needs
+``*.segmentation.connectomes.pitt.edu``, or each model name listed (:ref:`deploy-segmentation-network`).
 
 All of them resolve to ``web``. The proxy forwards each TLS connection by SNI name, unopened, to
-the right backend: a container on ``web``, ``viking-segmentation`` on ``compute``, or IIS on
-``iis`` (route table: :viking:`Viking proxy <proxy.html>`).
+the right backend: a container on ``web``, ``viking-segmentation`` on ``compute`` (or the
+segmentation server's own LAN address when it runs on macvlan), or IIS on ``iis`` (route table:
+:viking:`Viking proxy <proxy.html>`).
 
 Zero to running
 ---------------
@@ -88,11 +93,14 @@ Open these before anything else; they take the longest. The exact port lists are
 :doc:`ports_and_remote_access`, and what each credential is in :doc:`accounts_and_tokens`.
 
 * **DNS:** a wildcard record ``*.connectomes.pitt.edu`` pointing at the ``web`` server's public
-  address (or one A/CNAME record per name above).
+  address (or one A/CNAME record per name above, including each segmentation model name).
 * **Firewall:** the per-host rules in :ref:`deploy-firewall-request`.
 * **Certificate (only if Let's Encrypt is not allowed):** either an ACME EAB credential for the
   InCommon/Sectigo ACME server (key id, HMAC key, and server URL), or a wildcard/SAN certificate
-  issued for the names above.
+  issued for the names above (with ``*.segmentation.connectomes.pitt.edu`` for the extra models).
+* **Segmentation server on its own IP (optional):** a DHCP reservation for a MAC address, a second
+  MAC on the switch port, and a network ACL for 443 from ``web``
+  (:ref:`deploy-segmentation-network`).
 
 2. Bootstrap the Ubuntu servers (``compute`` and ``web``)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -233,6 +241,10 @@ file; it listens on 8442 for the proxy).
 
 Start the dashboard before ``nornir-build`` so the build container joins its network. Open the
 dashboard through ``stack.ps1 tunnel -Target compute`` at http://127.0.0.1:8087.
+
+``viking-segmentation up`` starts the default model only, on host port 40443 unless the run env
+puts it on its own IP (:ref:`deploy-segmentation-network`). Add the other models on ``compute``
+with ``stack viking-segmentation model <prefix> <file.pt>``.
 
 8. Deploy ``iis``
 ~~~~~~~~~~~~~~~~~
