@@ -23,6 +23,7 @@ Files (each subagent reads only its own, see Each wake; Task prompts carry the s
 - [gates.md](gates.md): what a change must pass; tests, mutation, benchmarks, commit, publish.
 - [metadata-port.md](metadata-port.md): XML-to-SQLite metadata port stages and gates; port wakes only.
 - [reports.md](reports.md): report format and learning from reverts.
+- [tracker.md](tracker.md): the `jamesra/nornir-review` issue tracker: candidates from it, filing what the loop cannot fix (with version info and git heads), resolving fixed issues.
 - [ledger.py](ledger.py): the only way to read or edit the ledger (see Ledger).
 
 The gates lean on [nornir-review-issue-fixing](../nornir-review-issue-fixing/SKILL.md), [hypothesis-testing](../hypothesis-testing/SKILL.md), [nornir-headless-unit-tests](../nornir-headless-unit-tests/SKILL.md), [nornir-debug-profiling](../nornir-debug-profiling/SKILL.md), [nornir-serial-batched-primitives](../nornir-serial-batched-primitives/SKILL.md), and the rules in [`.cursor/rules/`](../../rules/).
@@ -63,7 +64,7 @@ In both:
 
 In scope: the umbrella repo (`$ROOT`), every `nornir-*` submodule, and `dm4`, each on its checked-out branch (at the time of writing: `dev` for buildmanager, imageregistration, pyre, shared; `master` for pools, volumemodel, volumecontroller, web, dm4; `main` for docker, builddashboard). At launch the scout records each branch in the ledger and refuses to edit a submodule on a detached HEAD.
 
-Do not edit generated files (`*.egg-info`, build output), comment code out to compile, push, or tag. Confirm the owning submodule's branch before the first edit in it.
+Do not edit generated files (`*.egg-info`, build output), comment code out to compile, push, or tag. Confirm the owning submodule's branch before the first edit in it. The only GitHub writes allowed are issues, comments, and labels on `jamesra/nornir-review`, as [tracker.md](tracker.md) describes.
 
 A repo outside `$ROOT` (e.g. `D:\src\git\Sam2Trainer`) is in scope only for a run whose `STEERING.md` has a `focus:` line naming its path. The same gates apply; record it in `branches` and `launchDirty`; it commits without a pointer bump. No ledger key widens scope.
 
@@ -87,11 +88,12 @@ Long steps get their own caps (one run on 2026-10-29 took 116 minutes on a hung 
 ## Launch
 
 1. Detect the environment; check the one-runner rule. Read the `loop` skill once if available (`~/.cursor/skills-cursor/loop/SKILL.md`; absent in the container, so use the fallback below). Use the dynamic local schedule with sentinel `AGENT_LOOP_WAKE_nornir_improve`; never arm a fixed repeating sleeper.
-2. Create `$LOOP_ROOT`, `.loop/ledger.json`, and `STEERING.md` if missing. If `ledger.json` is from an earlier run (`stop` is true, or `runner` is empty and its `deadline` has passed), rename it to `.loop/ledger.<startedAt date>.json` and start a fresh one, copying only `rejected`, `deferred`, `proposals`, `reworked`, `flaky`, `mirrorPending`, `countsSincePublish`, owed `pyreBuilds`, and open `decisions` (with `answer`/`answerSource`); `wakeCount` restarts at 0. Earlier commits are found by the `Improvement-Loop:` trailer, not the old ledger. Run-specific scope or notes go in `STEERING.md`, not new ledger keys. Run Sync from the remote. Then, if `git submodule status` shows `+` for any package (checked-out commits the umbrella has not recorded), raise one decision `pointer-bumps`: list each such package and its unrecorded shas, and ask whether the loop's pointer bumps may carry them (gates.md Before commit step 3). The scout does not skip those packages; their loop commits wait for the answer before bumping.
+2. Create `$LOOP_ROOT`, `.loop/ledger.json`, and `STEERING.md` if missing. If `ledger.json` is from an earlier run (`stop` is true, or `runner` is empty and its `deadline` has passed), rename it to `.loop/ledger.<startedAt date>.json` and start a fresh one, copying only `rejected`, `deferred`, `proposals`, `reworked`, `flaky`, `mirrorPending`, `countsSincePublish`, owed `pyreBuilds`, `trackerIssues`, and open `decisions` (with `answer`/`answerSource`); `wakeCount` restarts at 0. Earlier commits are found by the `Improvement-Loop:` trailer, not the old ledger. Run-specific scope or notes go in `STEERING.md`, not new ledger keys. Run Sync from the remote. Then, if `git submodule status` shows `+` for any package (checked-out commits the umbrella has not recorded), raise one decision `pointer-bumps`: list each such package and its unrecorded shas, and ask whether the loop's pointer bumps may carry them (gates.md Before commit step 3). The scout does not skip those packages; their loop commits wait for the answer before bumping.
 3. Install missing dev tools into the `$PY` environment: `ruff`, `vulture`, `radon`, `pylint`, `pyright`, `pyperf`, `crosshair-tool`, plus `mutmut` in the container. Never add them to a package `pyproject.toml` or constraints files. Container installs vanish on recreate; that is not a failure (the next launch reinstalls). Record the resolved commands in ledger `toolCommands` (test tiers, `ruff`/`pyright`/`radon`, the mutmut command, pyperf with `--copy-env` on Windows, where workers otherwise cannot import the venv; see [Performance-evidence](../../rules/Performance-evidence.mdc)); later wakes reuse them.
-4. Mutation check mode: in the container, confirm `$PY -m mutmut --version` works and set `mutationMode: "native"`. On Windows, check that the `cursor-dev` container is reachable (needed for mutmut, see [gates.md](gates.md) Mutation check); if not, set `mutationMode: "manual"` and tell the user once.
-5. Build `hotspots`, run the tiered test baseline, then run one wake immediately. Tell the user the deadline, the interval, and that `STEERING.md` is read every wake (say so if it already contains `pause`).
-6. Arm the next wake with:
+4. Tracker: check access to `jamesra/nornir-review`, set ledger `tracker`, create the `improve-loop` label if missing, and write the open-issue snapshot ([tracker.md](tracker.md) Access and Snapshot). No access is not a failure: run with `tracker.mode: none` and tell the user once.
+5. Mutation check mode: in the container, confirm `$PY -m mutmut --version` works and set `mutationMode: "native"`. On Windows, check that the `cursor-dev` container is reachable (needed for mutmut, see [gates.md](gates.md) Mutation check); if not, set `mutationMode: "manual"` and tell the user once.
+6. Build `hotspots`, run the tiered test baseline, then run one wake immediately. Tell the user the deadline, the interval, the tracker mode, and that `STEERING.md` is read every wake (say so if it already contains `pause`).
+7. Arm the next wake with:
 
 ```json
 {"prompt":"Follow skill nornir-improve-loop.","deadline":"<ISO-8601>","intervalMinutes":<Y>}
@@ -111,13 +113,13 @@ On Windows PowerShell use `Start-Sleep -Seconds <seconds>` and `Write-Output` wi
 Main only schedules, relays, and talks to the user, per [main-session.md](main-session.md) (its only skill reading after launch). All work runs in fresh `generalPurpose` subagents (models per Model routing), foreground, one at a time, so main's context does not grow. Each subagent gets only the skill folder path and the ledger path and opens only the files named for its role below. **Never** paste wake history, open-decision lists, ledger JSON, or multi-paragraph "Context:" into the Task prompt; the ledger and `STEERING.md` are the memory.
 
 1. Main: read the payload (not the `loop` skill or full `SKILL.md`); record chat decision answers into the ledger. **Do not Sync in main** after launch.
-2. **Scout** (Syncs first; reads SKILL.md, protected.md, categories.md, the ledger, `STEERING.md`; metadata-port.md on port wakes; reports.md and gates.md Test baseline only when a report or baseline is due). Prompt exactly: `Run the scout step of skill nornir-improve-loop. Skill folder: <path>. Ledger: <path>.` In order:
-   1. run Sync from the remote; write `lastSync` / `syncSkips`; refresh `runner.heartbeatAt`;
+2. **Scout** (Syncs first; reads SKILL.md, protected.md, categories.md, tracker.md, the ledger, `STEERING.md`; metadata-port.md on port wakes; reports.md and gates.md Test baseline only when a report or baseline is due). Prompt exactly: `Run the scout step of skill nornir-improve-loop. Skill folder: <path>. Ledger: <path>.` In order:
+   1. run Sync from the remote; write `lastSync` / `syncSkips`; refresh `runner.heartbeatAt`; close tracker issues whose fixing loop commit is now on the remote, and file up to the per-wake cap of `proposals`/`deferred` items still at `issue: null` ([tracker.md](tracker.md) Resolving and Filing; skipped when `tracker.mode` is `none`);
    2. run `ledger.py <ledger> brief`: it prints the wake state and the `$LOOP_ROOT/STEERING.md` directives, or `MISSING <path>` (recreate the template and treat it as no steering). Open `STEERING.md` itself only when `brief` reports guidance lines; `get` other ledger keys as needed;
    3. on `stop`, a wake starting after the deadline (`startedAfterDeadline`), or `emptyWakes` reaching 3: write the `final` report (unless `stop` is already true and this run's `final` exists), set `stop: true`, and stop;
    4. on `pause`, end the wake (no daily report, hotspot rebuild, or baseline; an owed daily report is written on the first unpaused wake);
-   5. 24 hours after `lastReportAt` (or `startedAt`): write the `daily` report, rebuild `hotspots`, re-run the test baseline, check for reworked commits;
-   6. otherwise write one candidate to `candidate`: category (or port stage), package, files, one-paragraph plan, risk `low` or `high` (per Model routing). Edit no production code. A protected or unmeasurable candidate becomes a proposal or decision, and the wake ends.
+   5. 24 hours after `lastReportAt` (or `startedAt`): write the `daily` report, rebuild `hotspots`, refresh the tracker snapshot, re-run the test baseline, check for reworked commits;
+   6. otherwise write one candidate to `candidate`: category (or port stage), package, files, one-paragraph plan, risk `low` or `high` (per Model routing), and `issue` when it comes from the tracker ([tracker.md](tracker.md) Candidates). Edit no production code. A protected or unmeasurable candidate becomes a proposal or decision, and the wake ends.
    Return only this block:
    ```text
    candidate: <category in words (number), package | none: why>
@@ -126,10 +128,11 @@ Main only schedules, relays, and talks to the user, per [main-session.md](main-s
    report: none | <path>
    stop: yes | no | pause
    ```
-3. **Implementer** (reads SKILL.md Scope and Time box, protected.md, gates.md, the ledger; metadata-port.md on port wakes). Prompt exactly: `Run the implement step of skill nornir-improve-loop for the candidate in the ledger. Skill folder: <path>. Ledger: <path>.` Runs the candidate through the gates, tests, mutation check, and benchmark when needed; if green, commits in the owning submodule and bumps the umbrella pointer; publishes if due; clears `candidate`; writes the ledger. If the candidate proves riskier than the scout said, stop without committing and set risk `high`; the next wake re-runs it with the high-risk model. Return only this block:
+3. **Implementer** (reads SKILL.md Scope and Time box, protected.md, gates.md, the ledger; metadata-port.md on port wakes; tracker.md when `candidate.issue` is set or the wake ends in something to file). Prompt exactly: `Run the implement step of skill nornir-improve-loop for the candidate in the ledger. Skill folder: <path>. Ledger: <path>.` Runs the candidate through the gates, tests, mutation check, and benchmark when needed; if green, commits in the owning submodule and bumps the umbrella pointer; publishes if due; clears `candidate`; writes the ledger. If the candidate proves riskier than the scout said, stop without committing and set risk `high`; the next wake re-runs it with the high-risk model. Return only this block:
    ```text
    outcome: <package sha + summary | why nothing passed>
    decisions: none new | <ids>
+   tracker: none | <#n filed|commented|fixed, ...>
    publish: no | ran | owed
    countsSincePublish: <N>/6
    ```
@@ -178,13 +181,15 @@ Never hand-edit the ledger or write ad-hoc read-modify-write code for it. Use [l
   "hotspots": [], "baselineFailures": [], "flaky": [],
   "lastCategory": 0, "wakeCount": 0, "wakesSinceCompact": 0, "compactSummary": "", "emptyWakes": 0,
   "portStage": 0, "portEvidence": [],
-  "candidate": { "category": 0, "stage": null, "package": "", "files": [], "plan": "", "risk": "low|high" },
+  "candidate": { "category": 0, "stage": null, "package": "", "files": [], "plan": "", "risk": "low|high", "issue": null },
   "commits": [{ "package": "", "sha": "", "umbrellaSha": "", "category": 0, "stage": null, "summary": "", "lineDelta": 0,
-                "benchmark": "", "mutation": "", "risk": "", "models": {}, "review": "" }],
+                "benchmark": "", "mutation": "", "risk": "", "models": {}, "review": "", "issue": null }],
   "countsSincePublish": 0, "publishes": [], "pyreBuilds": [],
   "rejected": [], "deferred": [], "proposals": [],
   "decisions": [{ "id": "", "question": "", "options": [], "askedAt": "", "answer": null, "answerSource": null }],
   "reworked": [], "mirrorPending": [],
+  "tracker": { "mode": "gh|none", "reason": "", "checkedAt": "" },
+  "trackerIssues": [{ "number": 0, "title": "", "package": "", "action": "filed|commented|fixed|closed", "at": "" }],
   "lastSync": {}, "syncSkips": [], "modelSubstitutions": [],
   "lastReportAt": null, "reports": []
 }

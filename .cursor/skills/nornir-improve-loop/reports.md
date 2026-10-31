@@ -27,8 +27,9 @@ Keep each report reviewable in a few minutes:
 3. **Commits, riskiest first:** every commit in the period, sorted by risk (weigh shared-package or cross-package reach, port commits, latent-bug fixes, performance changes, closeness to protected areas, size). One line each: short sha (and umbrella pointer-bump sha), category or stage, package, summary, line delta, models that worked on it; performance commits add the before/after headline number, bug fixes the regression-test failure count against the old code, changed-test commits the surviving mutants and mutation mode. A commit with a notable risk gets one indented line saying what it is and what to check; others get none.
 4. **Open decisions:** each pending `decisions` entry with its id and options.
 5. **Reworked:** loop commits you reverted or rewrote, and the pattern now avoided.
-6. **Proposals:** each in full: protected areas first, then port proposals, unmeasurable performance work, deferred refactors.
-7. **Follow-ups:**
+6. **Proposals:** each in full: protected areas first, then port proposals, unmeasurable performance work, deferred refactors. Give each one's `jamesra/nornir-review` issue number, or why it has none.
+7. **Tracker:** `tracker.mode` (and the reason when `none`); issues filed, commented on, marked fixed, and closed in the period, from `trackerIssues`, each as `#n` with its title; items still waiting to be filed; fixed issues still open because their commit is unpushed.
+8. **Follow-ups:**
    - **Unpushed work:** per package, loop commits not yet on the remote, and the push order (submodules first, then the umbrella; see gates.md "Before commit and commit");
    - `git submodule status` lines with a `+` prefix, and whether the loop or the user caused them;
    - Pyre installer builds and results, and whether a publish is owed;
@@ -38,4 +39,4 @@ Keep each report reviewable in a few minutes:
 
 ## Learning from your changes
 
-With each daily report, check every loop commit from the last 14 days (found by the `Improvement-Loop:` trailer: `git log --grep "Improvement-Loop:"` in each submodule and in the umbrella). A commit that was reverted, or whose changed lines a non-loop commit has since rewritten, goes in `reworked`; add its pattern (category, file, kind of change) to `rejected` so later wakes avoid it, and flag it in the report. A performance change that a later measurement shows slower than its recorded benchmark also goes in `reworked`, with its entry appended to `.cursor/issue-handoff/optimization-loop-rejections.md`.
+With each daily report, check every loop commit from the last 14 days (found by the `Improvement-Loop:` trailer: `git log --grep "Improvement-Loop:"` in each submodule and in the umbrella). A commit that was reverted, or whose changed lines a non-loop commit has since rewritten, goes in `reworked`; add its pattern (category, file, kind of change) to `rejected` so later wakes avoid it, and flag it in the report. If it fixed a tracker issue, undo the fix there ([tracker.md](tracker.md) Resolving). A performance change that a later measurement shows slower than its recorded benchmark also goes in `reworked`, with its entry appended to `.cursor/issue-handoff/optimization-loop-rejections.md`.

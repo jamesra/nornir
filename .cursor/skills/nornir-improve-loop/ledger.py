@@ -40,7 +40,8 @@ SCHEMA_KEYS: frozenset[str] = frozenset({
     "branches", "mutationMode", "toolCommands", "hotspots", "baselineFailures", "flaky", "lastCategory",
     "wakeCount", "wakesSinceCompact", "compactSummary", "emptyWakes", "portStage", "portEvidence", "candidate",
     "commits", "countsSincePublish", "publishes", "pyreBuilds", "rejected", "deferred", "proposals", "decisions",
-    "reworked", "mirrorPending", "lastSync", "syncSkips", "modelSubstitutions", "lastReportAt", "reports",
+    "reworked", "mirrorPending", "tracker", "trackerIssues", "lastSync", "syncSkips", "modelSubstitutions",
+    "lastReportAt", "reports",
 })
 
 STEERING_PREFIXES: tuple[str, ...] = ("focus:", "avoid:", "answer:")

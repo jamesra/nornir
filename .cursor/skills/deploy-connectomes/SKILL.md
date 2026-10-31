@@ -7,6 +7,7 @@ description: Deploy, update, or debug the connectomes.pitt.edu hosts (compute, w
 
 Human docs (canonical): `docs/deployment/` (https://nornir.github.io/deployment/). Viking service
 specifics: Viking `Documentation/source/deployment/`. Rule: `.cursor/rules/nornir-docker-conventions.mdc`.
+First-time setup of a new compute host: `deploy-compute-host` skill.
 
 ## Hosts
 
