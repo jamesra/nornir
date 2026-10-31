@@ -40,9 +40,9 @@ Every stack gets the same shape, keyed by its kebab-case stack name (= compose p
 
 - Real env files, secrets, data, certs and host-specific config go under the layout root; versioned
   templates (`example.*`, sample envs, docs) go in the repository next to the Docker assets
-  (`nornir-docker/deploy/examples/` for deploy templates).
+  (deploy templates are in connectomes-deploy: `stacks/<stack>/`, `host/`).
 - **Never commit** real secrets, `Run/` files, or machine-specific resolved env files.
-- Create the tree with `nornir-docker/deploy/Initialize-DockerHost.ps1 -Role compute|web|iis|dev`
+- Create the tree with connectomes-deploy `Initialize-DockerHost.ps1 -Role compute|web|iis|dev`
   (copies templates only when missing; writes forwarding launchers, never copies of repo scripts).
 - Run stacks with `stack.ps1` (merges `host.env` → host secrets → `<stack>.run.env` → stack secrets
   and exports `STACK_*_DIR`, `DOCKER_CERTS_DIR`, `DOCKER_WORK_DIR` to compose).

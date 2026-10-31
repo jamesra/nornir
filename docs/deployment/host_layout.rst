@@ -8,7 +8,8 @@ under one root, ``NORNIR_DOCKER_USER_ROOT``:
 * Ubuntu: ``/srv/docker``
 
 Nothing under the root is committed. Templates live in the repositories (``example.*`` files) and
-are copied in by ``nornir-docker/deploy/Initialize-DockerHost.ps1``, which never overwrites an
+are copied in by ``Initialize-DockerHost.ps1`` from the `connectomes-deploy
+<https://github.com/jamesra/connectomes-deploy>`_ repository, which never overwrites an
 existing file. Re-run it after adding a stack to a host; it only fills in what is missing.
 
 The tree
@@ -17,7 +18,7 @@ The tree
 ::
 
    <root>/
-     stack.ps1                              forwarding launcher -> <repo>/nornir-docker/deploy/stack.ps1
+     stack.ps1                              forwarding launcher -> <connectomes-deploy>/stack.ps1
      Run/
        _host/
          host.env                           machine settings for every stack on this host
