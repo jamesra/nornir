@@ -37,7 +37,13 @@ umbrella `dev` 815dd69. Ask before pushing commits or images unless the user alr
    from `dev`, check that `dev` contains master's content so the image drops nothing:
    `git -C <sub> diff --stat origin/master origin/dev~N` (N = your unmerged commits) is empty, even
    when `rev-list origin/dev..origin/master` lists old merge history. Say in the report which branch
-   the tags now come from.
+   the tags now come from. To bring `master` up (done 2026-10-31, umbrella 13d5b57), work in scratch
+   clones, never by switching branches in the shared checkout: per submodule, fast-forward when
+   `master` has nothing of its own (`git push origin origin/dev:refs/heads/master`), otherwise clone
+   `master`, `merge --no-ff origin/dev`, check the tree equals `origin/dev`, push; then clone the
+   umbrella's `master`, merge `origin/dev`, resolve the submodule pointer conflicts to each package's
+   new `master` (`git update-index --cacheinfo 160000,<sha>,<path>`), confirm every pointer is on its
+   remote, push.
 3. **Clone clean.** The prod Dockerfile copies `nornir-shared`, `nornir-pools`,
    `nornir-imageregistration`, `dm4` and `nornir-buildmanager` whole, so a stray untracked or ignored
    file in a live checkout (another session's edit, a `build/lib` tree) ends up in a public image.
