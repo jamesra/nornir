@@ -7,7 +7,7 @@ Procedures for agents. Policy/guardrails live in [`.cursor/rules/`](../rules/). 
 | [nornir-commit-push](nornir-commit-push/SKILL.md) | Commit (and push) across umbrella + submodules in dependency order; pointer refresh; lost-work audit | [Monorepo-submodule-changes](../rules/Monorepo-submodule-changes.mdc), [Shared-checkout-safety](../rules/Shared-checkout-safety.mdc) |
 | [nornir-verify-change](nornir-verify-change/SKILL.md) | Verify before claiming done: tests, known flaky/baseline failures, lint/type delta | [Questions-and-proving-fixes](../rules/Questions-and-proving-fixes.mdc) |
 | [segmentation-training-export](segmentation-training-export/SKILL.md) | `ExportTrainingData` / SAM2 crop export and trainer handoff | [Training-set-naming](../rules/Training-set-naming.mdc) |
-| [docker-publish-ghcr](docker-publish-ghcr/SKILL.md) | Build, push, verify, pull images on GHCR | [nornir-docker-conventions](../rules/nornir-docker-conventions.mdc) |
+| [docker-publish-ghcr](docker-publish-ghcr/SKILL.md) | Ship code to build hosts end to end; build, push, verify, pull images on GHCR | [nornir-docker-conventions](../rules/nornir-docker-conventions.mdc) |
 | [nornir-realworld-refine-benchmark](nornir-realworld-refine-benchmark/SKILL.md) | Real-data refine-grid A/B and acceptance criteria | [Refine-grid-trust-questions](../rules/Refine-grid-trust-questions.mdc), [Performance-evidence](../rules/Performance-evidence.mdc) |
 | [archive-built-plans](archive-built-plans/SKILL.md) | Archive completed plans into `.cursor/Built Plans/` | — |
 | [cupy-missing-api-bugfix](cupy-missing-api-bugfix/SKILL.md) | CuPy missing/incompatible APIs; dual-backend first | [Numpy-CuPy-compatibility](../rules/Numpy-CuPy-compatibility.mdc) |
@@ -36,7 +36,7 @@ Procedures for agents. Policy/guardrails live in [`.cursor/rules/`](../rules/). 
 | docker-build-run-phases | Build vs run scripts + env layering |
 | deploy-connectomes | `stack.ps1` deploy/debug procedure for the servers |
 | deploy-compute-host | First-time setup of a new compute host, bare OS to verified containers |
-| docker-publish-ghcr | Push/pull/verify images on GHCR (client side and publisher side) |
+| docker-publish-ghcr | Ship a release to the build hosts; push/pull/verify images on GHCR (client side and publisher side) |
 | docker-machine-layout | `D:\Docker` / `/srv/docker` host paths + Compose bridge |
 | nornir-docker-devcontainer | Day-to-day cursor-dev / IDE setup |
 | nornir-docker-images-ci | Image matrix, OCI/BOM, CI/maintenance |

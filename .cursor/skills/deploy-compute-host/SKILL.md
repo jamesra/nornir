@@ -117,12 +117,9 @@ The compute host cannot answer HTTP-01. Copy the web host's folder to `/srv/dock
 
 ## 7. Publishing images (maintainer, dev box)
 
-Build and push from a CLEAN checkout (`git worktree add --detach <scratch> origin/master` plus
-`git submodule update --init nornir-shared nornir-pools nornir-imageregistration dm4 nornir-buildmanager nornir-docker`).
-The image copies those directories whole, so a stray untracked file in a live checkout ends up in a public image.
-`docker-build.ps1 -Images prod,cupy` from a PowerShell prompt, check the script inside, `docker-push.ps1 -Images prod,cupy`,
-then confirm the public digest equals the local one (anonymous token, `HEAD /v2/jamesra/nornir/manifests/<tag>`).
-Pushing overwrites the `<tag>-<VERSION>` tags unless `VERSION` was bumped. Ask before pushing.
+Skill **docker-publish-ghcr**, section 0: clean clone (never the live checkout), `docker-build.ps1 -Images prod,cupy`,
+check the script and code inside, `docker-push.ps1 -Images prod,cupy`, confirm the public digest anonymously,
+notify the host's session. Ask before pushing.
 
 ## Symptom, cause, fix
 
