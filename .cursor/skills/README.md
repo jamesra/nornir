@@ -12,6 +12,7 @@ Procedures for agents. Policy/guardrails live in [`.cursor/rules/`](../rules/). 
 | [archive-built-plans](archive-built-plans/SKILL.md) | Archive completed plans into `.cursor/Built Plans/` | — |
 | [cupy-missing-api-bugfix](cupy-missing-api-bugfix/SKILL.md) | CuPy missing/incompatible APIs; dual-backend first | [Numpy-CuPy-compatibility](../rules/Numpy-CuPy-compatibility.mdc) |
 | [deploy-connectomes](deploy-connectomes/SKILL.md) | Deploying or debugging the connectomes.pitt.edu hosts with `stack.ps1`: doctor, -Sync, up/rebuild, status, certs | [nornir-docker-conventions](../rules/nornir-docker-conventions.mdc) |
+| [deploy-compute-host](deploy-compute-host/SKILL.md) | First-time bring-up of a new Ubuntu GPU compute host (nornir-build, segmentation, viking-certs): inputs, bootstrap, certs, macvlan, verify, symptom table | [nornir-docker-conventions](../rules/nornir-docker-conventions.mdc) |
 | [docker-build-run-phases](docker-build-run-phases/SKILL.md) | Build vs run scripts, env layering | [nornir-docker-conventions](../rules/nornir-docker-conventions.mdc) |
 | [docker-machine-layout](docker-machine-layout/SKILL.md) | Host layout `Run` / `Builds` / `Data` / `Certs` / `Work` / `Logs` | [nornir-docker-conventions](../rules/nornir-docker-conventions.mdc) |
 | [hypothesis-testing](hypothesis-testing/SKILL.md) | Property-based tests with Hypothesis | — |
@@ -34,6 +35,7 @@ Procedures for agents. Policy/guardrails live in [`.cursor/rules/`](../rules/). 
 |-------|------|
 | docker-build-run-phases | Build vs run scripts + env layering |
 | deploy-connectomes | `stack.ps1` deploy/debug procedure for the servers |
+| deploy-compute-host | First-time setup of a new compute host, bare OS to verified containers |
 | docker-publish-ghcr | Push/pull/verify images on GHCR (client side and publisher side) |
 | docker-machine-layout | `D:\Docker` / `/srv/docker` host paths + Compose bridge |
 | nornir-docker-devcontainer | Day-to-day cursor-dev / IDE setup |
