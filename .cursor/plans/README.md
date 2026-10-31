@@ -11,6 +11,7 @@ Completed plans are archived under **[Built Plans](../Built%20Plans/)** with a d
 | [assemble_tiles_profiling.plan.md](assemble_tiles_profiling.plan.md) | Not started — benchmark/profile RPC3 601 optimized tile assembly (512×512, NumPy/CuPy) |
 | [fix_grid690_python_parity.plan.md](fix_grid690_python_parity.plan.md) | In progress — Phase 0 C++ audit checklist at `docs/refine-grid-cpp-parity-checklist.md` |
 | [best_effort_stos_refine_subpar_pairs.plan.md](best_effort_stos_refine_subpar_pairs.plan.md) | Not started — pair-adaptive best-effort refine for 953–952-class low ZNCC pairs |
+| [noise_crush_import.plan.md](noise_crush_import.plan.md) | In progress — default noise-crushed ImportIDoc/ImportMRC (`-NoCrush` opts out); data tests, visual check and Anscombe follow-up open |
 | [refine-grid_trusted_mesh_cb5bfbcb.plan.md](refine-grid_trusted_mesh_cb5bfbcb.plan.md) | In progress — trusted-mesh consolidation; only trusted cells shape the field (`NORNIR_REFINE_TRUSTED_MESH`) |
 
 Other open plans may still exist in the Cursor IDE plans directory (outside this repo) until they are finished and moved here. Examples still active: `async_stos_save_c955e29f.plan.md` (manual NAS save verification pending).

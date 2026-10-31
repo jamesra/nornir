@@ -19,7 +19,18 @@ Format and rules: the `publication-notes` skill.
   `linked_polygons`, with their overlap with the target and a provenance record (source position, size, LastModified,
   and a thumbprint of the section-to-section mapping) so only changed carries are recomputed.
 
+- **Noise-crushed import** (`nornir-imageregistration/nornir_imageregistration/noise_crush.py`, ImportIDoc/ImportMRC):
+  raw 16-bit TEM tiles are stored as section-wide noise-step codes, $q = \lfloor (x - o)/\Delta \rfloor$ with
+  $\Delta = k\hat\sigma$, instead of contrast-stretched 8-bit. About 86% smaller than raw uint16 at $k = 2.5$; the step
+  and estimator are recorded in each PNG and on the filter so counts can be recovered to within $\Delta/2$.
+
 ## Formulas
+
+Noise sigma per tile, Donoho-Johnstone MAD of the orthonormal Haar diagonal subband over an even-aligned center crop of
+at most 2048²: $h = (a - b - c + d)/2$ for each 2x2 block, $\hat\sigma = \mathrm{median}(|h - \mathrm{median}(h)|)/0.6745$.
+Section $\hat\sigma$ is the median over up to 16 evenly sampled tiles. Crush: $\Delta = \max(1, \mathrm{round}(k\hat\sigma))$,
+$q = \min(\lfloor \max(x - o, 0)/\Delta \rfloor, 2^b - 1)$, $o = \min(0, \lfloor x_{\min} \rfloor)$ for signed data else 0;
+recovery $\hat x = q\Delta + \Delta/2 + o$. Added error: RMS $\Delta/\sqrt{12}$ ($0.72\hat\sigma$ at $k = 2.5$).
 
 Circle carry, five-point mean scale (Sam2Trainer `docs/depth_relative_trust.md`, section 7):
 $c' = \Phi(c)$, $R' = R \cdot \frac{1}{4} \sum_{k=1}^{4} \lVert \Phi(c + R e_k) - \Phi(c) \rVert / R$, with
@@ -34,6 +45,21 @@ by $\ell_0 = T^{-1}(d)$, $\ell_{k+1} = \ell_k + T^{-1}(d) - T^{-1}(T(\ell_k))$, 
 when $\lVert T(\ell_k) - d \rVert_\infty \le 0.01$ px or after 8 steps ($T$ maps source to target).
 
 ## Algorithmic decisions
+
+- **2026-10-30 Import crushes raw TEM tiles by default (`-NoCrush` opts out), at $k = 2.5$ true sigma.** Why: on three
+  4080² uint16 tiles (`C:\Temp\000-002.png`, 2026-09-26 prototype) $k = 2.5$ keeps 34-39 levels (tissue p0.5-p99.5
+  spans 10-17) at 4.65-4.79 MB, 86% below raw (33.3 MB) and about 56% below today's stretched 8-bit PNG (~10.5 MB);
+  10.2 TB of raw tiles would be about 1.45 TB. The September prototype's "90% at 3 sigma" summed the Haar HH without
+  the 1/2 factor (2 sigma on synthetic $\sigma = 10$) and averaged in a structure-inflated patch estimate, so its step
+  was about 6 true sigma: 15-21 levels and RMS error 1.73 sigma, larger than the noise removed. Rejected: $k = 3$ (86%,
+  29-34 levels, user preferred the level count of 2.5), $k \approx 6$ (above), per-tile steps (tiles in a section would
+  have different units, breaking the section histogram, contrast and assembly), TIFF+DEFLATE (4.6-5.1 MB vs PNG level 6
+  4.3-4.4 MB, and a changed tile extension would rewrite every `.mosaic` and checksum), PNG level 9 (5-6 s/tile).
+  An existing uncrushed `Raw8` is never replaced, so re-importing to add sections does not rebuild old ones. Prune
+  scores of crushed tiles are scaled by $255/(q_{\max} - q_{\min})$ of the section cutoffs so existing thresholds keep
+  their meaning. Where: `nornir_imageregistration/noise_crush.py`,
+  `nornir-buildmanager/nornir_buildmanager/importers/{shared,idoc,mrc}.py`, `operations/pruneobj.py`
+  (`CrushedScoreScale`).
 
 - **2026-10-26 Pyre holds images deeper than 8 bits as float32; 8-bit images stay float16.** Why: float16 keeps 11
   significant bits, so a 16-bit image loses about 5 bits in Pyre. Save Warped Image of a real 16-bit TEM tile
@@ -89,6 +115,17 @@ when $\lVert T(\ell_k) - d \rVert_\infty \le 0.01$ px or after 8 steps ($T$ maps
 
 ## Discussion points
 
+- Measured pixel noise is shot-noise-shaped but far below what the camera's counts-per-electron predicts. Binned
+  variance against mean is linear (r 0.95-0.998). RC2 Gatan tiles (2012, `nornir-testdata` RC2_Micro/17): effective
+  gain 1.2-2.1 counts/e⁻, read noise near 0, $\sigma^2/S$ 1.3-1.45. OneView tiles (`Y:\AshCameraTest`, Aug 2026; RPC3's
+  2023 idoc records `CountsPerElectron = 115.93` for that camera): effective gain 0.44-1.22, so pixel sigma is 130-155
+  counts where Poisson at 116 counts/e⁻ predicts ~1,600. Likely cause: the scintillator spreads each electron over many
+  pixels (neighbour correlation 0.87-0.99, partly structure). So the step must come from measured pixel noise, not
+  from `CountsPerElectron`; the latter is useful for expressing codes in electrons (one $k = 2.5$ OneView step is about
+  3 e⁻). (2026-10-30, `photon_transfer.py` in the session scratchpad.)
+- One section-wide step is coarse in dark regions and fine in bright ones because shot noise grows as $\sqrt{S}$; a
+  variance-stabilising transform before quantizing would equalise it (open question below).
+
 - Registered (warped) images exported from Pyre's Save Warped Image before nornir-pyre `4eb7418` (2026-10-26) are
   the target image warped by the source-to-target transform, not the source image in target space; they should be
   re-exported. When the swap was introduced is not established (verify).
@@ -99,7 +136,15 @@ when $\lVert T(\ell_k) - d \rVert_\infty \le 0.01$ px or after 8 steps ($T$ maps
 
 - Anderson, J. R., et al. (2009). A computational framework for ultrastructural mapping of neural circuitry. *PLoS
   Biology* 7(3), e1000074. (verify) Used for: the serial-section registration workflow nornir continues.
+- Anscombe, F. J. (1948). The transformation of Poisson, binomial and negative-binomial data. *Biometrika* 35(3/4),
+  246-254. doi:10.2307/2332343 (verify). Used for: the planned variance-stabilised crush ($2\sqrt{N + 3/8}$).
+- Donoho, D. L., & Johnstone, I. M. (1994). Ideal spatial adaptation by wavelet shrinkage. *Biometrika* 81(3),
+  425-455. doi:10.1093/biomet/81.3.425 (verify). Used for: the MAD/0.6745 noise estimate on the finest wavelet subband.
 
 ## Open questions for a paper
 
 - Carry accuracy: carried-centre error against Viking's production carry and against the linked polygon, per volume.
+- Crushed tiles: effect on mosaic registration (seam MAE and offsets vs `-NoCrush` on the same sections), on SAM2
+  training and inference when both use crushed tiles, and visible banding in Leveled/Viking views (only 10-17 codes
+  span the tissue). Whether an Anscombe-stabilised crush in electron units (gain from `CountsPerElectron` or a
+  per-section photon-transfer fit) keeps fewer levels for the same fidelity.

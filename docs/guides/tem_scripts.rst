@@ -20,6 +20,15 @@ TEMImport
 
    TEMImport /path/to/idoc /path/to/volume
 
+Tiles deeper than 8 bits are **noise-crushed** by default (``ImportIDoc`` and ``ImportMRC``): each section's detector noise is estimated from up to 16 tiles (Haar wavelet MAD), and every tile is stored as ``floor(counts / step)`` with ``step = 2.5 x sigma`` counts, in 8-bit PNGs of the ``Raw8`` filter. That keeps about 35-40 intensity levels and is about 86% smaller than raw 16-bit. The tiles are not contrast-stretched; ``AdjustContrast`` levels them as usual. The step and estimate are stored on the filter (``Crush*`` attributes) and in each PNG (``nornir_crush`` text chunk), so ``counts ~= code x step + step / 2``.
+
+* ``-NoCrush`` keeps the previous contrast-stretched 8-bit tiles (MRC: the stretched ``Raw16`` filter).
+* ``-CrushK`` sets the step in noise sigmas (default 2.5); larger values give smaller files and coarser steps.
+* An existing uncrushed ``Raw8`` (or MRC ``Raw16``) filter is never replaced, so re-importing to add sections leaves imported sections alone. Remove a section's filter to crush it.
+* Changing ``-CrushK`` or turning crushing off rebuilds the affected filter and everything built from it.
+* Prune scores of crushed tiles are scaled to the stretched 8-bit range, so existing ``-DefaultThreshold`` values keep their meaning.
+* Train and run segmentation models on the same representation: a model trained on crushed tiles should see crushed tiles at inference.
+
 TEMBuild
 --------
 
