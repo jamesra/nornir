@@ -46,6 +46,22 @@ when $\lVert T(\ell_k) - d \rVert_\infty \le 0.01$ px or after 8 steps ($T$ maps
 
 ## Algorithmic decisions
 
+- **2026-10-30 Mosaic grid refine stops on the legacy mean shift, in full-resolution pixels.** Why: the Python port of
+  ir-refine-grid stopped on the max $|s|$ component (non-monotonic, follows the noisiest vertex) and compared
+  working-resolution shifts with a threshold the C++ tool applies in full-resolution pixels (`-sp` sets the ITK tile
+  spacing), a 4x looser stop at `-sp 4`. The stop metric is now
+  $\bar{s} = \frac{d}{2V}\sum_{v}(|s_{v,x}| + |s_{v,y}|)$ over all $V$ vertices of all tiles, $d$ the downsample;
+  refinement stops when $\bar{s} \le \tau$ or $\bar{s}$ fails to fall. RC3 0800: 5 passes, seam MAE 0.1007 (max rule
+  0.1000 after 4; working-res mean 0.1061 after 2; C++ 0.0857). RC3 1061: 0.0933 against 0.1011 (C++ 0.0831). The
+  stop explains under half the gap to C++; the rest is in the per-pass update (open question below). Rejected:
+  working-res mean (stops after 2 passes). Where: `nornir-imageregistration/nornir_imageregistration/local_distortion_correction.py`
+  (`_refine_tileset`), `nornir-imageregistration/docs/grid_refine_stos_vs_mosaic.md`.
+- **2026-10-30 Grid-refine and translate throughput: process-pool prewarp and pass-wide FFT batches on both
+  backends.** Why: on 850-tile RC3 sections the GPU ran at a median 10% SM and the host at 1-2% CPU; CuPy prewarp
+  from threads took 188 s against 17 s for the NumPy process pool (RC3 1061, 2 passes, 128 cores), and per-pair FFT
+  batches held ~121 cells. Output-neutral (bit-identical on Grid690; CuPy vs NumPy 2e-7 px mean on RC3 0800). Rejected:
+  thread-parallel tiles (measured regression, GIL and single CUDA stream). Where:
+  `nornir-imageregistration/docs/mosaic_refine_grid_gpu_assessment.md` (Full-section throughput).
 - **2026-10-30 Import crushes raw TEM tiles by default (`-NoCrush` opts out), at $k = 2.5$ true sigma.** Why: on three
   4080² uint16 tiles (`C:\Temp\000-002.png`, 2026-09-26 prototype) $k = 2.5$ keeps 34-39 levels (tissue p0.5-p99.5
   spans 10-17) at 4.65-4.79 MB, 86% below raw (33.3 MB) and about 56% below today's stretched 8-bit PNG (~10.5 MB);
@@ -144,6 +160,9 @@ when $\lVert T(\ell_k) - d \rVert_\infty \le 0.01$ px or after 8 steps ($T$ maps
 ## Open questions for a paper
 
 - Carry accuracy: carried-centre error against Viking's production carry and against the linked polygon, per volume.
+- Mosaic grid refine vs ir-refine-grid: with the stop rule matched, Python still trails C++ seam MAE by ~12% on RC3
+  1061 (0.0933 vs 0.0831). Which per-pass step differs (median filter, gap fill, blur, $1/(1+m)$ blend, cell
+  extraction) and whether matching it closes the gap.
 - Crushed tiles: effect on mosaic registration (seam MAE and offsets vs `-NoCrush` on the same sections), on SAM2
   training and inference when both use crushed tiles, and visible banding in Leveled/Viking views (only 10-17 codes
   span the tissue). Whether an Anscombe-stabilised crush in electron units (gain from `CountsPerElectron` or a
