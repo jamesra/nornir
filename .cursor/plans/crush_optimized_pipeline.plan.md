@@ -9,7 +9,7 @@ todos:
     content: "Retune the blob metric for inflated counts; compare on crushed and uncrushed sections"
     status: pending
   - id: brightness-drift
-    content: "TileGains pipeline on any .mosaic (robust least squares over overlaps, texture threshold, median gain 1); auto-run after import on Stage.mosaic, rerun after alignment; gain in each tile's nornir_crush chunk (rewritten without re-encode), source/checksum on the filter for staleness; applied by the loader's inflate and by Viking. First measure drift on a raw IDOC import"
+    content: "Gain function (robust least squares over overlaps, texture threshold, median gain 1) called directly by the import pipelines on Stage.mosaic, and exposed as a TileGains pipeline for any .mosaic (rerun after alignment); chunk stores quanta, gain, effective quanta (+ recommended effective offset), rewritten without re-encode; source/checksum on the filter for staleness; applied by the loader's inflate and by Viking. First measure drift on a raw IDOC import"
     status: pending
   - id: loader
     content: "nornir_imageregistration: one crush check in the loader (LoadImage / _load_image_by_extension_once); inflate to uint16 counts; route the raw Pillow readers through it or make them crush-aware"
@@ -194,11 +194,19 @@ Gain is its **own pipeline that runs against any `.mosaic`**; it **runs automati
 `Stage.mosaic`) and can be **rerun after alignment** (on the translated or grid mosaic), so sections that moved during
 capture get gains from correct overlaps.
 
-- Pipeline (working name `TileGains`): inputs a channel's filter and a mosaic transform; outputs per-tile gains.
-  ImportIDoc/ImportMRC call it on `Stage.mosaic` at the end of import; rerun by hand, or automatically when the
-  translate report flags the section, with `-InputTransform Translated_*` or `Grid_*`.
-- Rerunning rewrites each tile's `gain` in its `nornir_crush` chunk by copying the PNG's other chunks byte for byte
-  (no pixel re-encode), so a rerun costs file I/O only.
+- A gain function (in `nornir_imageregistration`, with a buildmanager operation wrapping it) takes a channel's filter
+  and a mosaic transform and writes per-tile gains. ImportIDoc/ImportMRC call the **function directly as a step in
+  their own pipeline definitions** (on `Stage.mosaic`); they do not invoke the gain pipeline. A separate pipeline
+  (working name `TileGains`) exposes the same function for any `.mosaic`, rerun by hand (or, open question,
+  automatically when the translate report flags the section) with `-InputTransform Translated_*` or `Grid_*`.
+- **Chunk contents (James):** the `nornir_crush` chunk stores the quanta (`step`), the `gain`, and the **effective
+  quanta** `e = step / gain`. A client multiplies codes by `e` to get a gain-corrected inflated image.
+  Exactly: corrected = (q x step + step/2 + offset) / gain = q x e + b, with b = (step/2 + offset) / gain; offset is 0
+  for unsigned data. q x e alone differs from that by the per-tile constant b (half a step, divided by the gain),
+  invisible after window/level and differing between tiles by ~half a step times a few percent of gain.
+  Recommendation: also store `effective_offset` b so q x e + b is exact for clients that need counts.
+- Rerunning rewrites each tile's `gain`, `effective quanta` (and `effective_offset`) in its `nornir_crush` chunk by
+  copying the PNG's other chunks byte for byte (no pixel re-encode), so a rerun costs file I/O only.
 - Provenance and staleness: the filter records the mosaic the gains came from (its checksum) and a checksum of the
   gain set (e.g. `TileGainsSource`, `TileGainsChecksum`). Anything built with other gains (assembled images, pyramid
   levels that copied the chunk) records the checksum it used and is rebuilt when it no longer matches, as translate
@@ -213,9 +221,9 @@ How the gains are computed (whichever mosaic is used):
 - Guards: robust solve (iteratively reweighted or trimmed) that drops pairs whose ratio disagrees with their
   neighbours (a stage misplacement like RC3 1637 compares unrelated tissue); skip strips with too little texture
   (blank resin, tissue edge); anchor the section's median gain at 1.
-- Stored in each tile's `nornir_crush` chunk as `gain`. The loader's one inflate becomes counts =
-  (q x step + step/2 + offset) / gain; Viking reads the same chunk; the codes are untouched, so gain 1 restores the
-  original data. `inflate=False` callers (registration) are unaffected (NCC and phase correlation ignore scale).
+- Stored in each tile's `nornir_crush` chunk (quanta, gain, effective quanta, see above). The loader's one inflate
+  becomes counts = q x e + b; Viking reads the same chunk; the codes are untouched, so gain 1 restores the original
+  data. `inflate=False` callers (registration) are unaffected (NCC and phase correlation ignore scale).
   Assembled images are built from gain-corrected counts and re-crushed with gain 1; pyramid levels copy the tile's
   chunk. Uncrushed tiles could carry a gain-only chunk so drift correction covers them too.
 - First step: measure the drift on a recent raw IDOC import (not the leveled RC3 tiles) to size it; a few percent
