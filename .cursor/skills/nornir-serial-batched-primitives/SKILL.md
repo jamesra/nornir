@@ -27,7 +27,7 @@ When adding, removing, or renaming a script or pytest module that benchmarks, pr
 | Pathway | Scripts (update as inventory changes) |
 |---------|----------------------------------------|
 | Phase correlation | `nornir-imageregistration/scripts/microbench*.py`, `compare*.py`, `verify*.py`, `audit*.py` (incl. opt-in `audit_cupy_item_bench.py`), `tabulate*.py`, `run_*investigation*.sh` |
-| STOS / refine | Scripts and launch configs that exercise `stos_brute` / refine under `nornir-imageregistration/scripts/`; `python -m nornir_imageregistration.stos_registration_debug`; `benchmarks/bench_stos_brute_pad_shape_checks.py` (+ `bench_stos_brute_pad_shape_gates_old.py` / `_new.py` isolates); `scripts/bench_stos_brute_backends.py` (AlignSections pair on CuPy vs NumPy, serial vs pair-parallel worker processes: latency, throughput, RSS, GPU memory, result agreement) |
+| STOS / refine | Scripts and launch configs that exercise `stos_brute` / refine under `nornir-imageregistration/scripts/`; `python -m nornir_imageregistration.stos_registration_debug`; `benchmarks/bench_stos_brute_pad_shape_checks.py` (+ `bench_stos_brute_pad_shape_gates_old.py` / `_new.py` isolates); `scripts/bench_stos_brute_backends.py` (AlignSections pair on CuPy vs NumPy, serial vs pair-parallel worker processes: latency, throughput, RSS, GPU memory, result agreement); `scripts/rc3_stos_brute_pose_check.py` (StosBrute pose accuracy: median ds32 distance of each method/overlap/flip/mask/`WarpedImageScaleFactors` variant to a reference Grid32 on real RC3 pairs) |
 | Mosaic arrange | Scripts touching `arrange_mosaic` |
 
 ### Pytest modules
