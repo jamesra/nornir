@@ -3,8 +3,8 @@ name: Crush-optimized pipeline
 overview: "Crushed tiles stay crushed end to end. The image loader sees the nornir_crush PNG chunk and inflates to 16-bit counts; every derived image (pyramid level, assembled section, volume tile) is re-crushed with the same section quanta; crushed filters are never leveled, and contrast moves to display time (Viking) and to in-memory normalization where an algorithm needs it."
 todos:
   - id: decisions
-    content: "James: settle the open decisions below (float normalization, pyramid rounding, blob input, exports, Viking sequencing)"
-    status: pending
+    content: "James: D1, D2, D3, D6 decided 2026-11-01; open: blob input (D4), pictures/web summary (D5), Leveled until Viking ships (D6)"
+    status: in_progress
   - id: loader
     content: "nornir_imageregistration: one crush check in the loader (LoadImage / _load_image_by_extension_once); inflate to uint16 counts; route the raw Pillow readers through it or make them crush-aware"
     status: pending
@@ -92,6 +92,7 @@ ExportImages. The scripts also hard-code `Raw8`, which is `Raw16` when codes nee
   writes the chunk before IDAT, so Pillow has it at open without decoding pixels: the check costs a dict lookup.
 - If present: decode codes, inflate with `noise_crush.uncrush` to **uint16 counts** (dtype=None), or to the
   requested float dtype under the normalization chosen in decision D1.
+- `LoadImage(..., inflate=True)` by default (D4); `inflate=False` returns the codes for assembly and registration.
 - Expose the parameters to callers that will save derived images: `LoadImage(..., return_crush=True)` or a sibling
   `LoadImageWithCrush(path) -> (image, CrushParams | None)`; `read_crush_params(path)` stays for metadata-only use.
 - Route the bypassing readers through the loader, or make them crush-aware where they deliberately work on codes
@@ -112,11 +113,10 @@ ExportImages. The scripts also hard-code `Raw8`, which is `Raw16` when codes nee
 
 ### 3. Pyramids and downsampling
 
-- Uncrush is affine, so averaging codes and re-crushing equals averaging counts and re-crushing up to rounding:
-  `Shrink`/`BuildTilePyramids` and the Viking tile pyramid can stay on codes (no 16-bit inflate), as long as they
-  **round** (not floor) and **copy the chunk**. Downsampled levels then carry the same quanta as level 1.
-- Averaging lowers noise, so lower levels could afford a finer step; James's rule is the same quanta (keeps one
-  set of display parameters per section). Recorded in D2.
+- Inflate, average, re-crush with the same quanta, copy the chunk (D2). Because a code inflates to the middle of its
+  step, this equals rounding the averaged codes to the nearest code; `Shrink` must not truncate codes directly.
+- Averaging lowers noise, so lower levels could afford a finer step; the rule is the same quanta at every level
+  (one set of display parameters per section).
 
 ### 4. Stages
 
@@ -142,28 +142,38 @@ a 16-bit one would display noise.
 
 - Decode with a library that reads L16 and tEXt (ImageSharp is already referenced by WebAnnotation).
 - Crush parameters per section from the volume XML (preferred: one read per section) with the tile chunk as fallback.
-- Texture format by `CrushBits`: R8 (or Alpha8/Color as today) for <= 8, R16 for 9-16. Not by monitor.
-- Window/level in the shader: `out = ((q - min) / (max - min))^gamma`, with min/max/gamma in code units from the
+- Texture format by section (D3): 8-bit for uncrushed sections, 16-bit (R16) of inflated counts for crushed ones.
+- Window/level in the shader: `out = ((x - min) / (max - min))^gamma`, with min/max/gamma in counts from the
   section's contrast hints; live adjustment becomes possible.
+- The local tile cache stores the crushed PNGs; inflation happens at texture upload.
 - HDR is an output choice (10-bit or FP16 swap chain), useful for narrow windows or 16-bit codes; with ~35-40 codes
   per RC section an 8-bit output already has more levels than the data.
 - VikingXML / volume export must carry the crush parameters and contrast hints per section.
 
-## Open decisions (James)
+## Decisions (James, 2026-11-01) and what remains open
 
-- **D1 Float normalization.** The loader today stretches each tile by its own max. For inflated counts: keep that,
-  divide by the dtype max (65535; dim), or divide by a section constant from the crush params (`offset + max_code x
-  step`), which gives every tile of a section the same scale. Recommendation: section constant.
-- **D2 Pyramid rounding and quanta.** Average codes and round half up, same quanta at every level (per the
-  direction above). Confirm rounding.
-- **D3 Existing volumes.** Uncrushed filters keep `Leveled`; crushed filters get no `Leveled`. Mixed volumes (some
-  sections crushed, some not) are possible today; Viking must handle both per section.
-- **D4 Blob input.** Level in memory from the contrast hints (keeps the tuned metric), or retune the metric on
-  counts.
-- **D5 Pictures.** MosaicReport, ExportImages and ExportTrainingData level in memory to 8-bit from the hints, the
-  same mapping Viking uses.
-- **D6 Sequencing.** A crushed volume is unviewable until Viking learns the chunk. Either Viking first, or the
-  pipeline first behind a switch with `Leveled` still produced until Viking ships.
+- **D1 Float normalization: section constant (decided).** Quanta are per section (one step, offset and bits for
+  every tile of a section, set at import), so an inflated tile requested as float is divided by the section constant
+  `offset + max_code x step`. Every tile of a section shares one scale (today each tile is stretched by its own max).
+- **D2 Rounding: none special (decided).** Downsampling averages codes and assembly interpolates them, giving
+  fractional codes. Inflate, average/blend, and re-crush with the same quanta: since a code inflates to the middle of
+  its step, re-crushing the average lands on the nearest code. Same quanta at every level.
+- **D3 Both crushed and uncrushed volumes (decided).** Uncrushed sections: 8-bit textures in Viking, `Leveled` as
+  today. Crushed sections: 16-bit textures of inflated counts, window/level in counts. Quanta (`Crush*`) are stored
+  per section in the volume metadata so images can be sent and inflated anywhere; local file caches (Viking's
+  included) keep the crushed PNGs.
+- **D4 Loader inflates by default (decided), with `inflate=False`** for operations that work on codes directly
+  (assembly, registration): uncrush is affine, so they need not inflate, and saving re-crushes as in D2.
+  **Open:** blob's metric `(median+1)/(var+1)` was tuned on `Leveled` 0-255 input; inflated counts (~0-16,000, a
+  different contrast) are not that input. Either stretch in memory from the section's contrast hints before blob,
+  or retune the metric.
+- **D5 Pictures: open.** Store inflated (leveled) versions for web pages and exports, or build a volume summary page
+  that inflates on the client. A browser `<img>` cannot read PNG text chunks, so client-side inflation means fetching
+  and decoding PNGs in JavaScript (pako/UPNG) onto a canvas; small pre-leveled 8-bit thumbnails are the cheap
+  alternative.
+- **D6 Viewers (decided): Viking and the volume summary page** are the only viewers of a volume. A crushed volume is
+  not viewable until Viking reads the quanta. **Open:** until Viking ships, do crushed imports still produce
+  `Leveled`?
 
 ## Validation
 
