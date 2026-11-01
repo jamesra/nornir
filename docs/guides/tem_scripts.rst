@@ -11,6 +11,24 @@ Run them in this order:
 
 The science for these stages is :doc:`../overview_alignment_theory`. Flags below are the ones in ``nornir-buildmanager/scripts``. ``nornir-build <Pipeline> --help`` lists every flag; the pipeline catalogue (:doc:`../pipelines`) is not this recipe.
 
+Running part of a chain
+-----------------------
+
+Arguments after the volume folder (after the import and volume folders for ``TEMImport`` and ``TEMBuild-import``) are passed to ``nornir-build`` as global options. ``-start-at`` and ``-stop-after`` run part of a ``--then`` chain:
+
+::
+
+   TEMAlign /storage2/RC3 -start-at 2 -stop-after 9
+   TEMAlign /storage2/RC3 -start-at RefineSectionAlignment#2
+
+A step is one of:
+
+* its 1-based number, the ``k`` in ``Name (k/N)`` on the dashboard and in the run header;
+* ``Name#k``, the k-th time pipeline ``Name`` appears in the chain;
+* a bare ``Name``, only when it appears once. In TEMAlign, ``AssembleStosOverlays``, ``RefineSectionAlignment`` and ``CreateVikingXML`` appear twice, so they need ``#1`` or ``#2``; the error lists the choices and their step numbers.
+
+Every step is still parsed and checked before anything runs, so a typo in a skipped step still fails at once. Skipped steps are logged (``Skipping 1/16 CreateBlobFilter (start-at 2)``) and shown on the dashboard as ``CreateBlobFilter (1/16) skipped``. An unknown name, an out-of-range number, or ``-stop-after`` before ``-start-at`` is an error. Without ``--then`` the run is step 1 of 1: ``-start-at 1`` and ``-stop-after 1`` do nothing, anything else is an error.
+
 TEMImport
 ---------
 
