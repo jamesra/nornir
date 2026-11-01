@@ -46,6 +46,24 @@ when $\lVert T(\ell_k) - d \rVert_\infty \le 0.01$ px or after 8 steps ($T$ maps
 
 ## Algorithmic decisions
 
+- **2026-11-01 Translate checks that the mosaic holds together, by image, and applies manual offsets.** Why: on RC3
+  1637 a ~300-tile block sits ~5,500 px from its stage positions in the 2022 layout, and the current code leaves it
+  at the stage positions, with no warning. Scoring overlaps across that block's boundary (NCC at downsample 32): 2022
+  layout median 0.34 (53% of 70 pairs above 0.3), current code 0.03 (none of 32), against ~0.5 inside the blocks. The
+  pairs across the join were not reported as failed: translate measured them at a false peak near the stage offset
+  and kept them, so a check on translate's own grouping missed it. The check therefore works from the images: score
+  every overlap on the final layout, link tiles through overlaps with NCC $\ge 0.5\,\tilde\rho$ ($\tilde\rho$ the
+  section median), and flag two components of $\ge 3$ tiles that touch only through non-matching overlaps ($\ge 2$
+  scored). RC3 0800 holds as one component of 849 tiles plus 2 singles (median 0.75). Every 1637 layout, 2022
+  included, splits into a left block of ~420 tiles and a right block of ~230-280 along a strip of poorly matched
+  tiles near $x \approx 57{,}000$-$60{,}000$ px, so neither join is confirmed by the images (the 2022 mosaic is
+  known to be misregistered).
+  Manual offsets (`*_ManualOffsets.csv`) had been read into `TranslateSettings.known_offsets` and never used; they now
+  enter the spring model with 10x the weight of any measured offset (measured weights are scaled down, since
+  relaxation asserts weights $\le 1$ and normalizes them per node). Rejected: only widening the pair search; padding
+  2 instead of 1 (the 2022 effective value, see f16c0f6 / #195) moved 1637's block 1,800 px of the needed 1,800 in X
+  but 1,100 of 5,200 in Y. Where: `nornir-imageregistration/nornir_imageregistration/translate_report.py`,
+  `arrange_mosaic.py` (`_apply_known_offsets`), `nornir-buildmanager/nornir_buildmanager/operations/registration.py`.
 - **2026-10-31 Mosaic grid refine measures each vertex with the ir-refine-grid estimator.** Why: with the stop rule
   matched, Python still trailed the 2022 C++ grids by 4-33% seam MAE on RC3 (0800, 1061, 1300, 1637). The port had
   replaced the legacy `match_one_pair` with a single-peak phase correlation. The faithful port

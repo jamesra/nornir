@@ -48,6 +48,11 @@ The first registration step is to translate the tiles to an optimal initial layo
 
 The translation of tiles results in a much better alignment, but minor distortions in the tiles still produce imperfections.
 
+When the stage positions of a block of tiles are wrong by more than the pair search covers, translate can attach the block in the wrong place: the pairs across the join either fail, leaving the block placed by its stage offset, or are measured at a false peak. Two things guard against that.
+
+* **Translate report.** Beside each translated mosaic, buildmanager writes ``<transform>_TranslateReport.json``. It lists translate's tile groups, the pairs that could not be measured, the manual offsets it applied, and a join check on the final layout. The check scores every overlap by NCC, links tiles through overlaps whose texture continues, and flags any two blocks of three or more tiles that overlap only where it does not. A flagged section is logged and its transform element gets ``NeedsReview="1"``.
+* **Manual offsets.** ``<transform>_ManualOffsets.csv`` (for example ``Translated_Prune_ManualOffsets.csv``) holds known tile offsets, one per row: ``A B Y X [comment]``, where ``Y X`` is tile B's position minus tile A's in full-resolution pixels. Translate holds each one with ten times the weight of any measured offset, so a single offset across a misjoin reattaches the block. The transform records a checksum of the offsets it was built with: a change rebuilds the mosaic, and a missing file is restored from the report. If the file is gone and the report cannot restore it, the existing mosaic is left in place rather than rebuilt without the offsets.
+
 Grid-based refinement (mosaic)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
