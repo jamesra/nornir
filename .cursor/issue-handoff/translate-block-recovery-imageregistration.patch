@@ -1,0 +1,617 @@
+diff --git a/nornir_imageregistration/__init__.py b/nornir_imageregistration/__init__.py
+index de14020..6b594bb 100644
+--- a/nornir_imageregistration/__init__.py
++++ b/nornir_imageregistration/__init__.py
+@@ -400,6 +400,7 @@ import nornir_imageregistration.volume as volume
+ 
+ import nornir_imageregistration.translate_report as translate_report
+ from nornir_imageregistration.translate_report import TranslateReport
++import nornir_imageregistration.translate_recovery as translate_recovery
+ import nornir_imageregistration.arrange_mosaic as arrange_mosaic
+ from nornir_imageregistration.arrange_mosaic import TranslateTiles2
+ 
+diff --git a/nornir_imageregistration/mosaic_tileset.py b/nornir_imageregistration/mosaic_tileset.py
+index 9da3a10..14aa109 100644
+--- a/nornir_imageregistration/mosaic_tileset.py
++++ b/nornir_imageregistration/mosaic_tileset.py
+@@ -12,7 +12,7 @@ import nornir_shared.tasktimer
+ from nornir_shared import prettyoutput
+ 
+ from nornir_imageregistration import Rectangle, RectLike
+-from nornir_imageregistration.env_flags import env_is_truthy
++from nornir_imageregistration.env_flags import env_flag, env_is_truthy, is_falsey
+ 
+ 
+ def _assemble_serial_gpu_enabled() -> bool:
+@@ -420,7 +420,9 @@ class MosaicTileset(typing.Dict[int, nornir_imageregistration.Tile]):
+         """Translate the tiles into a seamless mosaic.
+ 
+         :param report: If given, filled with how the layout was assembled, including a check of
+-            every join between tile groups on the final positions.
++            every join between tile groups on the final positions. A flagged join is then
++            repaired if a shift of the smaller block makes it hold (translate_recovery), unless
++            NORNIR_TRANSLATE_RECOVER_BLOCKS is falsey.
+         """
+ 
+         # We don't need to sort, but it makes debugging easier, and I suspect ensuring tiles are registered in the same order may increase reproducability
+@@ -429,6 +431,11 @@ class MosaicTileset(typing.Dict[int, nornir_imageregistration.Tile]):
+         if report is not None:
+             report.check_joins(translated, min_overlap=config.min_overlap,
+                                exclude_diagonal_overlaps=config.exclude_diagonal_overlaps)
++            if report.needs_review and not is_falsey(env_flag('NORNIR_TRANSLATE_RECOVER_BLOCKS')):
++                translated, final_report = nornir_imageregistration.translate_recovery.recover_misplaced_blocks(
++                    translated, report, config)
++                # The caller holds this report object; carry the accepted layout's report into it.
++                vars(report).update(vars(final_report))
+         return translated
+ 
+     def RefineLayout(self):
+diff --git a/nornir_imageregistration/translate_recovery.py b/nornir_imageregistration/translate_recovery.py
+new file mode 100644
+index 0000000..f598e6b
+--- /dev/null
++++ b/nornir_imageregistration/translate_recovery.py
+@@ -0,0 +1,367 @@
++"""Move a misplaced block of tiles to where its texture continues, then translate again.
++
++TranslateReport.check_joins finds blocks of tiles that no matching overlap connects to the main
++block: typically a block placed by stage positions that are off by more than translate's pair
++search. This module assembles the tiles of both blocks near their seam at low resolution, finds
++the shift of the secondary block that best matches the main one (masked NCC over every shift
++within a search radius, Padfield 2012), moves the block there, and translates again so the pairs
++across the join are measured at the translate level. The result is kept only if the two blocks
++then hold together.
++
++Host-only: tile images are read from disk and the correlation runs on NumPy/SciPy FFTs.
++"""
++
++from __future__ import annotations
++
++import copy
++import dataclasses
++import math
++from collections.abc import Collection
++from typing import Any
++
++import nornir_pools
++import numpy as np
++import scipy.fft
++import scipy.spatial
++from nornir_shared import prettyoutput
++from numpy.typing import NDArray
++
++import nornir_imageregistration
++
++# Blocks are compared at about this many full-resolution pixels per pixel. RC3 tile texture still
++# separates matching from unrelated overlaps at 32 (median NCC ~0.5 inside blocks, ~0 across a
++# misjoin, measured 2026-10-31).
++TARGET_DOWNSAMPLE = 32.0
++
++# How far to search, in tile widths. RC3 1637's block sat ~1.4 tile widths from its 2022 place.
++SEARCH_RADIUS_TILES = 3.0
++
++# A shift is scored only if the two blocks overlap by at least this fraction of one tile's area,
++# so a corner-to-corner touch cannot win on a handful of pixels.
++MIN_OVERLAP_TILE_FRACTION = 0.5
++
++# A shift is worth trying when it beats the current placement's NCC by at least this much.
++MIN_NCC_GAIN = 0.05
++
++# ...and reaches this fraction of the section's median overlap NCC, both at TARGET_DOWNSAMPLE.
++# Block NCC across a seam runs below single-overlap NCC, the more so when translate has bent the
++# misplaced block: RC3 0800 with a block displaced 5,000 px scored 0.30-0.45 at the true shift
++# over four runs, against a section median of 0.74-0.78. The translate rerun and join check
++# decide acceptance; this only spares reruns that cannot succeed (RC3 1637's best shift: 0.14).
++RECOVERY_NCC_RATIO = 0.33
++
++# ...and at least this block NCC whatever the section median. Near-blank sections (RC3 1025,
++# 1043: median overlap NCC 0.03; their best shifts 0.09-0.21) otherwise pass the relative gate.
++MIN_BLOCK_NCC = 0.25
++
++# Shifts are ranked by Fisher's z, atanh(NCC) * sqrt(n - 3), with n the overlap in pixels divided
++# by this many: neighbouring block-averaged pixels are correlated, so they are not independent
++# samples. Raw NCC let a 0.5-tile overlap at NCC 0.69 beat the real seam (RC3 0516, 1637); the
++# z ranking needs the small overlap to agree far better before it wins.
++PIXELS_PER_SAMPLE = 9.0
++
++# Joins tried per section; each accepted try is a full translate run.
++MAX_ATTEMPTS = 3
++
++
++@dataclasses.dataclass
++class BlockOffsetEstimate:
++    """Best shift of the moving block onto the fixed one, (Y, X) in full-resolution pixels."""
++    offset: tuple[float, float]
++    ncc: float
++    ncc_at_zero: float | None
++    overlap_tiles: float
++    at_search_edge: bool  # the best shift is on the edge of the search window, so the peak may lie outside it
++
++
++@dataclasses.dataclass
++class RecoveryAttempt:
++    fixed_tiles: int
++    moving_tiles: int
++    offset: tuple[float, float] | None
++    ncc: float | None
++    ncc_at_zero: float | None
++    accepted: bool
++    outcome: str
++
++
++def estimate_block_offset(tileset: nornir_imageregistration.mosaic_tileset.MosaicTileset,
++                          fixed_ids: Collection[int], moving_ids: Collection[int],
++                          search_radius_tiles: float | None = None,
++                          target_downsample: float | None = None,
++                          min_overlap_tiles: float | None = None,
++                          min_ncc: float | None = None,
++                          refine: bool = True) -> BlockOffsetEstimate | None:
++    """Find the shift of the moving block that best matches the fixed block where they would overlap.
++
++    Among shifts whose NCC reaches min_ncc, the one with the highest Fisher z wins; when none
++    does, the highest z overall (which the caller will then reject on its NCC). Ranking all shifts
++    by raw NCC let a 0.5-tile overlap win on noise; ranking all by z let a large overlap at NCC
++    0.10 beat the true seam at 0.45 (RC3 0800 with a block displaced 5,000 px).
++
++    Searches at target_downsample, then, if refine, searches again at a quarter of that around the
++    best shift: translate's relaxation moves a large block only slowly, so the closer the start the
++    better (RC3 0800 synthetic: 134 px off at 32 px/pixel left the block 44 px from its place).
++    The refinement supplies only the offset; the scores reported are from the first search.
++    Only tiles within reach of the other block are assembled. Returns None when no shift in range
++    gives the blocks enough overlap to score.
++    """
++    target = TARGET_DOWNSAMPLE if target_downsample is None else target_downsample
++    min_overlap = MIN_OVERLAP_TILE_FRACTION if min_overlap_tiles is None else min_overlap_tiles
++    floor = MIN_BLOCK_NCC if min_ncc is None else min_ncc
++    coarse = _search_block_offset(tileset, fixed_ids, moving_ids,
++                                  SEARCH_RADIUS_TILES if search_radius_tiles is None else search_radius_tiles,
++                                  target, min_overlap, floor, start=(0.0, 0.0))
++    if coarse is None or not refine:
++        return coarse
++
++    tile_size = _tile_size(tileset)
++    fine = _search_block_offset(tileset, fixed_ids, moving_ids, 3 * target / tile_size, target / 4,
++                                min_overlap, floor, start=coarse.offset)
++    if fine is None or fine.at_search_edge:
++        return coarse
++    # Only the position comes from the refinement. Its NCC is lower at the finer scale (RC3 0800:
++    # 0.21 against 0.30 at the same shift) and the thresholds are set at TARGET_DOWNSAMPLE.
++    return dataclasses.replace(coarse, offset=fine.offset)
++
++
++def _tile_size(tileset) -> float:
++    return float(np.median([max(t.FixedBoundingBox.Height, t.FixedBoundingBox.Width) for t in tileset.values()]))
++
++
++def _search_block_offset(tileset, fixed_ids: Collection[int], moving_ids: Collection[int], search_radius_tiles: float,
++                         target_downsample: float, min_overlap_tiles: float, min_ncc: float,
++                         start: tuple[float, float]) -> BlockOffsetEstimate | None:
++    """Masked-NCC search for the moving block's shift within search_radius_tiles of start."""
++    scale = float(tileset.image_to_source_space_scale)
++    factor = max(1, round(target_downsample / scale))
++    pixel = scale * factor  # full-resolution pixels per canvas pixel
++
++    tiles = {int(i): t for i, t in tileset.items()}
++    start_yx = np.asarray(start, dtype=np.float64)
++    corners = {i: np.asarray(t.FixedBoundingBox.ToArray(), dtype=np.float64) for i, t in tiles.items()}
++    for i in moving_ids:
++        if i in corners:
++            corners[i] = corners[i] + np.tile(start_yx, 2)
++
++    tile_size = _tile_size(tileset)
++    radius = search_radius_tiles * tile_size
++    fixed_band = _near(corners, fixed_ids, moving_ids, radius + 1.5 * tile_size)
++    moving_band = _near(corners, moving_ids, fixed_ids, radius + 1.5 * tile_size)
++    if not fixed_band or not moving_band:
++        return None
++
++    boxes = np.array([corners[i] for i in fixed_band + moving_band])  # minY minX maxY maxX
++    origin = boxes[:, :2].min(axis=0)
++    shape = tuple(math.ceil(v) + 1 for v in (boxes[:, 2:].max(axis=0) - origin) / pixel)
++    fixed_image, fixed_mask = _assemble(tiles, corners, fixed_band, origin, pixel, factor, shape)
++    moving_image, moving_mask = _assemble(tiles, corners, moving_band, origin, pixel, factor, shape)
++
++    radius_px = max(1, math.ceil(radius / pixel))
++    tile_area_px = (tile_size / pixel) ** 2
++    ncc, overlap = _masked_ncc(fixed_image, fixed_mask, moving_image, moving_mask, radius_px,
++                               min_overlap=min_overlap_tiles * tile_area_px)
++    if not np.any(np.isfinite(ncc)):
++        return None
++
++    samples = np.maximum(overlap / PIXELS_PER_SAMPLE - 3.0, 1.0)
++    z = np.arctanh(np.clip(ncc, -0.999, 0.999)) * np.sqrt(samples)
++    candidates = np.where(ncc >= min_ncc, z, np.nan)
++    best = np.unravel_index(np.nanargmax(candidates if np.any(np.isfinite(candidates)) else z), z.shape)
++    shift = np.array(best) - radius_px
++    zero = ncc[radius_px, radius_px]
++    return BlockOffsetEstimate(offset=(float(start_yx[0] + shift[0] * pixel), float(start_yx[1] + shift[1] * pixel)),
++                               ncc=float(ncc[best]), ncc_at_zero=float(zero) if np.isfinite(zero) else None,
++                               overlap_tiles=float(overlap[best] / tile_area_px),
++                               at_search_edge=bool(np.max(np.abs(shift)) >= radius_px))
++
++
++def recover_misplaced_blocks(translated: nornir_imageregistration.mosaic_tileset.MosaicTileset,
++                             report: nornir_imageregistration.TranslateReport,
++                             config: nornir_imageregistration.settings.TranslateSettings,
++                             max_attempts: int = MAX_ATTEMPTS):
++    """Try to fit each secondary block onto the main block, translating again for each plausible shift.
++
++    :param translated: Tileset at translate's final positions; report must hold its check_joins result.
++    :return: (tileset, report) for the accepted layout, which is the input when nothing was accepted.
++    """
++    attempts: list[RecoveryAttempt] = []
++    tried: list[set[int]] = []
++    while len(attempts) < max_attempts:
++        moving = _next_block(report, tried)
++        if moving is None:
++            break
++        fixed = set(report.matched_groups[0])
++        tried.append(moving)
++
++        estimate = estimate_block_offset(translated, fixed, moving, min_ncc=_ncc_needed(report.median_ncc))
++        reason = _why_not(estimate, report.median_ncc)
++        if reason is not None:
++            attempts.append(RecoveryAttempt(
++                fixed_tiles=len(fixed), moving_tiles=len(moving),
++                offset=None if estimate is None else estimate.offset,
++                ncc=None if estimate is None else estimate.ncc,
++                ncc_at_zero=None if estimate is None else estimate.ncc_at_zero, accepted=False,
++                outcome=reason))
++            continue
++        assert estimate is not None  # _why_not returns a reason for None
++
++        prettyoutput.Log(f"Moving a block of {len(moving)} tiles by {np.round(estimate.offset).tolist()} px "
++                         f"(block NCC {estimate.ncc:.3f}, was {estimate.ncc_at_zero}) and translating again")
++        candidate_tileset, candidate_report = _translate_with_block_moved(translated, moving, estimate.offset,
++                                                                          report, config)
++        accepted, outcome = _improved(report, candidate_report, fixed, moving)
++        attempts.append(RecoveryAttempt(fixed_tiles=len(fixed), moving_tiles=len(moving), offset=estimate.offset,
++                                        ncc=estimate.ncc, ncc_at_zero=estimate.ncc_at_zero, accepted=accepted,
++                                        outcome=outcome))
++        if accepted:
++            translated, report = candidate_tileset, candidate_report
++
++    report.recovery_attempts = [dataclasses.asdict(a) for a in attempts]
++    return translated, report
++
++
++def _next_block(report, tried: list[set[int]]) -> set[int] | None:
++    """The largest secondary block that is not mostly a block already tried."""
++    for block in report.secondary_blocks:
++        members = set(block)
++        if all(len(members & previous) < 0.5 * len(members) for previous in tried):
++            return members
++    return None
++
++
++def _ncc_needed(section_median_ncc: float | None) -> float:
++    """Block NCC a shift must reach to be tried."""
++    return max(MIN_BLOCK_NCC, RECOVERY_NCC_RATIO * (section_median_ncc or 0.0))
++
++
++def _why_not(estimate: BlockOffsetEstimate | None, section_median_ncc: float | None) -> str | None:
++    """Why a shift is not worth translating again for, or None when it is.
++
++    The block NCC must reach _ncc_needed, beat the current placement, and not sit on the edge of
++    the search window.
++    """
++    if estimate is None:
++        return "no shift within reach overlaps the main block enough to score"
++    if max(abs(estimate.offset[0]), abs(estimate.offset[1])) < 2 * TARGET_DOWNSAMPLE:
++        return "the block already sits where it matches best"
++    if estimate.at_search_edge:
++        return "the best shift is on the edge of the search window"
++    needed = _ncc_needed(section_median_ncc)
++    if estimate.ncc < needed:
++        return f"best block NCC {estimate.ncc:.3f} is below {needed:.3f}"
++    if estimate.ncc_at_zero is not None and estimate.ncc < estimate.ncc_at_zero + MIN_NCC_GAIN:
++        return f"best block NCC {estimate.ncc:.3f} is not better than the current {estimate.ncc_at_zero:.3f}"
++    return None
++
++
++def _translate_with_block_moved(translated, moving: set[int], offset: tuple[float, float], report, config):
++    """Translate again from the current positions with the moving block shifted."""
++    start = copy.deepcopy(translated)
++    for tile_id in moving:
++        start[tile_id].TranslateTargetSpace(np.asarray(offset, dtype=np.float64))
++
++    candidate_report = nornir_imageregistration.TranslateReport()
++    layout, tiles = nornir_imageregistration.TranslateTiles2(start, config=config, report=candidate_report)
++    candidate = layout.ToMosaicTileset(tiles)
++    candidate_report.check_joins(candidate, min_overlap=config.min_overlap,
++                                 exclude_diagonal_overlaps=config.exclude_diagonal_overlaps)
++    # Keep what the first run recorded about manual offsets; the rerun used the same settings.
++    candidate_report.passes += report.passes
++    return candidate, candidate_report
++
++
++def _improved(before, after, fixed: set[int], moving: set[int]) -> tuple[bool, str]:
++    """Accept when the two blocks now hold together and the section did not get worse overall."""
++    joined = max((len(fixed.intersection(g)) + len(moving.intersection(g)) for g in after.matched_groups), default=0)
++    needed = len(fixed) + 0.5 * len(moving)
++    if joined < needed:
++        return False, f"blocks still apart after translating again ({joined} of {len(fixed) + len(moving)} tiles held together)"
++    if before.median_ncc is not None and after.median_ncc is not None and after.median_ncc < before.median_ncc - 0.05:
++        return False, f"section median NCC fell from {before.median_ncc:.3f} to {after.median_ncc:.3f}"
++    return True, f"joined: {joined} of {len(fixed) + len(moving)} tiles hold together"
++
++
++def _near(corners: dict[int, NDArray], ids: Collection[int], others: Collection[int], reach: float) -> list[int]:
++    """Tiles of ids whose centres lie within reach of some tile centre in others.
++
++    :param corners: Tile ID to (minY, minX, maxY, maxX) in full-resolution pixels.
++    """
++    ids = sorted(i for i in ids if i in corners)
++    others = [i for i in others if i in corners]
++    if not ids or not others:
++        return []
++
++    def centre(i: int) -> NDArray:
++        return (corners[i][:2] + corners[i][2:]) / 2
++
++    distance = scipy.spatial.cKDTree(np.array([centre(i) for i in others])).query(
++        np.array([centre(i) for i in ids]), k=1)[0]
++    return [i for i, d in zip(ids, np.atleast_1d(distance)) if d <= reach]
++
++
++def _assemble(tiles: dict[int, Any], corners: dict[int, NDArray], ids: list[int], origin: NDArray, pixel: float,
++              factor: int, shape: tuple[int, ...]) -> tuple[NDArray[np.float32], NDArray[np.bool_]]:
++    """Average the block-reduced tile images onto a canvas at the given corners; tiles are rigid translations."""
++    total = np.zeros(shape, dtype=np.float32)
++    count = np.zeros(shape, dtype=np.float32)
++    pool = nornir_pools.GetGlobalMultithreadingPool()
++    tasks = [(tile_id, pool.add_task(f"Block tile {tile_id}", _reduced_tile, tiles[tile_id].ImagePath, factor))
++             for tile_id in ids]
++    for tile_id, task in tasks:
++        image = task.wait_return()
++        y, x = np.rint((corners[tile_id][:2] - origin) / pixel).astype(int)
++        h = min(image.shape[0], shape[0] - y)
++        w = min(image.shape[1], shape[1] - x)
++        total[y:y + h, x:x + w] += image[:h, :w]
++        count[y:y + h, x:x + w] += 1
++    mask = count > 0
++    total[mask] /= count[mask]
++    return total, mask
++
++
++def _reduced_tile(path: str, factor: int) -> NDArray[np.float32]:
++    image = nornir_imageregistration.LoadImage(path, dtype=np.float32, backend='numpy')
++    height, width = image.shape[0] // factor, image.shape[1] // factor
++    return image[:height * factor, :width * factor].reshape(height, factor, width, factor).mean(
++        axis=(1, 3), dtype=np.float32)
++
++
++def _masked_ncc(fixed: NDArray, fixed_mask: NDArray, moving: NDArray, moving_mask: NDArray, radius: int,
++                min_overlap: float) -> tuple[NDArray[np.floating], NDArray[np.floating]]:
++    """NCC of fixed against moving shifted by (dy, dx) for |dy|, |dx| <= radius, over the masks' overlap.
++
++    Padfield (2012), "Masked object registration in the Fourier domain", IEEE TIP 21(5). Element
++    [radius + dy, radius + dx] scores moving(x - (dy, dx)) against fixed(x). Shifts whose overlap is
++    under min_overlap pixels are NaN.
++    """
++    shape = tuple(s + radius + 1 for s in fixed.shape)
++    fm = fixed_mask.astype(np.float64)
++    mm = moving_mask.astype(np.float64)
++    f = np.where(fixed_mask, fixed, 0).astype(np.float64)
++    m = np.where(moving_mask, moving, 0).astype(np.float64)
++
++    def spectrum(a):
++        return scipy.fft.rfft2(a, s=shape, workers=-1)
++
++    def correlate(a_spec, b_spec):
++        full = scipy.fft.irfft2(a_spec * np.conj(b_spec), s=shape, workers=-1)
++        rows = np.r_[shape[0] - radius:shape[0], 0:radius + 1]
++        cols = np.r_[shape[1] - radius:shape[1], 0:radius + 1]
++        return full[np.ix_(rows, cols)]
++
++    F_fm, F_mm = spectrum(fm), spectrum(mm)
++    F_f, F_m = spectrum(f), spectrum(m)
++    overlap = correlate(F_fm, F_mm)
++    sum_f = correlate(F_f, F_mm)
++    sum_m = correlate(F_fm, F_m)
++    sum_ff = correlate(spectrum(f * f), F_mm)
++    sum_mm = correlate(F_fm, spectrum(m * m))
++    sum_fm = correlate(F_f, F_m)
++
++    with np.errstate(divide='ignore', invalid='ignore'):
++        n = np.where(overlap >= max(min_overlap, 1.0), overlap, np.nan)
++        numerator = sum_fm - sum_f * sum_m / n
++        variance = (sum_ff - sum_f ** 2 / n) * (sum_mm - sum_m ** 2 / n)
++        ncc = np.where(variance > 1e-9 * n ** 2, numerator / np.sqrt(np.abs(variance)), np.nan)
++    return ncc, overlap
+diff --git a/nornir_imageregistration/translate_report.py b/nornir_imageregistration/translate_report.py
+index e40e353..f204404 100644
+--- a/nornir_imageregistration/translate_report.py
++++ b/nornir_imageregistration/translate_report.py
+@@ -93,6 +93,7 @@ class TranslateReport:
+     median_ncc: float | None = None
+     matched_groups: list[list[int]] = dataclasses.field(default_factory=list)
+     joins: list[JoinCheck] = dataclasses.field(default_factory=list)
++    recovery_attempts: list[dict[str, Any]] = dataclasses.field(default_factory=list)
+     review_reasons: list[str] = dataclasses.field(default_factory=list)
+ 
+     @property
+diff --git a/tests/test_translate_recovery.py b/tests/test_translate_recovery.py
+new file mode 100644
+index 0000000..37991ec
+--- /dev/null
++++ b/tests/test_translate_recovery.py
+@@ -0,0 +1,178 @@
++"""Recovering a misplaced block of tiles after translate (translate_recovery).
++
++Tiles are cut from one smooth texture so overlaps really match. Two columns of a 6x6 grid are
++displaced as a block, as a stage error would; recovery must find the shift that puts them back
++and keep the result only when the mosaic then holds together.
++"""
++
++from __future__ import annotations
++
++import os
++import shutil
++import tempfile
++import unittest
++from unittest import mock
++
++import numpy as np
++import scipy.ndimage
++from PIL import Image
++
++import nornir_imageregistration
++import nornir_imageregistration.transforms.factory as tfactory
++from nornir_imageregistration import translate_recovery
++from nornir_imageregistration.translate_recovery import (
++    _masked_ncc,
++    estimate_block_offset,
++)
++
++_TILE = 128
++_STEP = 96  # 32 px (25%) overlap between neighbours
++_GRID = 6
++_MOVED_COLUMNS = (4, 5)  # 12 tiles: a secondary block (MIN_SECONDARY_BLOCK_TILES is 10)
++
++
++def _true_position(tile_id: int) -> np.ndarray:
++    row, col = divmod(tile_id, _GRID)
++    return np.array([row * _STEP, col * _STEP], dtype=np.float64)
++
++
++def _settings():
++    return nornir_imageregistration.settings.TranslateSettings(
++        min_overlap=0.05, max_relax_iterations=50, max_translate_iterations=2,
++        feature_score_threshold=None, use_feature_score=False)
++
++
++class TestMaskedNcc(unittest.TestCase):
++
++    def test_the_peak_is_the_shift_that_moves_the_moving_image_onto_the_fixed_one(self):
++        texture = scipy.ndimage.gaussian_filter(np.random.default_rng(3).random((96, 96)), 1.5)
++        fixed_mask = np.zeros_like(texture, dtype=bool)
++        fixed_mask[:, :60] = True
++        # The moving block is the right part of the texture, displaced by (7, -5).
++        shifted = np.roll(texture, (7, -5), axis=(0, 1))
++        moving_mask = np.zeros_like(texture, dtype=bool)
++        moving_mask[10:80, 40:85] = True
++        ncc, _ = _masked_ncc(texture, fixed_mask, shifted, moving_mask, radius=12, min_overlap=200)
++        best = np.array(np.unravel_index(np.nanargmax(ncc), ncc.shape)) - 12
++        np.testing.assert_array_equal([-7, 5], best)
++        self.assertGreater(np.nanmax(ncc), 0.99)
++
++
++class _GridTiles(unittest.TestCase):
++
++    def setUp(self):
++        self.tmpdir = tempfile.mkdtemp(prefix='test_translate_recovery_')
++        self.addCleanup(shutil.rmtree, self.tmpdir, ignore_errors=True)
++        size = _STEP * (_GRID - 1) + _TILE
++        texture = scipy.ndimage.gaussian_filter(np.random.default_rng(11).random((size, size)), 3.0)
++        texture = (texture - texture.min()) / (texture.max() - texture.min())
++        self.paths = []
++        for tile_id in range(_GRID * _GRID):
++            y, x = _true_position(tile_id).astype(int)
++            path = os.path.join(self.tmpdir, f'Tile{tile_id:05d}.png')
++            Image.fromarray((texture[y:y + _TILE, x:x + _TILE] * 255).astype(np.uint8)).save(path)
++            self.paths.append(path)
++        # Compare blocks at 4 px per pixel instead of 32: these tiles are 128 px.
++        patcher = mock.patch.object(translate_recovery, 'TARGET_DOWNSAMPLE', 4.0)
++        patcher.start()
++        self.addCleanup(patcher.stop)
++
++    @staticmethod
++    def moved(tile_id: int) -> bool:
++        return tile_id % _GRID in _MOVED_COLUMNS
++
++    def tileset(self, displacement):
++        shape = np.array((_TILE, _TILE))
++        transforms = [tfactory.CreateRigidTransform(
++            target_image_shape=shape, source_image_shape=shape, rangle=0,
++            warped_offset=_true_position(i) + (np.asarray(displacement) if self.moved(i) else 0))
++            for i in range(_GRID * _GRID)]
++        return nornir_imageregistration.mosaic_tileset.Create(transforms=transforms, imagepaths=self.paths,
++                                                              image_to_source_space_scale=1.0)
++
++    @staticmethod
++    def relative_error(tileset) -> float:
++        origin = np.asarray(tileset[0].FixedBoundingBox.BottomLeft)
++        return max(float(np.max(np.abs(np.asarray(t.FixedBoundingBox.BottomLeft) - origin - _true_position(i))))
++                   for i, t in tileset.items())
++
++
++class TestEstimateBlockOffset(_GridTiles):
++
++    def test_a_displaced_block_is_shifted_back(self):
++        tileset = self.tileset((80, -40))
++        moving = {i for i in range(_GRID * _GRID) if self.moved(i)}
++        estimate = estimate_block_offset(tileset, set(range(_GRID * _GRID)) - moving, moving)
++        assert estimate is not None
++        np.testing.assert_allclose([-80, 40], estimate.offset, atol=2)
++        self.assertGreater(estimate.ncc, 0.9)
++        self.assertFalse(estimate.at_search_edge)
++
++    def test_a_block_in_place_needs_no_shift(self):
++        tileset = self.tileset((0, 0))
++        moving = {i for i in range(_GRID * _GRID) if self.moved(i)}
++        estimate = estimate_block_offset(tileset, set(range(_GRID * _GRID)) - moving, moving)
++        assert estimate is not None
++        np.testing.assert_allclose([0, 0], estimate.offset, atol=2)
++
++
++class TestRecoverMisplacedBlocks(_GridTiles):
++    """Recovery from a layout whose block is intact but misplaced, as translate leaves it after a
++    stage error (RC3 0800 with a third of its tiles moved 5,000 px: block returned and joined)."""
++
++    # Translate itself lands a few px from the true layout on these small tiles.
++    TOLERANCE = 6.0
++
++    def misplaced(self):
++        tileset = self.tileset((200, 60))
++        report = nornir_imageregistration.TranslateReport(groups=[list(range(_GRID * _GRID))])
++        report.check_joins(tileset, min_overlap=0.05)
++        return tileset, report
++
++    def test_the_check_sees_the_block(self):
++        _, report = self.misplaced()
++        self.assertEqual([12], [len(b) for b in report.secondary_blocks])
++
++    def test_the_block_is_put_back_and_joined(self):
++        tileset, report = self.misplaced()
++        recovered, final = translate_recovery.recover_misplaced_blocks(tileset, report, _settings())
++        self.assertLess(self.relative_error(recovered), self.TOLERANCE)
++        self.assertEqual([True], [a['accepted'] for a in final.recovery_attempts], final.recovery_attempts)
++        self.assertEqual([], final.secondary_blocks)
++
++    def test_a_rejected_attempt_keeps_the_original_layout(self):
++        tileset, report = self.misplaced()
++        with mock.patch.object(translate_recovery, '_improved', return_value=(False, 'rejected for the test')):
++            recovered, final = translate_recovery.recover_misplaced_blocks(tileset, report, _settings())
++        self.assertIs(tileset, recovered)
++        self.assertEqual(['rejected for the test'], [a['outcome'] for a in final.recovery_attempts])
++
++
++class TestRecoveryWiring(_GridTiles):
++    """ArrangeTilesWithTranslate runs recovery only when the join check flags the section."""
++
++    def run_with(self, needs_review: bool, env: dict[str, str] | None = None):
++        def check(report, *args, **kwargs):
++            report.review_reasons = ['flagged for the test'] if needs_review else []
++
++        report = nornir_imageregistration.TranslateReport()
++        with mock.patch.object(nornir_imageregistration.TranslateReport, 'check_joins', autospec=True,
++                               side_effect=check), \
++                mock.patch.object(translate_recovery, 'recover_misplaced_blocks',
++                                  side_effect=lambda t, r, c: (t, r)) as recover, \
++                mock.patch.dict(os.environ, env or {}):
++            self.tileset((0, 0)).ArrangeTilesWithTranslate(_settings(), report=report)
++        return recover
++
++    def test_a_flagged_section_is_recovered(self):
++        self.run_with(needs_review=True).assert_called_once()
++
++    def test_a_section_that_holds_together_is_left_alone(self):
++        self.run_with(needs_review=False).assert_not_called()
++
++    def test_recovery_can_be_turned_off(self):
++        self.run_with(needs_review=True, env={'NORNIR_TRANSLATE_RECOVER_BLOCKS': '0'}).assert_not_called()
++
++
++if __name__ == '__main__':
++    unittest.main()

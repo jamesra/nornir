@@ -46,6 +46,16 @@ when $\lVert T(\ell_k) - d \rVert_\infty \le 0.01$ px or after 8 steps ($T$ maps
 
 ## Algorithmic decisions
 
+- **2026-11-01 Translate does not move misplaced blocks automatically; it flags them.** Tried: for each block of
+  $\ge 10$ tiles that no matching overlap connects to the main block, assemble both near the seam at ~32 px/pixel,
+  score every shift within 3 tile widths by masked NCC (Padfield 2012), rank by Fisher z among shifts with NCC above
+  a bar, refine, move, translate again, accept only if the blocks then hold together. On RC3 0800 with a displaced
+  block it recovered the shift whenever the block kept a clean seam (86-427 tiles, 3,000-6,000 px, back within
+  16 px; full pipeline accepted twice, moved tiles 21-44 px from reference against 7 px run-to-run noise), but missed
+  when translate had bent the block (true shift NCC 0.25, 142 px internal spread), and on RC3 0633 accepted a move
+  around a blank resin hole that looks wrong (smooth gradients give high NCC without alignment). Rejected as unsafe to
+  run unattended; the report now flags such blocks even when no overlap joins them directly, and the fix is a manual
+  offset. Details and code: `.cursor/issue-handoff/translate-block-recovery.md`.
 - **2026-11-01 StosBrute reseeds the noise generator before each section pair.** Why: the masked-area / padding
   noise came from one process-wide generator, so a pair's result depended on the pairs before it. On a 7-section IDOC
   test volume (6 pairs, Blob at downsample 16, NumPy) two runs of the unchanged code gave different transforms for 5 of
@@ -195,6 +205,9 @@ when $\lVert T(\ell_k) - d \rVert_\infty \le 0.01$ px or after 8 steps ($T$ maps
   246-254. doi:10.2307/2332343 (verify). Used for: the planned variance-stabilised crush ($2\sqrt{N + 3/8}$).
 - Donoho, D. L., & Johnstone, I. M. (1994). Ideal spatial adaptation by wavelet shrinkage. *Biometrika* 81(3),
   425-455. doi:10.1093/biomet/81.3.425 (verify). Used for: the MAD/0.6745 noise estimate on the finest wavelet subband.
+- Padfield, D. (2012). Masked object registration in the Fourier domain. *IEEE Transactions on Image Processing*
+  21(5), 2706-2718. doi:10.1109/TIP.2011.2181402 (verify). Used for: masked NCC over every shift in the set-aside
+  translate block recovery (`.cursor/issue-handoff/translate-block-recovery.md`).
 
 ## Open questions for a paper
 

@@ -1,0 +1,48 @@
+diff --git a/nornir_buildmanager/operations/registration.py b/nornir_buildmanager/operations/registration.py
+index 9b2c4d8..566bde1 100644
+--- a/nornir_buildmanager/operations/registration.py
++++ b/nornir_buildmanager/operations/registration.py
+@@ -259,6 +259,19 @@ def _SaveTranslateReport(report, report_full_path: str, report_path: str, transf
+                                                                              Path=report_path)
+     transform_parent_node.UpdateOrAddChildByAttrib(report_node, 'Name')
+ 
++    recovered = [a for a in report.recovery_attempts if a['accepted']]
++    for attempt in report.recovery_attempts:
++        message = (f"{output_transform_node.FullPath}: block of {attempt['moving_tiles']} tiles "
++                   f"{'moved by ' + str([round(v) for v in attempt['offset']]) + ' px' if attempt['accepted'] else 'left in place'}"
++                   f": {attempt['outcome']}")
++        prettyoutput.Log(message)
++        if Logger is not None:
++            (Logger.warning if attempt['accepted'] else Logger.info)(message)
++    if recovered:
++        output_transform_node.attrib['BlocksRecovered'] = str(len(recovered))
++    elif 'BlocksRecovered' in output_transform_node.attrib:
++        del output_transform_node.attrib['BlocksRecovered']
++
+     if report.needs_review:
+         output_transform_node.attrib['NeedsReview'] = '1'
+         for reason in report.review_reasons:
+diff --git a/tests/operations/test_translate_manual_offsets.py b/tests/operations/test_translate_manual_offsets.py
+index fd6e6dc..ab8e84b 100644
+--- a/tests/operations/test_translate_manual_offsets.py
++++ b/tests/operations/test_translate_manual_offsets.py
+@@ -91,6 +91,19 @@ class TestSaveTranslateReport(_TempDir):
+             self.assertTrue(json.load(f)['needs_review'])
+         self.assertEqual(1, len(parent.children))
+ 
++    def test_a_recovered_block_is_logged_and_marked(self):
++        report = TranslateReport(recovery_attempts=[
++            {'moving_tiles': 257, 'offset': (-5024.0, 1632.0), 'accepted': True, 'outcome': 'joined'},
++            {'moving_tiles': 12, 'offset': None, 'accepted': False, 'outcome': 'no shift within reach'}])
++        node = _FakeTransformNode()
++        with mock.patch.object(registration.prettyoutput, 'Log') as logged:
++            registration._SaveTranslateReport(report, self.report_path, os.path.basename(self.report_path),
++                                              _FakeParentNode(), node, None)
++        self.assertEqual('1', node.attrib['BlocksRecovered'])
++        messages = ' '.join(str(c) for c in logged.call_args_list)
++        self.assertIn('block of 257 tiles moved by [-5024, 1632] px', messages)
++        self.assertIn('block of 12 tiles left in place', messages)
++
+     def test_a_clean_report_clears_an_old_review_mark(self):
+         node = _FakeTransformNode({'NeedsReview': '1'})
+         registration._SaveTranslateReport(TranslateReport(), self.report_path, os.path.basename(self.report_path),
