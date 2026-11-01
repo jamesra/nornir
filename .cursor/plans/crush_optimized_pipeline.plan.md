@@ -241,6 +241,9 @@ How the gains are computed (whichever mosaic is used):
   a small regularised per-tile deviation, so tiles with few or poor overlaps (resin, section edge, misplaced blocks)
   take their gain from capture time. Capture is row/snake order, so time drift looks like a spatial gradient; overlaps
   (same tissue on both sides) are what separate it from content.
+- Magnitude (Build2 RC3 scan of idoc tile means, 1,698 RC3 sections, 2026-11-01): the first 10 tiles of a section
+  are up to 1.75x brighter than the last 10 (0360 1.75x; 0516/0886/0891 1.35-1.58x; 0800 1.19, 1637 1.17,
+  1300 1.08). Drift is large, so the temporal prior and the late-stretch anchor are needed, not optional.
 - First step: measure the drift on a recent raw IDOC import (not the leveled RC3 tiles) to size it; a few percent
   needs only the guards above, large or within-tile variation would change the design.
 
