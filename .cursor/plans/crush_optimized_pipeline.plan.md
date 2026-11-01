@@ -9,7 +9,7 @@ todos:
     content: "Retune the blob metric for inflated counts; compare on crushed and uncrushed sections"
     status: pending
   - id: brightness-drift
-    content: "Per-tile gain at import from stage-position overlaps (robust least squares, texture threshold, median gain 1), stored in the tile's nornir_crush chunk, applied by the loader's inflate and by Viking; first measure drift on a raw IDOC import"
+    content: "TileGains pipeline on any .mosaic (robust least squares over overlaps, texture threshold, median gain 1); auto-run after import on Stage.mosaic, rerun after alignment; gain in each tile's nornir_crush chunk (rewritten without re-encode), source/checksum on the filter for staleness; applied by the loader's inflate and by Viking. First measure drift on a raw IDOC import"
     status: pending
   - id: loader
     content: "nornir_imageregistration: one crush check in the loader (LoadImage / _load_image_by_extension_once); inflate to uint16 counts; route the raw Pillow readers through it or make them crush-aware"
@@ -189,10 +189,25 @@ Measured noise on these detectors is not Poisson-like either (RPC3: ~10x below t
 spread). It would also break the per-section quanta (D1), leave assembled images without a single quanta to re-crush
 with, and fold an adjustable intensity correction into an invertible storage encoding.
 
-Decided (James, 2026-11-01): keep per-section quanta for storage and correct brightness with a **gain per tile**,
-computed **at import** from the stage-position overlaps.
+Decided (James, 2026-11-01): keep per-section quanta for storage and correct brightness with a **gain per tile**.
+Gain is its **own pipeline that runs against any `.mosaic`**; it **runs automatically after import** (on
+`Stage.mosaic`) and can be **rerun after alignment** (on the translated or grid mosaic), so sections that moved during
+capture get gains from correct overlaps.
 
-- Import already reads every tile (histogram, noise, crush), so the overlap statistics cost almost nothing extra.
+- Pipeline (working name `TileGains`): inputs a channel's filter and a mosaic transform; outputs per-tile gains.
+  ImportIDoc/ImportMRC call it on `Stage.mosaic` at the end of import; rerun by hand, or automatically when the
+  translate report flags the section, with `-InputTransform Translated_*` or `Grid_*`.
+- Rerunning rewrites each tile's `gain` in its `nornir_crush` chunk by copying the PNG's other chunks byte for byte
+  (no pixel re-encode), so a rerun costs file I/O only.
+- Provenance and staleness: the filter records the mosaic the gains came from (its checksum) and a checksum of the
+  gain set (e.g. `TileGainsSource`, `TileGainsChecksum`). Anything built with other gains (assembled images, pyramid
+  levels that copied the chunk) records the checksum it used and is rebuilt when it no longer matches, as translate
+  does for manual offsets.
+
+How the gains are computed (whichever mosaic is used):
+
+- After import the tiles are already in the OS cache (histogram, noise and crush read them), so the first run is
+  cheap; reruns can use a downsampled pyramid level.
 - A gain is a ratio of robust strip statistics (median or trimmed mean over the nominal overlap), which tolerates the
   usual few-hundred-pixel stage error; one least-squares solve per section over all overlaps averages the rest.
 - Guards: robust solve (iteratively reweighted or trimmed) that drops pairs whose ratio disagrees with their
@@ -203,8 +218,6 @@ computed **at import** from the stage-position overlaps.
   original data. `inflate=False` callers (registration) are unaffected (NCC and phase correlation ignore scale).
   Assembled images are built from gain-corrected counts and re-crushed with gain 1; pyramid levels copy the tile's
   chunk. Uncrushed tiles could carry a gain-only chunk so drift correction covers them too.
-- Optional later step: if the translate report shows large stage errors, recompute gains from translated positions at
-  a downsampled pyramid level.
 - First step: measure the drift on a recent raw IDOC import (not the leveled RC3 tiles) to size it; a few percent
   needs only the guards above, large or within-tile variation would change the design.
 
