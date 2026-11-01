@@ -46,6 +46,16 @@ when $\lVert T(\ell_k) - d \rVert_\infty \le 0.01$ px or after 8 steps ($T$ maps
 
 ## Algorithmic decisions
 
+- **2026-11-01 StosBrute registers section pairs in parallel, each pair with its own noise seed.** Why: one pair at
+  a time left the CPU ~99% idle and the GPU ~4% busy (srv, 18.9 s median per pair), and the masked-area / padding noise
+  came from one process-wide generator, so a pair's result depended on the pairs before it. On a 7-section IDOC test
+  volume (6 pairs, Blob at downsample 16, NumPy) two runs of the unchanged code gave different transforms for 5 of 6
+  pairs, by up to 56 degrees on a weak pair (the threaded angle sweep draws noise in thread order). Now every pair
+  reseeds before registering; pairs in worker processes also score single-threaded, and gave byte-identical .stos
+  files with 2, 3 and 4 workers and under a CuPy main process; the serial path (`-Workers 1`, threaded sweep) still
+  varied on 1 of 6 pairs (0.6 degrees). Worker processes are NumPy only: `nornir_imageregistration` forces pool
+  children to NumPy and refuses CuPy there. Where: `nornir-buildmanager/nornir_buildmanager/operations/stos_brute_pairs.py`,
+  `block.py` (`StosBruteAll`).
 - **2026-11-01 Translate checks that the mosaic holds together, by image, and applies manual offsets.** Why: on RC3
   1637 a ~300-tile block sits ~5,500 px from its stage positions in the 2022 layout, and the current code leaves it
   at the stage positions, with no warning. Scoring overlaps across that block's boundary (NCC at downsample 32): 2022
