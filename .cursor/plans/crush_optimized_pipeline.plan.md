@@ -197,8 +197,13 @@ capture get gains from correct overlaps.
 - A gain function (in `nornir_imageregistration`, with a buildmanager operation wrapping it) takes a channel's filter
   and a mosaic transform and writes per-tile gains. ImportIDoc/ImportMRC call the **function directly as a step in
   their own pipeline definitions** (on `Stage.mosaic`); they do not invoke the gain pipeline. A separate pipeline
-  (working name `TileGains`) exposes the same function for any `.mosaic`, rerun by hand (or, open question,
-  automatically when the translate report flags the section) with `-InputTransform Translated_*` or `Grid_*`.
+  (working name `TileGains`) exposes the same function for any `.mosaic` (`-InputTransform Translated_*`, `Grid_*`).
+- **Recalculated after every translate (James, 2026-11-01), provided it is fast.** The translate pipeline definitions
+  (and TEMBuild) call the gain function on the new translated mosaic. Read tiles at a downsampled pyramid level so it
+  costs seconds per section next to translate's minutes; measure before wiring it in. Rewrite chunks only when some
+  tile's gain changes by more than a tolerance (~0.5%), so an unchanged section does not rewrite every tile and
+  pyramid chunk and mark downstream assemblies stale; when gains do change, the tiles' pyramid levels get the same
+  chunk update.
 - **Chunk contents (James):** the `nornir_crush` chunk stores the quanta (`step`), the `gain`, and the **effective
   quanta** `e = step / gain`. A client multiplies codes by `e` to get a gain-corrected inflated image.
   Exactly: corrected = (q x step + step/2 + offset) / gain = q x e + b, with b = (step/2 + offset) / gain; offset is 0
