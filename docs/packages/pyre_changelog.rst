@@ -12,6 +12,11 @@ Older installers remain on the repository
 `Releases page <https://github.com/jamesra/nornir/releases>`_
 (look for tags ``pyre-*``).
 
+1.8.4
+-----
+
+* Spacebar registration on damaged or heavily warped grids no longer freezes the UI for several seconds after results apply. When control points move but stay in the same mesh neighborhoods, Pyre reuses the existing triangulation instead of rebuilding it from scratch.
+
 1.8.3
 -----
 
