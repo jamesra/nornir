@@ -67,7 +67,6 @@ Run this after TEMBuild. A bad brute-force pair is fixed in Pyre (:doc:`pyre_use
 
 * ``CreateBlobFilter -Channels TEM -InputFilter Leveled -Levels 16,32,64 -OutputFilter Blob -Radius 9 -Median 7 -Max 3`` — a texture image so downsampled brute force still sees features.
 * ``AlignSections -NumAdjacentSections 1 -Filters Blob -UseMasks -Downsample 64 -Channels TEM`` — first slice-to-slice placement, one neighbor each way, and a potential registration chain.
-  Independent section pairs register concurrently. ``-Workers N`` sets how many: ``0`` (default) is automatic (NumPy backend: all cores but two, capped by ``MAX_PYTHON_THREADS``; CuPy backend: 1, serial on the GPU), ``1`` registers one pair at a time on the active backend, and ``N > 1`` runs N NumPy worker processes (also under ``-computational_library cupy``; CuPy cannot run in worker processes). Results from worker processes do not depend on the worker count.
 * ``AssembleStosOverlays -StosGroup StosBrute -Downsample 64 -StosMap PotentialRegistrationChain`` — overlay pictures of those pairs.
 * ``SelectBestRegistrationChain -StosGroup StosBrute -Downsample 64 -InputStosMap PotentialRegistrationChain -OutputStosMap FinalStosMap`` — choose the chain and write ``FinalStosMap``.
 * ``RefineSectionAlignment -InputGroup StosBrute -InputDownsample 64 -OutputGroup Grid -OutputDownsample 32 -Filter Leveled`` — first grid refine, from the brute result at 64 to a grid at 32.
