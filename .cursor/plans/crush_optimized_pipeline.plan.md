@@ -231,6 +231,16 @@ How the gains are computed (whichever mosaic is used):
   data. `inflate=False` callers (registration) are unaffected (NCC and phase correlation ignore scale).
   Assembled images are built from gain-corrected counts and re-crushed with gain 1; pyramid levels copy the tile's
   chunk. Uncrushed tiles could carry a gain-only chunk so drift correction covers them too.
+- Edge shading (vignetting) must be in the solve: one constant per overlap direction (left-right, top-bottom).
+  Without it the solve reads shading as gain and compounds it along rows and columns (RC3 0800 trial: gains 0.1-80).
+- Anchor (James, 2026-11-01: the earliest tiles are the brightest, the latest the most stable). The global solve
+  fixes only relative gains; the anchor sets which tiles keep their brightness. Anchor on the stable late stretch
+  (e.g. median of the last half of tiles in capture order, or the plateau the capture-order curve shows) rather than
+  the overall median, which early bright tiles pull up.
+- Temporal prior: if the drift is mostly a function of capture time, fit a smooth gain curve over capture order plus
+  a small regularised per-tile deviation, so tiles with few or poor overlaps (resin, section edge, misplaced blocks)
+  take their gain from capture time. Capture is row/snake order, so time drift looks like a spatial gradient; overlaps
+  (same tissue on both sides) are what separate it from content.
 - First step: measure the drift on a recent raw IDOC import (not the leveled RC3 tiles) to size it; a few percent
   needs only the guards above, large or within-tile variation would change the design.
 
