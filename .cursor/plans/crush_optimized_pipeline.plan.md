@@ -244,6 +244,17 @@ How the gains are computed (whichever mosaic is used):
 - Magnitude (Build2 RC3 scan of idoc tile means, 1,698 RC3 sections, 2026-11-01): the first 10 tiles of a section
   are up to 1.75x brighter than the last 10 (0360 1.75x; 0516/0886/0891 1.35-1.58x; 0800 1.19, 1637 1.17,
   1300 1.08). Drift is large, so the temporal prior and the late-stretch anchor are needed, not optional.
+- **RC3 test (Build2, 2026-11-01)**, 6 sections crush-imported from raw (k 2.5, 8-bit codes, step 218-469 counts;
+  176.7 GB of TIFs became 25.7 GB, 14.6%; storage3 needed an encrypted SMB mount (`seal`)). Gains at downsample 8
+  match level 1 (0800: p5-p95 0.876-1.191 vs 0.875-1.194) at ~16 s/section; pair residual MAD 0.07-0.36%, so
+  per-tile gains are well determined. Spread and how much a smooth curve over capture order explains:
+  0800 9.3% / 84% (rises to the last tile, 0.88-1.22); 1300 2.3% / 88%; 0891 8.0% / 85%; 0516 11.6% / 52% (first
+  tenth +23%); 1637 2.3% / 35%; 0360 19.8% / 31% (large non-temporal variation, check for resin/edge tiles).
+  Consequences: the drift often does not settle, so there is no stable late stretch to anchor on; anchor on the
+  section median and leave the absolute level to display contrast (to confirm with James). Per-tile gains from
+  overlaps are primary; the capture-time curve is only a fallback for tiles with few or poor overlaps.
+  `BuildImagePyramids -Filters Raw8` built no levels for the crushed filter (Build2 wrote level 8 by hand): the
+  pyramid item above is required. Data: storage2 `claude-transfer/rc3-gain-drift/`.
 - First step: measure the drift on a recent raw IDOC import (not the leveled RC3 tiles) to size it; a few percent
   needs only the guards above, large or within-tile variation would change the design.
 
