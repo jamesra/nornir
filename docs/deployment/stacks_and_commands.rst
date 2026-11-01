@@ -21,10 +21,14 @@ Stacks
 ------
 
 Stack keys are kebab-case and are also the ``Run/<stack>/`` folder name and the compose project
-name. The registries are ``nornir-docker/deploy/stacks.psd1`` and
-``<VIKING_REPO_ROOT_HOST>/deploy/stacks.psd1`` (Viking stacks appear only when
-``VIKING_REPO_ROOT_HOST`` is set in ``host.env``). ``stack.ps1 list`` prints both, with a
-``ThisHost`` column for the stacks in ``NORNIR_DOCKER_HOST_STACKS``.
+name. The registries are ``stacks.psd1`` in the `connectomes-deploy
+<https://github.com/jamesra/connectomes-deploy>`_ checkout (``nornir-build``,
+``nornir-dashboard``) plus the source-repo registries named by ``STACK_EXTRA_REGISTRIES`` in
+``host.env``. Its default loads ``<VIKING_REPO_ROOT_HOST>/deploy/stacks.psd1`` (the ``viking-*``
+stacks) and ``<NORNIR_REPO_ROOT_HOST>/nornir-docker/dev-stacks.psd1`` (``nornir-dev``,
+``nornir-cursor-worker``); a registry is skipped when its checkout variable is not set, and
+``none`` loads only connectomes-deploy's own. ``stack.ps1 list`` prints the stacks of every loaded
+registry, with a ``ThisHost`` column for the stacks in ``NORNIR_DOCKER_HOST_STACKS``.
 
 .. list-table::
    :header-rows: 1
@@ -74,7 +78,8 @@ name. The registries are ``nornir-docker/deploy/stacks.psd1`` and
    * - ``viking-segmentation``
      - compose
      - compute
-     - SAM2 segmentation gRPC servers (GPU); profile ``models`` adds v3, v4, and sem-v1
+     - SAM2 segmentation gRPC servers (GPU): the default model, plus one server per row of
+       ``Run/viking-segmentation/models.json`` (``model`` action; no compose profiles)
    * - ``viking-iis``
      - iis
      - iis
@@ -140,6 +145,14 @@ Stack actions
    * - ``deploy``
      - iis only: runs the Viking IIS deploy script (``up`` and ``rebuild`` are aliases)
      - not supported
+   * - ``model``
+     - Stacks with a models table (``viking-segmentation``): ``model <prefix> <file>`` adds or
+       changes a row of ``Run/<stack>/models.json`` and starts that server, ``model <prefix>``
+       recreates it, ``model`` alone recreates every row, ``model -Remove <prefix>`` deletes it.
+       Writes ``Run/<stack>/compose.generated.yaml``, merged after the compose files on every
+       later action. With ``SEGMENTATION_CERT_NAMES_DIR`` set, a changed name list restarts
+       ``viking-certs`` when it runs on this host (not with ``TLS_MODE=manual``).
+     - not supported
 
 ``-Service`` defaults to the registry's ``DefaultService``. ``up``, ``restart``, ``rebuild``,
 ``build`` and ``config`` first check the stack's required keys and secret files and stop with a
@@ -151,7 +164,7 @@ Examples::
    stack.ps1 viking-identity up
    stack.ps1 viking-identity logs -Follow -Tail 500
    stack.ps1 viking-annotation exec -Service <service> -- ls /app
-   stack.ps1 viking-segmentation up -Profile seg-v3
+   stack.ps1 viking-segmentation model v3 sam2_em_v3_epoch_9.pt
    stack.ps1 all down
 
 Tools

@@ -42,7 +42,7 @@ Committed templates **always end in `.env`**:
 - **`example.<id>.build.env`** — documents the `--build-arg`s each image expects. No script reads it; copy values into your own `docker build` flags or into CWD files for `docker-build.ps1`.
 - **`example.<id>.run.env`** — runtime variables for Compose or copy targets (e.g. `.env`, `.env.cursor-worker`).
 
-`<id>` is the **normalized image tag** (`:` → `-`, e.g. `nornir-dev`), or a **Compose stack / service name** for a named-stack run template (e.g. `cursor-dev`, or a `stack.ps1` stack key such as `nornir-build`). There is no shared build template; shared build overrides go in a machine-local `build.env` in the invocation directory. `stack.ps1` run templates live in `nornir-docker/deploy/examples/` (`example.<stack>.run.env`, `example.host.env`).
+`<id>` is the **normalized image tag** (`:` → `-`, e.g. `nornir-dev`), or a **Compose stack / service name** for a named-stack run template (e.g. `cursor-dev`, or a `stack.ps1` stack key such as `nornir-build`). There is no shared build template; shared build overrides go in a machine-local `build.env` in the invocation directory. `stack.ps1` run templates live in the connectomes-deploy repo (`stacks/<stack>/example.<stack>.run.env`, `host/example.host.env`).
 
 | Role | Example path under `nornir-docker/` |
 |------|-------------------------------------|

@@ -43,7 +43,7 @@ Procedure ([nornir-review-issue-fixing](../nornir-review-issue-fixing/SKILL.md) 
 3. Before attributing any suite failure to the change, re-run it on a `HEAD` worktree baseline and compare failure sets across repeats; several suites carry known failures and flaky tests.
 4. Make the smallest fix that turns the test green; fix only the defect. If it would change user-visible behavior beyond removing the defect (UI flow, defaults, what gets saved), add it to `decisions` instead.
 5. Prefer warn over raise when the degraded state still gives correct results and the defect is only silence; throttle the warning on hot calls.
-6. For a bug a Pyre user could notice, add one line to `nornir-pyre/CHANGELOG.user.md` under its unreleased section in the same commit.
+6. For a bug a Pyre user could notice, add one line to `nornir-pyre/pyre/CHANGELOG.user.md` under its unreleased / next-version section in the same commit.
 7. Bug in a protected area, or not reproducible outside a GUI, a GPU, or a live service: write a proposal with the evidence and likely fix, and file it on the tracker with the version info ([tracker.md](tracker.md) Filing).
 8. **Sweep for siblings.** Name the defect's pattern in one line (Bug patterns in [categories.md](categories.md)). Search the whole scope (umbrella, every `nornir-*` submodule, `dm4`; not protected areas) with `rg` and add each hit to `deferred` as `{ path, line, pattern, category: 13, issue }`; file one tracker issue per pattern listing the hits, and set its number on each hit. Fix only this wake's instance; each hit later needs its own reproducing test. A new pattern goes to `$LOOP_ROOT/BUG-PATTERNS.md` (never this skill folder); reports list new patterns for the user to fold into categories.md.
 

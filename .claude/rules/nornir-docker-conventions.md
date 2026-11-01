@@ -18,11 +18,13 @@ pages consistent.
 
 ### Entry point
 
-- **`nornir-docker/deploy/stack.ps1`** is the one entry point for starting, stopping, inspecting and
-  deploying every stack (nornir and Viking), locally or with `-Target <host>` over SSH. Register new
-  stacks in `nornir-docker/deploy/stacks.psd1` (or `<Viking>/deploy/stacks.psd1`), not in a new ad hoc
-  launcher.
-- Host setup: **`deploy/Initialize-DockerHost.ps1 -Role compute|web|iis|dev`**. The launchers it writes
+- **`stack.ps1` in the connectomes-deploy repo** (`D:\src\git\connectomes-deploy`, `/srv/connectomes-deploy`
+  on hosts) is the one entry point for starting, stopping, inspecting and deploying every stack (nornir and
+  Viking), locally or with `-Target <host>` over SSH. Register new stacks in connectomes-deploy
+  `stacks.psd1`, `nornir-docker/dev-stacks.psd1` (dev stacks) or `<Viking>/deploy/stacks.psd1`, not in a new
+  ad hoc launcher. `nornir-docker/deploy/` is the old copy from before the move (2026-10-21); do not use or
+  extend it.
+- Host setup: **connectomes-deploy `Initialize-DockerHost.ps1 -Role compute|web|iis|dev`**. The launchers it writes
   under the layout root **forward** to the checkout; never copy repo scripts into the layout (they
   dot-source siblings and break).
 
@@ -30,7 +32,7 @@ pages consistent.
 
 - Dockerfiles, Compose files, entry scripts, and **committed** `example.*.build.env` / `example.*.run.env`
   templates belong under **`nornir-docker/`** (a git submodule in the monorepo). Deploy templates are in
-  `nornir-docker/deploy/examples/`.
+  connectomes-deploy: `stacks/<stack>/example.<stack>.run.env` and `host/example.host.env`.
 - Do **not** add parallel monorepo-root `docker/` trees or duplicate image definitions without an
   explicit design decision.
 

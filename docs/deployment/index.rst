@@ -8,6 +8,14 @@ configuration (proxy routes, TLS renewer, identity clients, SQL databases, segme
 IIS) is in the Viking deployment docs, starting at the :viking:`Viking bring-up checklist
 <index.html>`; those pages link back here for the commands and the host layout.
 
+The deploy tooling (``stack.ps1``, ``Initialize-DockerHost.ps1``, ``bootstrap-ubuntu.sh``, the
+``nornir-build`` / ``nornir-dashboard`` stack registry and the host and stack templates) lives in
+the `connectomes-deploy <https://github.com/jamesra/connectomes-deploy>`_ repository, cloned to
+``/srv/connectomes-deploy`` on Ubuntu hosts. ``nornir-docker/deploy/`` in the nornir checkout is
+an old copy from before the move (2026-10-21); do not use it. Stacks that still run from source
+checkouts come from registries there: ``<Viking>/deploy/stacks.psd1`` and
+``<nornir>/nornir-docker/dev-stacks.psd1`` (:doc:`stacks_and_commands`).
+
 .. toctree::
    :maxdepth: 1
 
@@ -54,16 +62,21 @@ What runs where
      - ``nornir-dashboard`` locally; ``nornir-dev`` and ``nornir-cursor-worker``
        (:doc:`nornir_dev_and_worker`). Deploys to every target with ``-Target <name>``.
 
-Every public name is a single label under ``VIKING_DOMAIN`` (``connectomes.pitt.edu``), so one
-wildcard certificate ``*.connectomes.pitt.edu`` (or one SAN certificate) covers all of them:
+The service names are single labels under ``VIKING_DOMAIN`` (``connectomes.pitt.edu``), so one
+wildcard certificate ``*.connectomes.pitt.edu`` (or one SAN certificate) covers them:
 
 ``identity``, ``websvc``, ``annotation``, ``corrections``, ``segmentation``,
-``segmentationdemo``, ``segmentation-v3``, ``segmentation-v4``, ``segmentation-sem-v1``,
-``gallery``, ``gallery-tem``, ``gallery-sem``.
+``segmentationdemo``, ``gallery``, ``gallery-tem``, ``gallery-sem``.
+
+Each further segmentation model is a row of ``Run/viking-segmentation/models.json`` and is named
+``<prefix>.segmentation.<domain>`` (for example ``v3.segmentation.connectomes.pitt.edu``). That
+name has two labels, so ``*.connectomes.pitt.edu`` does not cover it: the certificate also needs
+``*.segmentation.connectomes.pitt.edu``, or each model name listed (:ref:`deploy-segmentation-network`).
 
 All of them resolve to ``web``. The proxy forwards each TLS connection by SNI name, unopened, to
-the right backend: a container on ``web``, ``viking-segmentation`` on ``compute``, or IIS on
-``iis`` (route table: :viking:`Viking proxy <proxy.html>`).
+the right backend: a container on ``web``, ``viking-segmentation`` on ``compute`` (or the
+segmentation server's own LAN address when it runs on macvlan), or IIS on ``iis`` (route table:
+:viking:`Viking proxy <proxy.html>`).
 
 Zero to running
 ---------------
@@ -80,11 +93,14 @@ Open these before anything else; they take the longest. The exact port lists are
 :doc:`ports_and_remote_access`, and what each credential is in :doc:`accounts_and_tokens`.
 
 * **DNS:** a wildcard record ``*.connectomes.pitt.edu`` pointing at the ``web`` server's public
-  address (or one A/CNAME record per name above).
+  address (or one A/CNAME record per name above, including each segmentation model name).
 * **Firewall:** the per-host rules in :ref:`deploy-firewall-request`.
 * **Certificate (only if Let's Encrypt is not allowed):** either an ACME EAB credential for the
   InCommon/Sectigo ACME server (key id, HMAC key, and server URL), or a wildcard/SAN certificate
-  issued for the names above.
+  issued for the names above (with ``*.segmentation.connectomes.pitt.edu`` for the extra models).
+* **Segmentation server on its own IP (optional):** a DHCP reservation for a MAC address, a second
+  MAC on the switch port, and a network ACL for 443 from ``web``
+  (:ref:`deploy-segmentation-network`).
 
 2. Bootstrap the Ubuntu servers (``compute`` and ``web``)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -94,27 +110,32 @@ the deploy user). To use a dedicated account, create it first (``sudo adduser de
 ``--user deploy``. On ``compute``, install the NVIDIA driver first
 (``sudo ubuntu-drivers install`` and reboot)::
 
-   curl -fsSL https://raw.githubusercontent.com/jamesra/nornir-docker/main/deploy/bootstrap-ubuntu.sh -o bootstrap-ubuntu.sh
+   curl -fsSL https://raw.githubusercontent.com/jamesra/connectomes-deploy/main/bootstrap-ubuntu.sh -o bootstrap-ubuntu.sh
    sudo bash bootstrap-ubuntu.sh --gpu          # compute
    sudo bash bootstrap-ubuntu.sh --open-web     # web
    # log out and back in (docker group)
 
-   git clone --recurse-submodules https://github.com/jamesra/nornir.git /srv/src/nornir
-   git clone --recurse-submodules https://github.com/jamesra/Viking.git /srv/src/Viking
+   git clone https://github.com/jamesra/connectomes-deploy.git /srv/connectomes-deploy
+   git clone --recurse-submodules https://github.com/jamesra/nornir.git /srv/src/nornir     # compute only
+   git clone https://github.com/jamesra/Viking.git /srv/src/Viking
+   git -C /srv/src/Viking submodule update --init gRPC_Protos
 
-   pwsh /srv/src/nornir/nornir-docker/deploy/Initialize-DockerHost.ps1 -Role compute -VikingRepoRoot /srv/src/Viking -SetUserEnv
-   pwsh /srv/src/nornir/nornir-docker/deploy/Initialize-DockerHost.ps1 -Role web -VikingRepoRoot /srv/src/Viking -SetUserEnv
+   pwsh /srv/connectomes-deploy/Initialize-DockerHost.ps1 -Role compute -NornirRepoRoot /srv/src/nornir -VikingRepoRoot /srv/src/Viking -SetUserEnv
+   pwsh /srv/connectomes-deploy/Initialize-DockerHost.ps1 -Role web -VikingRepoRoot /srv/src/Viking -SetUserEnv
 
-The layout this creates is :doc:`host_layout`.
+The nornir checkout is needed only on hosts that run ``nornir-*`` stacks, until their images are
+published. Viking image builds need only its ``gRPC_Protos`` submodule; the other Viking submodules
+are not needed. The layout this creates is :doc:`host_layout`.
 
 3. Prepare the dev box
 ~~~~~~~~~~~~~~~~~~~~~~
 
-In PowerShell 7 on the Windows dev box, from the nornir checkout. If the dev box still runs the old
-``viking`` compose project, stop it first (``docker compose -p viking down``); its ports clash
-with the new stacks::
+In PowerShell 7 on the Windows dev box, with connectomes-deploy cloned next to the other
+checkouts (``D:\src\git\connectomes-deploy``). If the dev box still runs the old ``viking``
+compose project, stop it first (``docker compose -p viking down``); its ports clash with the new
+stacks::
 
-   .\nornir-docker\deploy\Initialize-DockerHost.ps1 -Role dev -VikingRepoRoot D:\src\git\Viking -WithTargets -SetUserEnv
+   D:\src\git\connectomes-deploy\Initialize-DockerHost.ps1 -Role dev -NornirRepoRoot D:\src\git\nornir -VikingRepoRoot D:\src\git\Viking -WithTargets -SetUserEnv
 
    ssh-keygen -t ed25519
    type $env:USERPROFILE\.ssh\id_ed25519.pub | ssh deploy@compute.connectomes.pitt.edu "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
@@ -133,12 +154,14 @@ On each host, ``Initialize-DockerHost.ps1`` copied a template into every file be
 that host (``ssh`` in, or VS Code Remote-SSH). Every key is described in
 :doc:`configuration_reference`.
 
-* ``Run/_host/host.env``: ``VIKING_DOMAIN``, ``TLS_MODE``, ``TLS_EMAIL`` (``NORNIR_DOCKER_USER_ROOT``,
+* ``Run/_host/host.env``: ``VIKING_DOMAIN`` (the parent domain, without a host label),
+  ``TLS_MODE``, ``TLS_EMAIL`` (``NORNIR_DOCKER_USER_ROOT``, ``DEPLOY_REPO_ROOT_HOST``,
   ``NORNIR_REPO_ROOT_HOST``, ``VIKING_REPO_ROOT_HOST`` and ``NORNIR_DOCKER_HOST_STACKS`` are
   pre-filled). On ``web``, also the proxy's upstreams: ``VIKING_COMPUTE_HOST`` (LAN name or IP of
-  ``compute``), ``VIKING_IIS_HOST``, and optionally ``VIKING_UPSTREAM_DEFAULT`` (default: IIS)
-  and ``VIKING_HTTP_UPSTREAM_WEBSVC`` (keeps old Viking clients' ``http://`` WCF and tile
-  requests working instead of redirecting them to https).
+  ``compute``) and ``VIKING_IIS_HOST``. ``VIKING_UPSTREAM_DEFAULT`` (default: IIS) and
+  ``VIKING_HTTP_UPSTREAM_WEBSVC`` (keeps old Viking clients' ``http://`` WCF and tile requests
+  working instead of redirecting them to https) are optional ``viking-proxy`` settings in
+  ``Run/viking-proxy/viking-proxy.run.env``.
 * ``Run/_host/secrets/secrets.env``: ``GITHUB_TOKEN`` if the host pulls from GHCR.
 * ``Run/<stack>/<stack>.run.env`` for every stack the host runs.
 * ``compute`` only: ``Run/nornir-net-mounts/net-mounts/nas-mounts.tsv`` and
@@ -218,6 +241,10 @@ file; it listens on 8442 for the proxy).
 
 Start the dashboard before ``nornir-build`` so the build container joins its network. Open the
 dashboard through ``stack.ps1 tunnel -Target compute`` at http://127.0.0.1:8087.
+
+``viking-segmentation up`` starts the default model only, on host port 40443 unless the run env
+puts it on its own IP (:ref:`deploy-segmentation-network`). Add the other models on ``compute``
+with ``stack viking-segmentation model <prefix> <file.pt>``.
 
 8. Deploy ``iis``
 ~~~~~~~~~~~~~~~~~

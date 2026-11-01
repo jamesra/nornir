@@ -26,7 +26,14 @@ Hosts, SSH, and stack.ps1
      - Push the branch (and submodule commits) first; ``-Sync`` deploys the remote, not your tree.
    * - ``Unknown stack 'viking-...'``
      - ``VIKING_REPO_ROOT_HOST`` is not set in that host's ``host.env``, so the Viking registry is
-       not loaded.
+       not loaded (or ``STACK_EXTRA_REGISTRIES`` is set and does not name it). The same applies to
+       ``nornir-dev`` / ``nornir-cursor-worker`` and ``NORNIR_REPO_ROOT_HOST``.
+   * - ``<root>/stack.ps1``: ``Not found: .../stack.ps1 (set DEPLOY_REPO_ROOT_HOST in
+       Run/_host/host.env)``
+     - The launcher cannot find the connectomes-deploy checkout. Set ``DEPLOY_REPO_ROOT_HOST`` in
+       ``host.env``, or re-run connectomes-deploy's ``Initialize-DockerHost.ps1``. A launcher
+       written by the old ``nornir-docker/deploy`` copy still forwards to that copy
+       (:doc:`migrating_from_old_layout`).
    * - ``up`` fails with ``port is already allocated`` / ``address already in use`` on the dev box
      - The old ``viking`` compose project is still running. ``docker compose -p viking down``
        (``docker ps`` shows what holds the port), then ``stack.ps1 <stack> up`` again.
@@ -71,8 +78,20 @@ Network and TLS
      - Decrypt (``openssl pkey -in key.pem -out key.dec.pem``); check you have the key for this
        certificate; use ``-Force`` to replace a later-expiring certificate on purpose.
    * - Segmentation names fail through the proxy
-     - ``compute`` does not accept 40443-40447 from ``web`` (Pitt firewall or ``DOCKER-USER``), or
-       ``stack.ps1 certs push -From web`` has not copied the certificate to ``compute``.
+     - With published ports: ``compute`` does not accept 40443 (or a model's ``port``) from
+       ``web`` (Pitt firewall or ``DOCKER-USER``). On macvlan: the network ACL does not allow
+       ``web`` to ``<IP>:443``, or ``VIKING_UPSTREAM_SEGMENTATION`` is not set in the proxy run
+       env. Either way, ``stack.ps1 certs push -From web`` may not have copied the certificate to
+       the segmentation host (:ref:`deploy-segmentation-network`).
+   * - A ``<prefix>.segmentation`` model name fails, the default one works
+     - ``segmentation.map`` is not in ``Data/viking-proxy/models.d/`` on ``web`` or the proxy was
+       not restarted after it changed; or the certificate lacks ``*.segmentation.<domain>`` (or
+       that name).
+   * - ``viking-segmentation up`` with the macvlan overlay: ``invalid subnet``, or the old NIC or
+       subnet is still used
+     - ``SEGMENTATION_LAN_SUBNET`` must be CIDR (``10.20.30.0/24``), not a netmask. After changing
+       ``SEGMENTATION_MACVLAN_PARENT`` or the subnet, run ``stack viking-segmentation down``
+       before ``up``: an existing network keeps its old settings.
    * - ``doctor``: ``DNS <name> does not resolve yet``
      - The Pitt DNS ticket is not done, or the record is not a wildcard.
 

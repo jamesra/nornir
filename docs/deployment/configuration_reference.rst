@@ -2,8 +2,11 @@ Configuration reference
 =======================
 
 Every key in the committed templates, plus the run-time variables the ``nornir-docker`` launchers
-read. Templates are in ``nornir-docker/deploy/examples/`` unless a path is given. Viking service
-keys (SQL connection strings, identity clients, segmentation models) are in the Viking
+read. Host templates (``example.host.env``, ``example.host.secrets.env``,
+``example.targets.psd1``) are in ``host/`` of the `connectomes-deploy
+<https://github.com/jamesra/connectomes-deploy>`_ repository, and the ``nornir-build`` and
+``nornir-dashboard`` templates in its ``stacks/<stack>/``; other templates give their path. Viking
+service keys (SQL connection strings, identity clients, segmentation models) are in the Viking
 ``deploy/examples/`` templates and the Viking deployment docs (:viking:`proxy <proxy.html>`,
 :viking:`TLS <tls.html>`, :viking:`identity <identity.html>`, :viking:`segmentation
 <segmentation.html>`).
@@ -55,14 +58,28 @@ Template ``example.host.env``. Machine settings for every stack on the host; no 
      - yes
      - Layout root (:doc:`host_layout`). Filled in by ``Initialize-DockerHost.ps1``. Also read from
        the process environment by every launcher.
-   * - ``NORNIR_REPO_ROOT_HOST``
+   * - ``DEPLOY_REPO_ROOT_HOST``
      - checkout containing ``stack.ps1``
      - yes
-     - nornir checkout on this host; forwarding launchers and ``-Sync`` use it.
+     - connectomes-deploy checkout on this host (``/srv/connectomes-deploy`` on Ubuntu). Filled in
+       by ``Initialize-DockerHost.ps1``; ``<root>/stack.ps1`` forwards to it, and ``-Sync`` uses it.
+   * - ``NORNIR_REPO_ROOT_HOST``
+     -
+     - ``nornir-*`` stacks
+     - nornir checkout on this host (``/srv/src/nornir``), needed until the ``nornir-*`` images run
+       without it; the ``nornir-build`` / ``nornir-dashboard`` launchers and the nornir dev-stack
+       registry live there. ``-Sync`` uses it.
    * - ``VIKING_REPO_ROOT_HOST``
      -
      - Viking hosts
      - Viking checkout; without it the Viking registry is not loaded.
+   * - ``STACK_EXTRA_REGISTRIES``
+     - see meaning
+     -
+     - Source-repo stack registries loaded after connectomes-deploy's ``stacks.psd1``, comma list
+       of ``<RepoRootVar>:<path>``. Empty loads ``VIKING_REPO_ROOT_HOST:deploy/stacks.psd1`` and
+       ``NORNIR_REPO_ROOT_HOST:nornir-docker/dev-stacks.psd1``. ``none`` loads only
+       connectomes-deploy's registry.
    * - ``NORNIR_DOCKER_HOST_STACKS``
      - role preset
      - yes
@@ -79,16 +96,45 @@ Template ``example.host.env``. Machine settings for every stack on the host; no 
      -
      - Override for one service name. Same for ``_WEBSVC`` (``websvc``), ``_ANNOTATION``
        (``annotation``), ``_CORRECTIONS`` (``corrections``), ``_SEGMENTATION``
-       (``segmentation``), ``_SEGMENTATIONDEMO`` (``segmentationdemo``), ``_SEG_V3``
-       (``segmentation-v3``), ``_SEG_V4`` (``segmentation-v4``), ``_SEG_SEM_V1``
-       (``segmentation-sem-v1``), ``_GALLERY``
+       (``segmentation``), ``_SEGMENTATIONDEMO`` (``segmentationdemo``), ``_GALLERY``
        (``gallery``), ``_TEM_GALLERY`` (``gallery-tem``), ``_SEM_GALLERY`` (``gallery-sem``).
        Keep overrides single-label under the domain so one wildcard certificate still covers them.
+       The other segmentation models are rows of ``Run/viking-segmentation/models.json``
+       (``stack.ps1 viking-segmentation model``), named ``<prefix>.segmentation.<domain>``; the
+       certificate needs ``*.segmentation.<domain>`` (or each name) for them.
+   * - ``VIKING_BACKEND_NETWORK``
+     -
+     -
+     - Docker network shared by ``viking-proxy`` and the segmentation model servers on the same
+       host (for example ``viking-backend``); the proxy then reaches them by name and nothing is
+       published (connectomes-deploy ``stacks/viking-proxy/compose.backend.yaml``).
+   * - ``VIKING_IDENTITY_URL``
+     - ``https://$VIKING_HOSTNAME_IDENTITY/``
+     -
+     - Token issuer used by identity, annotation, corrections and segmentation. A stack's own
+       setting (``IDENTITY_AUTHORITY``, ``IdentityServer__Endpoint``,
+       ``SEGMENTATION_IDENTITY_ENDPOINT``) wins.
+   * - ``VIKING_IDENTITY_API_URL``
+     - ``https://$VIKING_HOSTNAME_IDENTITY/webapi/``
+     -
+     - Identity WebApi (permissions, resources).
+   * - ``VIKING_CORRECTIONS_DIR``
+     - ``<root>/Data/viking-corrections``
+     -
+     - Published section corrections: ``viking-corrections`` writes ``<dir>/corrections``,
+       ``viking-annotation`` reads it.
+   * - ``VIKING_ACME_WEBROOT``
+     - ``<root>/Data/viking-certs/webroot``
+     -
+     - HTTP-01 challenge webroot: ``viking-certs`` writes it, ``viking-proxy`` serves it on port 80.
    * - ``VIKING_COMPUTE_HOST``
      -
      - ``web``
-     - LAN name or IP of ``compute``; the proxy forwards the segmentation names to it (ports
-       40443-40447).
+     - LAN name or IP of ``compute``; the proxy forwards ``segmentation`` (port 40443) and
+       ``segmentationdemo`` (40444) to it, and it is the default ``SEGMENTATION_UPSTREAM_HOST`` of
+       published ``models.json`` rows. A segmentation server on its own IP (macvlan) is set with
+       ``VIKING_UPSTREAM_SEGMENTATION=<IP>:443`` in the proxy run env instead
+       (:ref:`deploy-segmentation-network`).
    * - ``VIKING_IIS_HOST``
      -
      - ``web``
@@ -96,11 +142,13 @@ Template ``example.host.env``. Machine settings for every stack on the host; no 
    * - ``VIKING_UPSTREAM_DEFAULT``
      - the IIS host
      -
-     - ``host:port`` for TLS connections whose SNI name matches no service.
+     - ``viking-proxy`` setting; the template puts it in ``Run/viking-proxy/viking-proxy.run.env``.
+       ``host:port`` for TLS connections whose SNI name matches no service.
    * - ``VIKING_HTTP_UPSTREAM_WEBSVC``
      -
      -
-     - ``host:port``: pass plain-HTTP ``websvc`` traffic through on port 80 instead of redirecting
+     - ``viking-proxy`` setting; the template puts it in ``Run/viking-proxy/viking-proxy.run.env``.
+       ``host:port``: pass plain-HTTP ``websvc`` traffic through on port 80 instead of redirecting
        it to https, so old Viking clients' ``http://`` WCF and tile requests keep working.
    * - ``TLS_MODE``
      - ``letsencrypt``
@@ -180,8 +228,9 @@ Template ``example.targets.psd1``; a PowerShell data file, one entry per target 
      - Stacks ``all`` means for this target (informational for ``-Images load``; the target's own
        ``NORNIR_DOCKER_HOST_STACKS`` decides what ``all`` runs there).
    * - ``Repos``
-     - ``@{ NORNIR_REPO_ROOT_HOST = '<path>'; VIKING_REPO_ROOT_HOST = '<path>' }``: checkouts that
-       ``-Sync`` fast-forwards.
+     - ``@{ DEPLOY_REPO_ROOT_HOST = '<path>'; NORNIR_REPO_ROOT_HOST = '<path>';
+       VIKING_REPO_ROOT_HOST = '<path>' }``: checkouts that ``-Sync`` fast-forwards (list only
+       those the target has).
    * - ``Tunnels``
      - ``ssh -L`` specs (``local:host:port``) opened by ``stack.ps1 tunnel``.
    * - ``CertPush``
@@ -300,7 +349,8 @@ Shared by ``start-nornir-build.ps1``, cursor-dev net mounts, and the worker's
      - ``nornir-docker/dev/example.nas-mounts.tsv``
      - Tab-separated ``fstype source target options`` per share.
    * - ``secrets/net-creds/<id>.cred``
-     - ``example.net-creds.cred``
+     - connectomes-deploy ``stacks/nornir-build/example.net-creds.cred`` (copied as
+       ``storage.cred``)
      - ``username=``, ``password=``, ``domain=`` (optional), LF line endings.
    * - ``.run.nornir-net-mounts.env``
      - ``nornir-docker/example.nornir-net-mounts.run.env``
@@ -433,6 +483,18 @@ Other launcher variables
    * - ``NORNIR_RELEASE``, ``NORNIR_IMAGE_VARIANT``
      - from ``VERSION``
      - ``docker-build.ps1`` build args (``Builds/nornir/build.env``).
+   * - ``STACK_COMPOSE_OVERLAYS``
+     -
+     - ``stack.ps1``, in a compose stack's run env: comma list of extra compose files merged after
+       the registry's, for host-specific variations. Relative paths resolve against
+       connectomes-deploy (``DEPLOY_REPO_ROOT_HOST``). Examples:
+       ``stacks/viking-segmentation/compose.macvlan.yaml`` (:ref:`deploy-segmentation-network`),
+       ``stacks/viking-proxy/compose.backend.yaml``. A missing file stops ``up``.
+       ``Run/<stack>/compose.generated.yaml`` (written by ``model``) is merged after them.
+   * - ``STACK_PROFILES``
+     - the registry's ``Profiles``
+     - ``stack.ps1``, in a stack's run env: replaces the stack's default compose profiles (``none``
+       turns them off). ``-Profile`` adds to the result.
 
 Viking keys that ``stack.ps1`` checks
 -------------------------------------
@@ -482,7 +544,8 @@ Deprecated names
      - ``Run/nornir-cursor-worker/nornir-cursor-worker.run.env``
      - yes, as fallbacks
    * - ``Initialize-NornirBuildAppliance.ps1 -MonorepoRoot``
-     - ``deploy/Initialize-DockerHost.ps1 -Role compute -RepoRoot``
+     - connectomes-deploy ``Initialize-DockerHost.ps1 -Role compute -NornirRepoRoot`` (``-RepoRoot``
+       is still accepted as an alias)
      - removed
 
 ``NORNIR_MONOREPO_ROOT`` inside containers (``cursor-dev-entry.sh``, the image build) is a

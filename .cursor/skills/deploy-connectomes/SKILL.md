@@ -1,6 +1,6 @@
 ---
 name: deploy-connectomes
-description: Deploy, update, or debug the connectomes.pitt.edu hosts (compute, web, iis, dev box) with nornir-docker's stack.ps1. Use when bringing a stack up or down on a server, rolling out a change, renewing or distributing the TLS certificate, or diagnosing a server stack.
+description: Deploy, update, or debug the connectomes.pitt.edu hosts (compute, web, iis, dev box) with connectomes-deploy's stack.ps1. Use when bringing a stack up or down on a server, rolling out a change, renewing or distributing the TLS certificate, or diagnosing a server stack.
 ---
 
 # Deploy connectomes.pitt.edu
@@ -13,7 +13,7 @@ First-time setup of a new compute host: `deploy-compute-host` skill.
 
 | Target | Stacks |
 |--------|--------|
-| `compute` (Ubuntu GPU) | `nornir-build`, `nornir-dashboard`, `viking-segmentation` |
+| `compute` (Ubuntu GPU) | `nornir-build`, `viking-segmentation`, `viking-certs` (manual mode, receives `certs push`); `nornir-dashboard` only if it runs there (role default in `Initialize-DockerHost.ps1` lists it; opr-marc-build2 does not run it) |
 | `web` (Ubuntu) | `viking-proxy`, `viking-certs`, `viking-identity`, `viking-annotation`, `viking-corrections` (+ annotation gallery from Sam2Trainer, not a stack) |
 | `iis` (Windows IIS) | `viking-iis` |
 | dev box (Windows) | deploys to all of them with `-Target <name>`; local `nornir-dashboard`, `nornir-dev` |

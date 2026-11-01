@@ -35,7 +35,8 @@ Run env
 -------
 
 ``<root>/Run/nornir-dashboard/nornir-dashboard.run.env``, from
-``nornir-docker/deploy/examples/example.nornir-dashboard.run.env``. ``start-dashboard.ps1`` falls
+``stacks/nornir-dashboard/example.nornir-dashboard.run.env`` in the `connectomes-deploy
+<https://github.com/jamesra/connectomes-deploy>`_ repository. ``start-dashboard.ps1`` falls
 back to the legacy name ``dashboard.run.env``. Secrets (the token) go in
 ``Run/nornir-dashboard/secrets/secrets.env``; ``stack.ps1`` merges both
 (:doc:`host_layout`).
