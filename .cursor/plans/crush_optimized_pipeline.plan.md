@@ -9,7 +9,7 @@ todos:
     content: "Retune the blob metric for inflated counts; compare on crushed and uncrushed sections"
     status: pending
   - id: brightness-drift
-    content: "Measure per-tile brightness drift across overlaps on RC3; if material, per-tile gain from overlap least squares, stored as metadata, applied on inflate/assemble"
+    content: "Per-tile gain at import from stage-position overlaps (robust least squares, texture threshold, median gain 1), stored in the tile's nornir_crush chunk, applied by the loader's inflate and by Viking; first measure drift on a raw IDOC import"
     status: pending
   - id: loader
     content: "nornir_imageregistration: one crush check in the loader (LoadImage / _load_image_by_extension_once); inflate to uint16 counts; route the raw Pillow readers through it or make them crush-aware"
@@ -189,12 +189,24 @@ Measured noise on these detectors is not Poisson-like either (RPC3: ~10x below t
 spread). It would also break the per-section quanta (D1), leave assembled images without a single quanta to re-crush
 with, and fold an adjustable intensity correction into an invertible storage encoding.
 
-Proposed instead (not decided): keep per-section quanta for storage, and correct brightness as its own step. After
-translate, overlapping tiles should agree in the overlap; solve once per section for a gain (and optionally an
-offset) per tile by least squares over all overlaps (the join check already scores them), store the gains as
-per-tile metadata, and apply them on inflate/assemble. Reversible, complete rather than partial, and it also works on
-uncrushed data. First step: measure the drift (per-tile brightness ratios across overlaps) on a few RC3 sections to
-size the problem.
+Decided (James, 2026-11-01): keep per-section quanta for storage and correct brightness with a **gain per tile**,
+computed **at import** from the stage-position overlaps.
+
+- Import already reads every tile (histogram, noise, crush), so the overlap statistics cost almost nothing extra.
+- A gain is a ratio of robust strip statistics (median or trimmed mean over the nominal overlap), which tolerates the
+  usual few-hundred-pixel stage error; one least-squares solve per section over all overlaps averages the rest.
+- Guards: robust solve (iteratively reweighted or trimmed) that drops pairs whose ratio disagrees with their
+  neighbours (a stage misplacement like RC3 1637 compares unrelated tissue); skip strips with too little texture
+  (blank resin, tissue edge); anchor the section's median gain at 1.
+- Stored in each tile's `nornir_crush` chunk as `gain`. The loader's one inflate becomes counts =
+  (q x step + step/2 + offset) / gain; Viking reads the same chunk; the codes are untouched, so gain 1 restores the
+  original data. `inflate=False` callers (registration) are unaffected (NCC and phase correlation ignore scale).
+  Assembled images are built from gain-corrected counts and re-crushed with gain 1; pyramid levels copy the tile's
+  chunk. Uncrushed tiles could carry a gain-only chunk so drift correction covers them too.
+- Optional later step: if the translate report shows large stage errors, recompute gains from translated positions at
+  a downsampled pyramid level.
+- First step: measure the drift on a recent raw IDOC import (not the leveled RC3 tiles) to size it; a few percent
+  needs only the guards above, large or within-tile variation would change the design.
 
 ## Validation
 
