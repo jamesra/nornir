@@ -56,6 +56,17 @@ when $\lVert T(\ell_k) - d \rVert_\infty \le 0.01$ px or after 8 steps ($T$ maps
   workers, same outputs) was tried and dropped, because `nornir_imageregistration` keeps pool children off the GPU
   and one CuPy pair (~19-25 s) beats one NumPy core (~73-104 s). Where:
   `nornir-buildmanager/nornir_buildmanager/operations/stos_brute_pairs.py`, `block.py` (`StosBruteAll`).
+- **2026-11-01 StosBrute pairs can run in several CuPy worker processes sharing one GPU (`-GpuWorkers N`).** Why: about
+  18 of CuPy's ~25 s per pair is host NumPy (log-polar scale search) and the GPU was ~6-12% busy, so N CuPy processes
+  interleave their GPU work while each does its host work on its own core. Workers are spawned, never forked (a
+  forked child may inherit CUDA state), and opt in with `SetActiveComputationLib(cupy, allow_in_child=True)`; other
+  pool children still run NumPy. Measured on the 6 IDOC test pairs (Blob at 16) repeated, Ryzen 9950X + RTX 4500 Ada,
+  machine shared with other jobs using 10-19 cores: in process 6.4 pairs/min (GPU 12%), 2 workers 9.9, 4 workers 12.7
+  (12 pairs, last round half empty), 8 workers 26.4 (24 pairs, GPU 52% mean, 91% peak); with 28 other cores busy:
+  in process 1.7, 2 workers 9.0, 4 workers 12.7, 8 workers 15.8. Outputs were byte-identical for every N (per-pair
+  reseed). About 500 MB GPU memory per worker (CuPy pool ~320 MB plus the CUDA context). Main-process prepare and
+  publish took 2-9 ms per pair, so it is not the bottleneck. Where: `nornir_imageregistration/computational_lib.py`,
+  `nornir-buildmanager/nornir_buildmanager/operations/stos_brute_pairs.py` (`GpuWorkerPairExecutor`).
 - **2026-11-01 Translate checks that the mosaic holds together, by image, and applies manual offsets.** Why: on RC3
   1637 a ~300-tile block sits ~5,500 px from its stage positions in the 2022 layout, and the current code leaves it
   at the stage positions, with no warning. Scoring overlaps across that block's boundary (NCC at downsample 32): 2022
