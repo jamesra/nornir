@@ -3,8 +3,14 @@ name: Crush-optimized pipeline
 overview: "Crushed tiles stay crushed end to end. The image loader sees the nornir_crush PNG chunk and inflates to 16-bit counts; every derived image (pyramid level, assembled section, volume tile) is re-crushed with the same section quanta; crushed filters are never leveled, and contrast moves to display time (Viking) and to in-memory normalization where an algorithm needs it."
 todos:
   - id: decisions
-    content: "James: D1, D2, D3, D6 decided 2026-11-01; open: blob input (D4), pictures/web summary (D5), Leveled until Viking ships (D6)"
-    status: in_progress
+    content: "James: D1-D6 decided 2026-11-01 (blob retuned; thumbnails pre-leveled, downloads inflated server-side; ships all at once). Open: per-tile brightness gain (beam drift) as a separate step"
+    status: completed
+  - id: blob-retune
+    content: "Retune the blob metric for inflated counts; compare on crushed and uncrushed sections"
+    status: pending
+  - id: brightness-drift
+    content: "Measure per-tile brightness drift across overlaps on RC3; if material, per-tile gain from overlap least squares, stored as metadata, applied on inflate/assemble"
+    status: pending
   - id: loader
     content: "nornir_imageregistration: one crush check in the loader (LoadImage / _load_image_by_extension_once); inflate to uint16 counts; route the raw Pillow readers through it or make them crush-aware"
     status: pending
@@ -164,16 +170,31 @@ a 16-bit one would display noise.
   included) keep the crushed PNGs.
 - **D4 Loader inflates by default (decided), with `inflate=False`** for operations that work on codes directly
   (assembly, registration): uncrush is affine, so they need not inflate, and saving re-crushes as in D2.
-  **Open:** blob's metric `(median+1)/(var+1)` was tuned on `Leveled` 0-255 input; inflated counts (~0-16,000, a
-  different contrast) are not that input. Either stretch in memory from the section's contrast hints before blob,
-  or retune the metric.
-- **D5 Pictures: open.** Store inflated (leveled) versions for web pages and exports, or build a volume summary page
-  that inflates on the client. A browser `<img>` cannot read PNG text chunks, so client-side inflation means fetching
-  and decoding PNGs in JavaScript (pako/UPNG) onto a canvas; small pre-leveled 8-bit thumbnails are the cheap
-  alternative.
-- **D6 Viewers (decided): Viking and the volume summary page** are the only viewers of a volume. A crushed volume is
-  not viewable until Viking reads the quanta. **Open:** until Viking ships, do crushed imports still produce
-  `Leveled`?
+  Blob's metric `(median+1)/(var+1)` was tuned on `Leveled` 0-255 input; inflated counts (~0-16,000, a different
+  contrast) are not that input. **Decided: retune blob**, and test the retuned metric on uncrushed data too (it may
+  do as well or better there).
+- **D5 Pictures (decided).** The volume summary page uses small pre-leveled 8-bit thumbnails. Full-image downloads
+  for browser users are inflated (and leveled) on the server, since a browser `<img>` cannot read PNG text chunks.
+- **D6 Viewers and rollout (decided).** Viking and the volume summary page are the only viewers of a volume. We control
+  Viking's release, so the feature ships all at once (nornir, both Viking clients, summary page); no interim
+  `Leveled` for crushed volumes.
+
+## Beam brightness drift (James's question, 2026-11-01)
+
+Beam brightness can drift during a section's capture, giving visible brightness steps between tiles. Dividing each
+tile by its own quanta at import would correct this only partly: the step is k x the tile's noise sigma, and when the
+beam brightens by a factor a the signal scales by a but the noise by ~sqrt(a) (shot-noise limited) or ~1 (read-noise
+limited), so per-tile codes scale by between sqrt(a) and a, removing at best about half of the change in log terms.
+Measured noise on these detectors is not Poisson-like either (RPC3: ~10x below the Poisson prediction, scintillator
+spread). It would also break the per-section quanta (D1), leave assembled images without a single quanta to re-crush
+with, and fold an adjustable intensity correction into an invertible storage encoding.
+
+Proposed instead (not decided): keep per-section quanta for storage, and correct brightness as its own step. After
+translate, overlapping tiles should agree in the overlap; solve once per section for a gain (and optionally an
+offset) per tile by least squares over all overlaps (the join check already scores them), store the gains as
+per-tile metadata, and apply them on inflate/assemble. Reversible, complete rather than partial, and it also works on
+uncrushed data. First step: measure the drift (per-tile brightness ratios across overlaps) on a few RC3 sections to
+size the problem.
 
 ## Validation
 
