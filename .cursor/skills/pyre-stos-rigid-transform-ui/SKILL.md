@@ -73,8 +73,8 @@ Rigid model API (imageregistration); Pyre STOS runtime model is `CenteredSimilar
    - **Target panel** → whole-layer translate/rotate **blocked** for rigid/grid.
    - **Rigid rotation** → **Composite window only** (`rigid_rotation_locked`).
 5. **Rotation pivot** (rigid, composite): Ctrl+scroll passes the **source-space cursor** (`point_pair.source`, already `InverseTransform(display)`) to `Rotate`; `TransformController` calls `RotateFixedAboutSourcePoint` to pin `Transform(pivot)` in target space.
-6. **Relative scale**: Shift+scroll on composite/source when the model is `CenteredSimilarity2DTransform`. Pivot is the **source-space cursor** (`point_pair.source`); `ScaleWarped` calls `ScaleWarpedAboutSourcePoint` (do not InverseTransform again). Composite then adjusts camera lookat so the pinned target point stays under the cursor.
-7. **Zoom**: mouse wheel without Ctrl zooms about the cursor.
+6. **Relative scale**: Shift+scroll on composite/source when the model is `CenteredSimilarity2DTransform` (≈2% per notch). **Alt+Shift+scroll** is the fine version (≈0.5% per notch), mirroring Ctrl+Shift vs Ctrl for rotation. Windows menu-bar Alt activation is swallowed on `PyreWindowBase` so the wheel stays on the GL view. Pivot is the **source-space cursor** (`point_pair.source`); `ScaleWarped` calls `ScaleWarpedAboutSourcePoint` (do not InverseTransform again). Composite then adjusts camera lookat so the pinned target point stays under the cursor.
+7. **Zoom**: mouse wheel without Ctrl/Shift zooms about the cursor.
 
 ## Command routing
 
