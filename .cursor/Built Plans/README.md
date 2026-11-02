@@ -26,6 +26,7 @@ Each linked plan file retains its original frontmatter, overview, and implementa
 | [stos_file_source_selector_e597a2eb.plan.md](stos_file_source_selector_e597a2eb.plan.md) | `pyre/stos_manual_paths.py`, `pyre/ui/widgets/stos_file_source_selector.py`, `pyre/settings/app.py`; `tests/test_stos_file_source_browser.py` |
 | [warp_and_transfer_optimization_08b8512c.plan.md](warp_and_transfer_optimization_08b8512c.plan.md) | Prewarp GPU cost reduction (coverage warp elimination, validity mask derivation) |
 | [shared_image_dtype_ad28b2be.plan.md](shared_image_dtype_ad28b2be.plan.md) | Keep-as-is: shared Pyre alignment images stay native dtype (`host_image_payload`, `BuildAlignmentROIs`); ROI `ScoreOneAngle` may still cast float16 |
+| [relax_exterior_grid_341ad955.plan.md](relax_exterior_grid_341ad955.plan.md) | Exterior/masked grid spring settle after registration + menu; `transformcontroller.enqueue_relax_exterior_grid_points`; `stoswindow` Registration menu; `tests/test_masked_grid_relax.py`; `CHANGELOG.user.md` |
 
 ## Plans still open (not archived)
 

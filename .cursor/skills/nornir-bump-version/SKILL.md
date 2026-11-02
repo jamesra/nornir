@@ -32,7 +32,10 @@ python release/verify_package_versions.py
 
 ### Pyre installer after a package bump
 
-1. Add a curated ``## X.Y.Z`` section (user-facing notes only) to ``nornir-pyre/pyre/CHANGELOG.user.md``.
+1. Add a curated ``## X.Y.Z — not yet released`` section (user-facing notes only) to
+   ``nornir-pyre/pyre/CHANGELOG.user.md``. Each bullet: bold skim summary, then detail
+   (see **user-changelog** rule). When the installer ships, replace ``not yet released``
+   with the release date ``YYYY-MM-DD``; leave older sections below.
 2. From the monorepo root:
 
 ```powershell

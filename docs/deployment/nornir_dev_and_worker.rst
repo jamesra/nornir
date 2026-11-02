@@ -129,7 +129,9 @@ Same path-B mounts as the appliance (:doc:`nornir_build_appliance`). Copy
    docker compose -f nornir-docker/compose.cursor-dev.yaml -f D:/Docker/Run/nornir-net-mounts/compose.net-mounts.override.yaml run --rm cursor-dev
 
 The override is the only thing that grants ``CAP_SYS_ADMIN``; plain ``cursor-dev`` stays
-unprivileged.
+without mount privileges. Both ``cursor-dev`` services always grant ``CAP_SYS_PTRACE`` and
+``seccomp:unconfined`` so ``strace``, ``py-spy``, and ``gdb`` can attach inside the container
+(``drop-sys-admin-after-mounts.sh`` removes only ``SYS_ADMIN``).
 
 ``docker-run-nornir-dev.ps1``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

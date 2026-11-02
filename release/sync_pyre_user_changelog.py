@@ -24,7 +24,10 @@ _CHANGELOG = _ROOT / "nornir-pyre" / "pyre" / "CHANGELOG.user.md"
 _PYPROJECT = _ROOT / "nornir-pyre" / "pyproject.toml"
 _DOCS_RST = _ROOT / "docs" / "packages" / "pyre_changelog.rst"
 
-_VERSION_HEADING = re.compile(r"^##\s+(\d+\.\d+\.\d+)\s*$", re.MULTILINE)
+_VERSION_HEADING = re.compile(
+    r"^##\s+(\d+\.\d+\.\d+)(?:\s+[—–-]\s+(.+?))?\s*$",
+    re.MULTILINE,
+)
 _PYPROJECT_VERSION = re.compile(
     r'(?m)^version\s*=\s*["\'](\d+\.\d+\.\d+)["\']\s*$'
 )
@@ -40,15 +43,22 @@ def read_pyre_version(pyproject: Path = _PYPROJECT) -> str:
 
 def parse_changelog(text: str) -> dict[str, str]:
     """Map version string -> section body (markdown, without the ## heading)."""
+    return {version: body for version, _label, body in parse_changelog_entries(text)}
+
+
+def parse_changelog_entries(text: str) -> list[tuple[str, str | None, str]]:
+    """Return ``(version, release_label, body)`` in file order."""
     matches = list(_VERSION_HEADING.finditer(text))
-    sections: dict[str, str] = {}
+    entries: list[tuple[str, str | None, str]] = []
     for index, match in enumerate(matches):
         version = match.group(1)
+        label = match.group(2)
+        if label is not None:
+            label = label.strip() or None
         start = match.end()
         end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
-        body = text[start:end].strip()
-        sections[version] = body
-    return sections
+        entries.append((version, label, text[start:end].strip()))
+    return entries
 
 
 def section_for_version(changelog_path: Path, version: str) -> str:
@@ -84,7 +94,6 @@ def _md_bullet_to_rst(line: str) -> str:
 def changelog_to_rst(changelog_path: Path) -> str:
     """Convert the user changelog markdown into an RST page body."""
     text = changelog_path.read_text(encoding="utf-8")
-    sections = parse_changelog(text)
     lines = [
         "Pyre user changelog",
         "===================",
@@ -101,11 +110,18 @@ def changelog_to_rst(changelog_path: Path) -> str:
         "(look for tags ``pyre-*``).",
         "",
     ]
-    for version in sorted(sections.keys(), key=lambda v: tuple(int(p) for p in v.split(".")), reverse=True):
-        lines.append(version)
-        lines.append("-" * len(version))
+    entries = parse_changelog_entries(text)
+    by_version = {version: (label, body) for version, label, body in entries}
+    for version in sorted(
+            by_version.keys(),
+            key=lambda v: tuple(int(p) for p in v.split(".")),
+            reverse=True):
+        label, body = by_version[version]
+        heading = f"{version} — {label}" if label else version
+        lines.append(heading)
+        lines.append("-" * len(heading))
         lines.append("")
-        for raw in sections[version].splitlines():
+        for raw in body.splitlines():
             if not raw.strip():
                 lines.append("")
                 continue

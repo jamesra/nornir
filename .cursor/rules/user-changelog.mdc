@@ -1,0 +1,29 @@
+---
+description: Keep nornir-pyre/pyre/CHANGELOG.user.md (Pyre Help → What's New) in Viking-style release-summary format.
+alwaysApply: true
+---
+
+# User changelog (Pyre)
+
+[`nornir-pyre/pyre/CHANGELOG.user.md`](../../nornir-pyre/pyre/CHANGELOG.user.md) ships in the Windows
+installer. Pyre shows it from **Help → What's New** and once after each upgrade. Write it for people
+who use Pyre, not for developers. CI copies each version section into the GitHub Release body and
+regenerates `docs/packages/pyre_changelog.rst` via `release/sync_pyre_user_changelog.py`.
+
+- A commit that changes what a Pyre user can see or do (behaviour, a fix they could notice, a hotkey,
+  menu, dialog, preference or default) adds a bullet to the newest section of `CHANGELOG.user.md` in
+  the same commit.
+- One `## <version> — <date, or "not yet released">` heading per version, **newest first**. Older
+  versions stay below (append history; do not delete). The newest heading matches
+  `nornir-pyre/pyproject.toml`: when that version changes, rename the unreleased heading. When a
+  version ships, replace `not yet released` with the release date (`YYYY-MM-DD`).
+- Write bullets for users: what changed and how to use it, naming menus, buttons and hotkeys as Pyre
+  shows them. Leave out internal refactors and build changes. Notes only developers need go in an
+  HTML comment (`<!-- -->`), which Pyre does not show.
+- Start each bullet with a **bold summary of one short sentence or less** that a reader can skim
+  (a fix keeps `Fix:` inside the bold), then the full detail as plain text that does not repeat the
+  summary, for example
+  `- **Fix: Spacebar freeze on warped grids.** Spacebar registration on damaged or heavily warped
+  grids no longer freezes the UI…`.
+- Supported Markdown: `#` / `##` headings, `-` or `*` bullets, paragraphs, `**bold**`, `` `code` ``
+  and links. Keep prior version sections intact when adding a new one at the top.

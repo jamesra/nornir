@@ -12,43 +12,57 @@ Older installers remain on the repository
 `Releases page <https://github.com/jamesra/nornir/releases>`_
 (look for tags ``pyre-*``).
 
-1.8.4
------
+1.8.6 — not yet released
+------------------------
 
-* Spacebar registration on damaged or heavily warped grids no longer freezes the UI for several seconds after results apply. When control points move but stay in the same mesh neighborhoods, Pyre reuses the existing triangulation instead of rebuilding it from scratch.
+* **Exterior grid points settle after registration.** After each grid-point registration, Pyre runs one spring step that settles exterior / masked lattice points into a low-energy layout matching the warped interior. Use **Registration → Relax Exterior Grid Points** to run that step again without registering.
+* **One Ctrl+Z for a Spacebar queue.** **Ctrl+Z** after a Spacebar registration queue undoes the whole queue in one step, including a cancel that left some points already applied.
+* **STOS browser shows cached scores first.** The STOS folder browser paints pair ZNCC from `stos_quality.json` as soon as the folder scan finishes, then validates checksums and scores missing entries in the background.
 
-1.8.3
------
+1.8.5 — 2026-11-01
+------------------
 
-* Dragging a multi-point selection no longer drops the other selected points when you press on one of them; the whole group moves together.
-* Spacebar registration uses the alignment window, not only the center pixel: a point still registers when enough of both images is unmasked (default 25%, adjustable under **Registration → Transform Settings** as **Min unmasked tissue %**).
-* Opening a source or target mask updates every registration path (Spacebar and Refine Grid), so masks stay applied after you load them from the File menu.
-* After Spacebar on a single hovered point, that point is selected again when alignment finishes so you can press Space repeatedly to fine-tune it. Clear the selection (click empty space) before Space on a different point if you do not want the previous one included.
-* **Ctrl+Z** undoes recent edits: control-point drags (including multi-point), rigid layer drags, delete points, create point, call point to mouse, convert transform type, and mesh Spacebar alignment results. **Ctrl+X** still redoes when available.
-* After installing or upgrading, Pyre shows **What's New** once with the notes for that version. Open it again anytime from **Help → What's New**.
+* **Fix: Refine Grid colinear trusted points.** Refine Grid no longer distorts a section when the trusted control points it found lie on a line; it keeps the existing transform instead.
+* **Faster Refine Grid on shift-only cells.** Refine Grid is faster on sections where most grid cells only need a shift.
+* **1.8.4 installer replaced.** Includes the 1.8.3 and 1.8.4 changes below. The installer published as 1.8.4 was built from older code and lacked them; it has been replaced by this release.
 
-1.8.2
------
+1.8.4 — 2026-11-01
+------------------
 
-* **File → Save Warped Image** now saves the source image aligned into the target image's space. Pyre 1.7.7 and earlier saved the wrong image (the target image, warped the wrong way); re-export any warped images saved with those versions. Saving no longer fails with "cannot write mode I as PNG", and the dialog offers an 8-bit or 16-bit PNG. 8-bit images are always saved as 8-bit.
-* **File → Save STOS File** writes the source and target image sizes in the right places. Pyre 1.7.7 and earlier swapped them whenever the two images differed in size, which can affect grid transforms; re-save those files if you use them.
-* 16-bit images open again (they failed to load), and Pyre keeps their full precision, so a 16-bit warped image matches its source exactly. 16-bit images use twice the memory they did.
-* Fixed Pyre keeping every CPU core busy for a minute or more after it starts or after you load images. Background worker processes in the installed version were crashing and restarting in a loop.
-* Much lower CPU use while Pyre sits idle. The image windows now redraw only when something on screen changes, such as a blinking selected point or a point being aligned.
-* Spacebar registration: each press aligns only the point under the cursor or the selected points, not every point from earlier presses. Holding Space aligns each point once, the Composite view stays still while results arrive, and the progress bar clears when the work is done. **Escape** or the **Cancel** button in the status bar stops queued point alignments as well as running jobs.
-* **Registration → Remove Points on Masked Areas** works again and checks each image's mask against that image's points.
-* Images opened with ``-Source`` and ``-Target`` are no longer replaced by the STOS file from your previous session, and a source and target image with the same file name in different folders are no longer aligned against themselves. After Pyre restores a source and target image without a STOS file, Save Warped Image works.
-* The STOS folder browser no longer re-scores a whole folder every time Pyre starts. It saves quality scores as it computes them, pauses scoring while it is hidden or minimized, and opens at launch only if it was open when you last quit Pyre. If you use it, reopen it once with **File → Open STOS Folder Browser** after updating; Pyre remembers it from then on.
-* Menus are reorganized into **File**, **Transform**, **Registration**, **View**, and **Help**. Registration defaults are under **Registration → Transform Settings**, image contrast is under **View → Contrast**, and **Help → Mouse and Keyboard Controls** (F1) shows an updated controls reference. **Help → Online Manual** opens the manual in your browser.
+* **Fix: Spacebar freeze on warped grids.** Spacebar registration on damaged or heavily warped grids no longer freezes the UI for several seconds after results apply. When control points move but stay in the same mesh neighborhoods, Pyre reuses the existing triangulation instead of rebuilding it from scratch.
 
-1.7.7
------
+1.8.3 — 2026-10-31
+------------------
 
-* Cancel in-flight control-point registrations (including refine-grid work) when you open a different ``.stos`` file, so the UI does not keep applying edits from the previous pair.
-* Faster feedback when Spacebar registration points fall on blue/busy or masked regions: both source and target masks are checked before a registration job is queued.
-* Installer and documentation packaging updates for the Windows build.
+* **Multi-point drag keeps the whole selection.** Dragging a multi-point selection no longer drops the other selected points when you press on one of them; the whole group moves together.
+* **Spacebar uses the alignment window.** Spacebar registration uses the alignment window, not only the center pixel: a point still registers when enough of both images is unmasked (default 25%, adjustable under **Registration → Transform Settings** as **Min unmasked tissue %**).
+* **Loaded masks apply to every registration path.** Opening a source or target mask updates every registration path (Spacebar and Refine Grid), so masks stay applied after you load them from the File menu.
+* **Spacebar reselects the aligned point.** After Spacebar on a single hovered point, that point is selected again when alignment finishes so you can press Space repeatedly to fine-tune it. Clear the selection (click empty space) before Space on a different point if you do not want the previous one included.
+* **Ctrl+Z undoes recent edits.** **Ctrl+Z** undoes control-point drags (including multi-point), rigid layer drags, delete points, create point, call point to mouse, convert transform type, and mesh Spacebar alignment results. **Ctrl+X** still redoes when available.
+* **What's New after upgrade.** After installing or upgrading, Pyre shows **What's New** once with the notes for that version. Open it again anytime from **Help → What's New**.
 
-1.7.6
------
+1.8.2 — 2026-11-01
+------------------
 
-* Baseline Windows installer release used with the Nornir monorepo ``v1.7.6`` line.
+* **Fix: Save Warped Image direction.** **File → Save Warped Image** now saves the source image aligned into the target image's space. Pyre 1.7.7 and earlier saved the wrong image (the target image, warped the wrong way); re-export any warped images saved with those versions. Saving no longer fails with "cannot write mode I as PNG", and the dialog offers an 8-bit or 16-bit PNG. 8-bit images are always saved as 8-bit.
+* **Fix: Save STOS image sizes.** **File → Save STOS File** writes the source and target image sizes in the right places. Pyre 1.7.7 and earlier swapped them whenever the two images differed in size, which can affect grid transforms; re-save those files if you use them.
+* **Fix: 16-bit images open again.** 16-bit images open again (they failed to load), and Pyre keeps their full precision, so a 16-bit warped image matches its source exactly. 16-bit images use twice the memory they did.
+* **Fix: CPU thrash after start.** Fixed Pyre keeping every CPU core busy for a minute or more after it starts or after you load images. Background worker processes in the installed version were crashing and restarting in a loop.
+* **Lower idle CPU use.** Much lower CPU use while Pyre sits idle. The image windows now redraw only when something on screen changes, such as a blinking selected point or a point being aligned.
+* **Spacebar aligns only the current points.** Each Spacebar press aligns only the point under the cursor or the selected points, not every point from earlier presses. Holding Space aligns each point once, the Composite view stays still while results arrive, and the progress bar clears when the work is done. **Escape** or the **Cancel** button in the status bar stops queued point alignments as well as running jobs.
+* **Fix: Remove Points on Masked Areas.** **Registration → Remove Points on Masked Areas** works again and checks each image's mask against that image's points.
+* **Fix: -Source / -Target session restore.** Images opened with `-Source` and `-Target` are no longer replaced by the STOS file from your previous session, and a source and target image with the same file name in different folders are no longer aligned against themselves. After Pyre restores a source and target image without a STOS file, Save Warped Image works.
+* **STOS browser scores less aggressively.** The STOS folder browser no longer re-scores a whole folder every time Pyre starts. It saves quality scores as it computes them, pauses scoring while it is hidden or minimized, and opens at launch only if it was open when you last quit Pyre. If you use it, reopen it once with **File → Open STOS Folder Browser** after updating; Pyre remembers it from then on.
+* **Menus reorganized.** Menus are reorganized into **File**, **Transform**, **Registration**, **View**, and **Help**. Registration defaults are under **Registration → Transform Settings**, image contrast is under **View → Contrast**, and **Help → Mouse and Keyboard Controls** (F1) shows an updated controls reference. **Help → Online Manual** opens the manual in your browser.
+
+1.7.7 — 2026-09-24
+------------------
+
+* **Cancel registration when opening another STOS.** Cancel in-flight control-point registrations (including refine-grid work) when you open a different `.stos` file, so the UI does not keep applying edits from the previous pair.
+* **Faster skip on masked Spacebar points.** Faster feedback when Spacebar registration points fall on blue/busy or masked regions: both source and target masks are checked before a registration job is queued.
+* **Installer and docs packaging.** Installer and documentation packaging updates for the Windows build.
+
+1.7.6 — 2026-09-13
+------------------
+
+* **Baseline Windows installer.** Baseline Windows installer release used with the Nornir monorepo `v1.7.6` line.

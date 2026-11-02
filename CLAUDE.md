@@ -19,6 +19,7 @@ not here.
 @.cursor/rules/Line-endings-and-encoding.mdc
 @.cursor/rules/Workspace-map.mdc
 @.cursor/rules/Questions-and-proving-fixes.mdc
+@.cursor/rules/user-changelog.mdc
 
 ## Glob-scoped rules
 

@@ -29,6 +29,7 @@ Default virtual environment: `D:\src\git\nornir\venv\pyre314` (see **Virtual-Env
 | [Line-endings-and-encoding.mdc](.cursor/rules/Line-endings-and-encoding.mdc) | Preserve line endings; ASCII-only `.ps1` for PowerShell 5.1; Windows paths in inline Python |
 | [Workspace-map.mdc](.cursor/rules/Workspace-map.mdc) | Sibling repos, data volumes, training data, scratch roots; live checkouts feed deployments |
 | [Questions-and-proving-fixes.mdc](.cursor/rules/Questions-and-proving-fixes.mdc) | Answer questions without editing; evidence before "fixed"; stop circling after two failed attempts; remove debug instrumentation |
+| [user-changelog.mdc](.cursor/rules/user-changelog.mdc) | Pyre `CHANGELOG.user.md`: bold skim lead + detail; dated version headings; append history |
 
 ### Glob-scoped
 
