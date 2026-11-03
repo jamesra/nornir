@@ -34,6 +34,10 @@ Composite overlay shader colors: **magenta = source**, **green = target**.
 
 - **Target layer**: native target coordinates; does not move on screen.
 - **Source layer**: warped into target display space; moves during alignment.
+- **Camera `lookat`**: stored in **target display space**. Pan/zoom are a plain
+  translate of that lookat. `Transform` / `InverseTransform` are for image warp and
+  mouse/command pivots only — not for camera navigation (avoids RBF/mesh inverse
+  rockets after convert-to-grid/RBF).
 
 ### Image tile mesh (mesh / grid / RBF)
 
@@ -66,14 +70,14 @@ Rigid model API (imageregistration); Pyre STOS runtime model is `CenteredSimilar
 
 1. **Single transform**: translate/rotate in any view updates the same registration.
 2. **Composite is the alignment truth check**: source and target overlays should match the standalone panels.
-3. **Composite default adjusts the mapped (source) layer**: the source overlay warped into target space moves; the target reference stays static. On mouse-up after rigid translate, rebase composite `camera.lookat` so target-display framing does not snap onto the moved source (`display_lookat_for_composite` while frozen → `lookat_from_display_position` after `end_interactive_edit`).
+3. **Composite default adjusts the mapped (source) layer**: the source overlay warped into target space moves; the target reference stays static. Composite `camera.lookat` is already display-locked, so ending a rigid translate does **not** rebase lookat through `InverseTransform`.
 4. **Which layer moves** (rigid):
    - **Composite + translate/rotate** → **source overlay** moves; **target layer frozen** during the gesture.
    - **Source panel + translate** → mapped layer moves (`TranslateWarped`).
    - **Target panel** → whole-layer translate/rotate **blocked** for rigid/grid.
    - **Rigid rotation** → **Composite window only** (`rigid_rotation_locked`).
 5. **Rotation pivot** (rigid, composite): Ctrl+scroll passes the **source-space cursor** (`point_pair.source`, already `InverseTransform(display)`) to `Rotate`; `TransformController` calls `RotateFixedAboutSourcePoint` to pin `Transform(pivot)` in target space.
-6. **Relative scale**: Shift+scroll on composite/source when the model is `CenteredSimilarity2DTransform` (≈2% per notch). **Alt+Shift+scroll** is the fine version (≈0.5% per notch), mirroring Ctrl+Shift vs Ctrl for rotation. Windows menu-bar Alt activation is swallowed on `PyreWindowBase` so the wheel stays on the GL view. Pivot is the **source-space cursor** (`point_pair.source`); `ScaleWarped` calls `ScaleWarpedAboutSourcePoint` (do not InverseTransform again). Composite then adjusts camera lookat so the pinned target point stays under the cursor.
+6. **Relative scale**: Shift+scroll on composite/source when the model is `CenteredSimilarity2DTransform` (≈2% per notch). **Alt+Shift+scroll** is the fine version (≈0.5% per notch), mirroring Ctrl+Shift vs Ctrl for rotation. Windows menu-bar Alt activation is swallowed on `PyreWindowBase` so the wheel stays on the GL view. Pivot is the **source-space cursor** (`point_pair.source`); `ScaleWarped` calls `ScaleWarpedAboutSourcePoint` (do not InverseTransform again). Composite then adjusts camera lookat with a plain display-space translate so the pinned target point stays under the cursor.
 7. **Zoom**: mouse wheel without Ctrl/Shift zooms about the cursor.
 
 ## Command routing
