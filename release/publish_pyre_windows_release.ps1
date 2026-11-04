@@ -7,6 +7,8 @@
 #   - Pyre-<ver>-Setup.exe  (versioned; kept forever)
 #   - Pyre-Setup.exe        (same bytes; stable name for /releases/latest/download/)
 # Release notes come from nornir-pyre/CHANGELOG.user.md (## <ver> section).
+# <ver> defaults to dist/installer/last-built-version.txt (written by build-installer.ps1),
+# then nornir-pyre/pyproject.toml.
 # Also regenerates docs/packages/pyre_changelog.rst.
 #
 # Examples:
@@ -35,6 +37,12 @@ if (-not (Test-Path $Python)) {
 
 Set-Location $RepoRoot
 
+# build-installer.ps1 bumps pyproject past the version it just built, so publish
+# the recorded build rather than whatever pyproject says now.
+$LastBuilt = Join-Path $RepoRoot "nornir-pyre\packaging\windows\dist\installer\last-built-version.txt"
+if (-not $Version -and (Test-Path $LastBuilt)) {
+    $Version = (Get-Content $LastBuilt -Raw).Trim()
+}
 if (-not $Version) {
     $Version = & $Python -c "from release.sync_pyre_user_changelog import read_pyre_version; print(read_pyre_version())"
     if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($Version)) {
@@ -74,7 +82,9 @@ if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
     throw "GitHub CLI (gh) is required"
 }
 
-$existing = gh release view $Tag --repo $Repo 2>$null
+# "release not found" on stderr is the normal answer for a new version; via cmd so
+# Windows PowerShell 5.1 does not turn it into a terminating error under "Stop".
+cmd /c "gh release view $Tag --repo $Repo >nul 2>&1"
 if ($LASTEXITCODE -eq 0) {
     Write-Host "Updating existing release $Tag"
     gh release upload $Tag $VersionedExe $LatestExe --repo $Repo --clobber

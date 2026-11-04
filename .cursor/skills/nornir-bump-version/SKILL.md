@@ -60,6 +60,19 @@ git push origin pyre-X.Y.Z
 
 `build-installer.ps1` reads `nornir-pyre/pyproject.toml`; override only when needed with `-Version x.y.z`.
 
+**Automatic patch bump (local builds).** Do not hand-bump the patch number for a local installer build:
+
+- `build-freeze.ps1` first runs `release/bump_pyre_version.py --if-released`: when the current
+  version's changelog heading is already dated (shipped), it moves to the next patch and opens an
+  empty `## X.Y.Z+1 — not yet released` section. Move any bullets added after that release into it.
+- After Inno Setup succeeds, `build-installer.ps1` writes `dist/installer/last-built-version.txt`,
+  then runs `bump_pyre_version.py`: the built section gets today's date, and pyproject, the BOM and a
+  new `not yet released` changelog section move to the next patch. `-NoBump` or `-Version` skips it;
+  so does GitHub Actions.
+- `publish_pyre_windows_release.ps1` publishes `last-built-version.txt`, not the bumped pyproject.
+- Commit the bumped `pyproject.toml` / `CHANGELOG.user.md` (submodule), then `package-versions.yaml`
+  and the pointer (umbrella).
+
 Docs always link the latest installer, `https://github.com/jamesra/nornir/releases/latest/download/Pyre-Setup.exe`; versioned installers stay on prior `pyre-*` releases.
 
 ## Cut a monorepo release

@@ -12,12 +12,41 @@ Older installers remain on the repository
 `Releases page <https://github.com/jamesra/nornir/releases>`_
 (look for tags ``pyre-*``).
 
-1.8.6 — not yet released
+1.8.9 — not yet released
 ------------------------
+
+
+1.8.8 — 2026-11-04
+------------------
+
+* **Choose whether mesh transforms open as Mesh or RBF.** **Registration → Transform Settings → Point / Mesh → Open mesh transforms as** picks the transform type used when a `.stos` with a mesh transform is opened. RBF transforms are saved as meshes, so choose **RBF** to keep editing them as RBF after reopening. Grid and rigid transforms open unchanged.
+* **Histograms are no longer flattened by one tall bar.** When one or two bars (for example fully black or fully white pixels) are more than twice as tall as every other bar, the contrast and registration-quality histograms scale to the remaining bars instead. Bars that run off the top show their count.
+* **Choose which side of a point a Composite drag moves.** **Registration → Transform Settings → Point / Mesh → Composite drag moves** offers **Target point** (the default: the point follows the cursor over the image) or **Source point**: the point stays still on screen and the warped image slides under it with the cursor. The arrow-key nudge follows the same choice. Grid transforms always move the target point.
+* **Mesh transforms continue smoothly past the control points.** Outside the area covered by a mesh's control points, Pyre now continues the mapping with the nearest edge triangle, the same way the warped image is built. The image tiles, the cursor position and new control points beyond the edge stay in place while you drag a point and right after a mesh opens, instead of stopping at the edge. Grid transforms are unchanged.
+<!-- Pyre only: pyre/mesh_hull_affine.py uses hull_extrapolation forward/inverse extrapolators for TransformType.MESH; registration and builds keep the RBF fallback. -->
+* **Fix: RBF images did not move while dragging a point.** On RBF transforms (including a mesh converted to RBF) the images now follow a control point while you drag it, as they do for mesh transforms. During the drag the image near the point moves with it; the exact RBF result is drawn when you release the point.
+* **Fix: Deleting one point also deleted the point just added.** A new control point stays selected, and **Shift+right-click** on a different point removed both. **Shift+right-click** on a point that is not selected now removes only that point; on a selected point it still removes the whole selection, and **Delete** / **Backspace** remove the selection. Deleting points on a GPU-loaded mesh can also be undone with **Ctrl+Z** again.
+* **Fix: "points parameter has unexpected type" when converting a transform.** Converting a GPU-loaded mesh (for example to RBF) no longer reports this error, and cancelling a point drag or pressing **Ctrl+Z** after a point edit restores the points on GPU-loaded and RBF transforms instead of failing.
+* **Fix: Shift+right-click did not delete RBF control points.** In RBF transform mode, **Shift+right-click** on a control point and the **Delete** / **Backspace** keys now remove points, as they do for mesh transforms. Moving or adding points on an RBF transform also no longer leaves the reverse mapping wrong, which could misplace the cursor-to-source position used by rotate, scale and registration.
+* **Fix: Composite pan jumped or stuck on mesh, grid and RBF transforms.** Right-drag panning, **W/A/S/D** and zoom-to-cursor in the Composite window now move the image smoothly under the cursor, including after converting from a rigid transform. Before, the view could jump or stop following the mouse in strongly warped areas.
+<!-- Reverted nornir-pyre f7d4492 (display-native composite lookat) on 2026-11-03 at the user's request; it could leave the Composite overlay off after Mesh<->RBF and reopen. Pan now inverts the forward warp's local Jacobian (composite_display._local_forward_jacobian) instead of an iterative InverseTransform solve per move; plain translate when the Jacobian is degenerate. -->
+* **Fix: convert transform type left selection and Space gestures stuck.** Changing transform type (for example mesh → rigid, or rigid → RBF) now clears the control-point selection and refreshes Space / mouse command routing for the new type. Leftover selection had been blocking **Shift+wheel** / **Alt+Shift+wheel** scale, and Space could still behave like rigid refine after converting to mesh, grid, or RBF.
+* **Optional best-angle estimate for Refine Grid.** **Registration → Transform Settings** and the Refine Grid dialog offer **Estimate best angle**, off by default. When on, each cell runs a log-polar angle estimate and registers that angle in addition to 0 and any max/step angles; Refine Grid no longer searches scale on that path.
+
+1.8.7 — 2026-11-01
+------------------
+
+* **Alt+Shift+wheel for fine scale.** **Alt+Shift+mouse wheel** scales the transform in small steps (about 0.5% per notch). **Shift+wheel** remains the larger step (~2%). **Ctrl+Shift+wheel** remains the fine rotation gesture. Holding Alt no longer steals focus into the menu bar. On Windows, Shift(+Alt)+wheel is often reported as a sideways scroll; Pyre still treats that as a scale step.
+* **Fix: choosing a STOS stayed stuck while scores validated.** Opening a transform from the STOS browser (double-click or context-menu Open) no longer waits behind folder-wide checksum validation. Opens use their own worker; background score checks can stop when superseded.
+
+1.8.6 — 2026-11-01
+------------------
 
 * **Exterior grid points settle after registration.** After each grid-point registration, Pyre runs one spring step that settles exterior / masked lattice points into a low-energy layout matching the warped interior. Use **Registration → Relax Exterior Grid Points** to run that step again without registering.
 * **One Ctrl+Z for a Spacebar queue.** **Ctrl+Z** after a Spacebar registration queue undoes the whole queue in one step, including a cancel that left some points already applied.
 * **STOS browser shows cached scores first.** The STOS folder browser paints pair ZNCC from `stos_quality.json` as soon as the folder scan finishes, then validates checksums and scores missing entries in the background.
+* **Fix: STOS browser froze on network folders.** Opening a large STOS folder on a network share no longer freezes Pyre for minutes. The browser reads file dates and Manual overrides from one listing of each folder instead of checking every file separately, and the listing runs in the background.
+* **Fix: Refine w/ Grid failed in the 1.8.5 installer.** **Registration → Refine w/ Grid** stopped with "No module named 'matplotlib.backends.backend_svg'" when saving its diagnostic plots. The installer now includes the module.
 
 1.8.5 — 2026-11-01
 ------------------
