@@ -135,3 +135,50 @@ then re-run Prune, because scores are scaled when Prune writes them. ds4 tiles a
     span = shared.CrushCodeSpan(hist, (0.0001, 0.9999))   # ImportIDoc -Min/-Max defaults
     # set CrushCodeSpan=f'{round(span, 3):g}' on the Raw8 Filter element (VolumeManager load/save, or edit
     # TEM/0139/TEM/VolumeData.xml), then re-run Prune for section 139 (its PruneScores file is stale)
+
+## Prune scale on crushed sections (2026-11-05, buildmanager cd0a081, not pushed)
+
+**Persistence bug.** The import set `CrushCodeSpan` after the filter node's last save. The span therefore reached only
+memory, or the channel's `Filter_Link`. Prune reads `Raw8/VolumeData.xml`, found no span, and fell back to scale 1.0;
+on RC2 139 every tile was removed.
+- **Fix:** IDoc and MRC imports yield the filter after writing its crush attributes and span.
+- **Fallback:** `CrushedScoreScale` also reads the `Filter_Link`.
+- **Checked:** a crushed import of RC2_Micro/17 writes `CrushCodeSpan` on the `<Filter>`.
+
+**Why crushed scores were 98-209x the 2015 scores, not ~217x.**
+- A prune score is a sum of standard deviations, so it is linear in intensity.
+- A legacy Raw8 tile is (raw - Min) * 255 / (Max - Min), with RC2's hand-chosen Min/Max: round numbers such as
+  4500-9000, with spans of 4,500-5,500 counts.
+- A crushed score divided by the span in codes equals the legacy score only when that span is (Max - Min) / step.
+- The 0.0001/0.9999 code-histogram span covers the whole intensity range instead (tears, folds), which is 1.1-2.3x wider.
+
+Validation (tiles with 2015 score >= 10; median of crushed score / 2015 score; scores in the scratch volume):
+
+| Section | Current span (codes) | Ratio | Legacy cutoffs (counts) | Legacy span (codes) | Ratio with legacy span |
+|---|---|---|---|---|---|
+| 1226 | 39.7 | 98x | 4500-9000 | 17.4 | 224x |
+| 360 | 23.5 | 209x | 1772-6399 | 22.2 | 221x |
+| 943 | 28.8 | 122x | 10500-16000 | 15.2 | 231x |
+| 139 | 47.0 | 180x | 500-5000 | 37.5 | 226x |
+
+The remaining +2-6% over 217x is consistent with crushed tiles not clipping at the cutoffs and adding quantization
+noise.
+
+**Fix.** A section's contrast override (ContrastOverrides / histogram cutoffs file in the import directory) sets
+`CrushCodeSpan = (Max - Min) / step` (`shared.CrushCodeSpanFromContrastOverride`). For the RC2 reimports, put each
+section's legacy Raw8 `MinIntensityCutoff`/`MaxIntensityCutoff` in the override file, or set the attribute directly on
+the `<Filter>`, then re-prune.
+
+**For new volumes there is no legacy scale to match.** Legacy scores were never contrast-independent: they move with
+each section's chosen cutoffs. A portable alternative is a score in noise units: code score x CrushK, that is, counts
+over sigma. Here it ran 34-83x the 2015 scores, which reflects real tissue contrast against noise. It needs its own
+thresholds. Not implemented.
+
+**Flat-tile rule for crushed sections (proposal, not implemented).** Compare texture to the section's measured noise,
+not to its intensity span:
+- A tile is flat when its median cell std at ds4, in counts (codes x step), is below about 1.5 x sigma_ds4.
+- sigma_ds4 is estimated on the ds4 tiles with `noise_crush.estimate_noise_sigma`, not as sigma/4, since detector noise
+  is spatially correlated.
+- A noise-only tile sits at about 1 x sigma_ds4 in any section. Faint tissue (943) is still above it, while span-based
+  rules removed 262 of 943's tissue tiles.
+- Calibrate the factor on 1226 (81 flat tiles found by the legacy rule) and 943 (none).
