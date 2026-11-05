@@ -85,6 +85,12 @@ Not verified end to end: a `-NoCrush` import of the same data crashed (segfault 
 outside of the main thread" in the legacy histogram plot) and, with `MPLBACKEND=Agg`, hung with no tile written. Both
 happen inside the import call, before the new step, so they are not caused by it; not checked on the previous commit.
 
+## Where to run it on RC2 (James, 2026-11-05)
+
+`Y:\Volumes\RC2-mirror` is a block copy of `Y:\Volumes\RC2`. Any write to the RC2 volume, for example a `TileGains`
+run, goes to RC2-mirror, never to `Y:\Volumes\RC2`; reading RC2 is fine. Everything in this note so far ran on
+isolated copies under `C:\Temp\Nornir\gain_test\` and only read RC2.
+
 ## Not done
 
 - Applying the gains when loading crushed tiles (loader item), Viking reading them, assembled images re-crushed with
