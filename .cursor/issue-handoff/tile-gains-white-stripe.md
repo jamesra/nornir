@@ -69,12 +69,24 @@ overlaps (1 rejected), gains p5-p95 0.904-1.119, 15 s for the solve; chunks writ
 unchanged), `TileGainsSource` / `TileGainsChecksum` saved on the filter; a second run writes nothing (gains within
 0.5%).
 
+## Import step (buildmanager `bfa346e`)
+
+ImportIDoc and ImportMRC now end with a step in their pipeline definitions that iterates the imported sections and
+calls `tilegains.TileGains` on `Stage` at level 1 (the only level an import writes; its tiles are still in the OS
+cache), with `CrushedOnly` (legacy `-NoCrush` filters are skipped, as the plan's gain chunk is for crushed tiles) and
+`SkipIfCurrent` (a re-import does not recompute gains already computed from this Stage checksum). Level-1 reads use 8
+reader threads to keep memory near 1 GB.
+
+Tested with a real import (`ImportIDoc` of `D:\nornir-testdata\PlatformRaw\IDOC\RC2_Micro\17`, 25 tiles, crushed,
+scratch volume `C:\Temp\Nornir\gain_test\importtest\vol`): gains computed (40 overlaps, 0.99-1.01, 6 s) and recorded on
+the filter; a second import skipped the step. Guards: `tests/test_tilegains_op.py`.
+
+Not verified end to end: a `-NoCrush` import of the same data crashed (segfault after "Starting a Matplotlib GUI
+outside of the main thread" in the legacy histogram plot) and, with `MPLBACKEND=Agg`, hung with no tile written. Both
+happen inside the import call, before the new step, so they are not caused by it; not checked on the previous commit.
+
 ## Not done
 
-- ImportIDoc / ImportMRC do not call the gain function yet (the plan wants it as an import step on Stage.mosaic).
-  The importer files were being changed by the importer worker in parallel; wiring is a small follow-up once that
-  lands: call `operations.tilegains.TileGains(StageTransformNode, FilterNode, Downsample=...)` after the tile pyramid
-  exists.
 - Applying the gains when loading crushed tiles (loader item), Viking reading them, assembled images re-crushed with
   gain 1.
 - Translate pipelines re-running gains after every translate (plan: provided it is fast; it is ~5-40 s per section).
