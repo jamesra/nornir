@@ -70,6 +70,10 @@ git push origin pyre-X.Y.Z
   new `not yet released` changelog section move to the next patch. `-NoBump` or `-Version` skips it;
   so does GitHub Actions.
 - `publish_pyre_windows_release.ps1` publishes `last-built-version.txt`, not the bumped pyproject.
+  A new release is tagged at the umbrella HEAD, which must already be pushed (never the default
+  `master`, whose old workflow would rebuild and publish stale code). The tag push starts
+  `pyre-windows-release.yml`, which skips when the release already has its installer or the tag
+  version differs from that commit's pyproject.
 - Commit the bumped `pyproject.toml` / `CHANGELOG.user.md` (submodule), then `package-versions.yaml`
   and the pointer (umbrella).
 

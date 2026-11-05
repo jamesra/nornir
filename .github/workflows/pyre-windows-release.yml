@@ -61,28 +61,58 @@ jobs:
           "tag=pyre-$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
           Write-Host "Pyre version=$v tag=pyre-$v"
 
+      # publish_pyre_windows_release.ps1 creates the pyre-<ver> tag after uploading a local
+      # build. Without this guard that tag push rebuilt whatever commit the tag landed on
+      # (once: old master, Pyre 1.8.4) and published it, possibly as latest.
+      - name: Skip when the tag does not match or the release is already published
+        id: guard
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $ver = "${{ steps.ver.outputs.version }}"
+          $tag = "${{ steps.ver.outputs.tag }}"
+          $skip = $false
+          if ("${{ github.ref_type }}" -eq "tag" -and "${{ github.ref_name }}".StartsWith("pyre-") -and "${{ github.ref_name }}" -ne $tag) {
+            Write-Host "::notice::Tag ${{ github.ref_name }} is on a commit whose pyproject says Pyre $ver; not building."
+            $skip = $true
+          }
+          if (-not $skip -and "${{ github.event_name }}" -ne "workflow_dispatch") {
+            $assets = gh release view $tag --repo ${{ github.repository }} --json assets --jq '.assets[].name' 2>$null
+            if ($LASTEXITCODE -eq 0 -and ($assets -contains "Pyre-$ver-Setup.exe")) {
+              Write-Host "::notice::Release $tag already has Pyre-$ver-Setup.exe (published locally); not rebuilding."
+              $skip = $true
+            }
+          }
+          "skip=$($skip.ToString().ToLower())" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
       - name: Build PyInstaller bundle
+        if: steps.guard.outputs.skip != 'true'
         shell: pwsh
         run: |
           Set-ExecutionPolicy -Scope Process Bypass
           ./nornir-pyre/packaging/windows/build-freeze.ps1 -SkipVerify
 
       - name: Smoke test frozen bundle
+        if: steps.guard.outputs.skip != 'true'
         shell: pwsh
         run: |
           Set-ExecutionPolicy -Scope Process Bypass
           ./nornir-pyre/packaging/windows/validate-frozen.ps1
 
       - name: Install Inno Setup
+        if: steps.guard.outputs.skip != 'true'
         run: choco install innosetup -y --no-progress
 
       - name: Compile installer
+        if: steps.guard.outputs.skip != 'true'
         shell: pwsh
         run: |
           Set-ExecutionPolicy -Scope Process Bypass
           ./nornir-pyre/packaging/windows/build-installer.ps1
 
       - name: Prepare assets and release notes
+        if: steps.guard.outputs.skip != 'true'
         shell: pwsh
         run: |
           $ver = "${{ steps.ver.outputs.version }}"
@@ -96,6 +126,7 @@ jobs:
             --write-docs
 
       - name: Upload installer artifact
+        if: steps.guard.outputs.skip != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: pyre-windows-installer
@@ -104,6 +135,7 @@ jobs:
             nornir-pyre/packaging/windows/dist/installer/Pyre-Setup.exe
 
       - name: Publish GitHub Release (pyre-*)
+        if: steps.guard.outputs.skip != 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.ver.outputs.tag }}
@@ -119,7 +151,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Trigger documentation deploy
-        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.skip_docs_trigger) }}
+        if: ${{ steps.guard.outputs.skip != 'true' && !(github.event_name == 'workflow_dispatch' && inputs.skip_docs_trigger) }}
         shell: pwsh
         run: |
           gh workflow run docs.yml --repo ${{ github.repository }}

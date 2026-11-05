@@ -90,9 +90,18 @@ if ($LASTEXITCODE -eq 0) {
     gh release upload $Tag $VersionedExe $LatestExe --repo $Repo --clobber
     gh release edit $Tag --repo $Repo --notes-file $NotesFile --latest
 } else {
-    Write-Host "Creating release $Tag"
+    # Without --target gh tags the default branch (master), and the tag push makes
+    # pyre-windows-release.yml rebuild that old code. Tag the pushed umbrella HEAD
+    # instead; its workflow skips because this release already has the installer.
+    $TargetSha = (git -C $RepoRoot rev-parse HEAD).Trim()
+    $OnRemote = git -C $RepoRoot branch -r --contains $TargetSha 2>$null
+    if (-not $OnRemote) {
+        throw "Umbrella HEAD $TargetSha is not on origin. Push the umbrella (and submodules) first, then publish."
+    }
+    Write-Host "Creating release $Tag at umbrella $TargetSha"
     gh release create $Tag $VersionedExe $LatestExe `
         --repo $Repo `
+        --target $TargetSha `
         --title "Pyre $Version Windows installer" `
         --notes-file $NotesFile `
         --latest
