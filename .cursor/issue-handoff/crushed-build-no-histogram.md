@@ -110,3 +110,28 @@ Not run end to end: no crushed test volume on this workstation. Raw8 pyramid lev
   not stored. When the Viking/export work starts, store display-only hints under names no nornir stage reads (e.g.
   `CrushDisplayMin/Max` from the conversion-time code histogram) rather than restoring `Min/MaxIntensityCutoff`.
 - The plan's loader/inflate (D1, D4), save/re-crush (D2), pyramids, blob retune and brightness-drift todos are untouched.
+
+## Fix 2026-11-05: CrushCodeSpan was 1 (buildmanager 42ce21d, umbrella e371f6b)
+
+`CrushCodeSpan` read the import's -Max (0.9999, a cumulative fraction) as an amount trimmed from the top, so the high
+cutoff landed on the low one and the span was 1 code. RC2 139 (imported on Build2 with d203e57) got
+`CrushCodeSpan="1"`, so `CrushedScoreScale` was 255 and its prune scores about 40-48x too high. Only sections whose
+tiles were converted by d203e57 are affected (MRC imports take the span from the cutoffs; filters with old cutoffs
+had them moved over).
+
+In-place repair, without re-importing. A plain re-import does not fix it: the tiles already exist, so nothing is
+converted and the span is not recomputed. Instead, recompute the span from the tiles' codes and rewrite the attribute,
+then re-run Prune, because scores are scaled when Prune writes them. ds4 tiles are enough:
+
+    import glob, os
+    import numpy as np
+    from PIL import Image
+    from nornir_buildmanager.importers import shared
+    raw8 = '<scratch volume>/TEM/0139/TEM/Raw8'
+    hist = np.zeros(256, np.int64)
+    for p in glob.glob(os.path.join(raw8, 'TilePyramid', '004', '*.png')):
+        with Image.open(p) as im:
+            hist += np.bincount(np.asarray(im).ravel(), minlength=256)
+    span = shared.CrushCodeSpan(hist, (0.0001, 0.9999))   # ImportIDoc -Min/-Max defaults
+    # set CrushCodeSpan=f'{round(span, 3):g}' on the Raw8 Filter element (VolumeManager load/save, or edit
+    # TEM/0139/TEM/VolumeData.xml), then re-run Prune for section 139 (its PruneScores file is stale)
