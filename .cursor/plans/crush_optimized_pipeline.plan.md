@@ -21,11 +21,11 @@ todos:
     content: "Shrink/BuildTilePyramids and the Viking tile pyramid keep crushed codes and the chunk (average codes, round, copy chunk)"
     status: pending
   - id: stages
-    content: "Mosaic, Assemble, Blob, Stos, MosaicToVolume, prune and histogram on the crushed filter; Leveled not produced for crushed filters"
-    status: pending
+    content: "Mosaic, Assemble, Blob, Stos, MosaicToVolume, prune and histogram on the crushed filter; Leveled not produced for crushed filters. PARTLY DONE 2026-11-05 (crushed-build-no-histogram.md): Histogram/AdjustContrast/SetContrast skip or refuse crushed filters (no Leveled); crushed IDoc imports have no histogram pre-pass and no contrast attributes; Prune reads codes on purpose with CrushCodeSpan. Open: Blob, Stos, MosaicToVolume, AssembleTiles (optimized tiles normalise each tile by its own max)"
+    status: in_progress
   - id: scripts
-    content: "TEMBuild/TEMAlign (.sh/.cmd) and Pipelines.xml defaults pick the crushed filter (Raw8 or Raw16) instead of Leveled"
-    status: pending
+    content: "TEMBuild/TEMAlign (.sh/.cmd) and Pipelines.xml defaults pick the crushed filter (Raw8 or Raw16) instead of Leveled. PARTLY DONE 2026-11-05: scripts/TEMBuildCrushed.sh (NORNIR_CRUSHED_FILTER picks Raw8/Raw16). Open: TEMAlign, .cmd, Pipelines.xml defaults"
+    status: in_progress
   - id: exports
     content: "MosaicReport, ExportImages, ExportTrainingData level in memory from the contrast hints (they produce pictures, not pipeline data)"
     status: pending
