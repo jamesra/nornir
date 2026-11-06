@@ -154,13 +154,14 @@ def main() -> None:
 
         translated.SetTransform(prune)
         translated.ResetChecksum()
-        translated.attrib["ManualOffsetsChecksum"] = nornir_imageregistration.settings.MosaicOffsetsChecksum([])
-        translated.attrib["ManualOffsetsCount"] = "0"
+        # Attribute assignment on the node (not .attrib[...]) lets the volume manager mark it changed.
+        translated.ManualOffsetsChecksum = nornir_imageregistration.settings.MosaicOffsetsChecksum([])
+        translated.ManualOffsetsCount = "0"
         grid.SetTransform(translated)
         grid.ResetChecksum()
-        grid.attrib["cmd"] = ("python:nornir_imageregistration.RefineGridMosaic(per half; cell_size=(128, 128), mesh_shape=(8, 8), "
-                              "iterations=10, displacement_threshold=0.25, imageScale=0.25) on Leveled level 4; "
-                              "hand-rescued, see .cursor/skills/rescue-damaged-section")
+        grid.cmd = ("python:nornir_imageregistration.RefineGridMosaic(per half; cell_size=(128, 128), mesh_shape=(8, 8), "
+                    "iterations=10, displacement_threshold=0.25, imageScale=0.25) on Leveled level 4; "
+                    "hand-rescued, see .cursor/skills/rescue-damaged-section")
         translated.Locked = True
         grid.Locked = True
         channel.Save()
