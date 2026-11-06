@@ -20,6 +20,7 @@ not here.
 @.cursor/rules/Workspace-map.mdc
 @.cursor/rules/Questions-and-proving-fixes.mdc
 @.cursor/rules/user-changelog.mdc
+@.cursor/rules/Self-updating-pipelines.mdc
 
 ## Glob-scoped rules
 

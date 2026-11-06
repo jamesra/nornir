@@ -1,0 +1,21 @@
+---
+description: Nornir volumes are self-updating; when input data changes, re-run the pipelines and let them rebuild stale outputs instead of deleting or managing derived data by hand
+alwaysApply: true
+---
+
+## Self-updating pipelines
+
+Nornir volumes rebuild themselves. Each stage records what it was built from (input checksums, transform and
+filter attributes) and, when its input changes, regenerates its output on the next pipeline run. Derived data
+needs no management by hand.
+
+- **Change the input, then re-run the pipelines.** After replacing a filter (e.g. a section's Raw filter), a
+  mosaic or other input, run the normal stages; dependent outputs (Blob, Mask, Leveled, assemblies, tilesets,
+  VikingXML) rebuild because their recorded inputs no longer match.
+- **Leave stale outputs in place.** Do not delete, rename or hand-patch derived filters, tilesets or mosaics to
+  "clean up" after an input change; the stage that owns them replaces them.
+- **Keep volumes in their normal form.** No parallel copies of filters, extra VikingXML files or backups inside
+  a volume; anything outside a volume's usual layout becomes manual cleanup later. Backups and experiments go
+  outside the volume (e.g. `Y:\_nornir_work\<topic>\`).
+- **A stage that misses an input change is a bug.** Report it (or fix it in the stage's validity check); do not
+  work around it with manual deletions, which hides the bug and breaks the self-updating design.

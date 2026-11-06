@@ -30,6 +30,7 @@ Default virtual environment: `D:\src\git\nornir\venv\pyre314` (see **Virtual-Env
 | [Workspace-map.mdc](.cursor/rules/Workspace-map.mdc) | Sibling repos, data volumes, training data, scratch roots; live checkouts feed deployments |
 | [Questions-and-proving-fixes.mdc](.cursor/rules/Questions-and-proving-fixes.mdc) | Answer questions without editing; evidence before "fixed"; stop circling after two failed attempts; remove debug instrumentation |
 | [user-changelog.mdc](.cursor/rules/user-changelog.mdc) | Pyre `CHANGELOG.user.md`: bold skim lead + detail; dated version headings; append history |
+| [Self-updating-pipelines.mdc](.cursor/rules/Self-updating-pipelines.mdc) | Volumes self-update: change inputs and re-run pipelines; never clean up derived data by hand; keep volumes in normal form |
 
 ### Glob-scoped
 
