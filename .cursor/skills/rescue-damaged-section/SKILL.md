@@ -78,6 +78,48 @@ be registered by correlation**; plan on a manual merge in Pyre.
      put it) was a true misplacement and was fixed by moving the tile.
    - Without extrema masking, large black or white regions produced spurious 0.99 matches (noise floor 0.69
      instead of 0.49). Always mask them.
+   **Standard for every repair (user, 2026-11-05): the full poor-edge check.** Every tile whose edges correlate poorly
+   where the layout puts them (half or more of its neighbour edges at NCC <= 0.3), and every tile in two or more
+   misplaced pairs, is searched against **all** tiles within the radius, and re-placed when the evidence clears this
+   section's own noise floor (`scripts/replace_tiles.py solve`: clusters of 2+ peaks above the far-pair 95th percentile,
+   or a single peak 0.05 above the far-pair maximum). Repeating textures raise the floor a lot (section 11: far pairs
+   p95 0.77, max 0.86), so never use fixed thresholds. Then re-run the cross-check on the result and compare. Tiles
+   the evidence cannot place stay out (user: no unconfirmed fill tiles). Tile overlap is not a fault (Assemble keeps the
+   pixels closest to a tile centre); judge only alignment.
+   **Placement rules (user, 2026-11-05, after 515 and 1034; built into `replace_tiles.py solve`):**
+   - **Settled tiles never move.** A tile whose edges with its immediate neighbours all correlate above the noise floor's
+     p95 at the layout, and which is in no misplaced pair, is aligned; no far peak overrides that. Every other tile
+     (poor edges, misplaced pairs, not placed) is a suspect and goes through the wide search.
+   - **Short moves (under a quarter pitch, ~900 px) need edge confirmation only:** two or more neighbours' peaks
+     agreeing on the new place above the noise floor (or one very strong peak).
+   - **Far moves need independent agreement:** three or more different tiles agreeing within the tolerance, each peak
+     at least 0.05 above the floor's p95, or two agreeing tiles that confirm the new spot from opposite sides. Tiles
+     confirmed earlier in the same solve count as support, not only tiles settled at the start (515 has only 492 of
+     1,789 settled; requiring settled-only support blocked its correct 470-710 px moves of 1688, 1689, 2018, 621).
+   - **Hard check:** a move is undone when the tile's median edge NCC at the new place, measured on the images, is lower
+     than at the old place by more than 0.02 (515's tile 975 went from 0.72 to -0.15 on a "supported" far move).
+   - **The solve makes no move under 128 px;** those corrections are left to the grid refine. ds16 peaks are too coarse
+     for them: in 515, 15-70 px solve moves made 742 edges better and 693 worse (poor edges 170 -> 243).
+   - Short-move estimates may come from neighbours that are themselves suspects (515's 1688: 1687 never settled because
+     its tear-side neighbours are suspects too); far moves accept support only from settled or already-confirmed tiles.
+   - Unresolved tiles: `scripts/islands.py` searches them against every tile (3+ settled tiles agreeing), then lays the
+     rest out as islands (connected by confirmed mutual pairs) and singletons in rows below the section, and tries each
+     island as one rigid group; it writes review mosaics only (1034: 217 unresolved under the first solve, 37 under the
+     final rules, none placeable above the noise floor). 515's black holes came from single 0.93-0.95 peaks
+     on fold/tear texture that threw tiles 2,000-7,000 px; 1034's group moves of 5,800-7,500 px were real (displaced
+     torn tissue: edges rose from about 0.0-0.5 to 0.5-0.9 after the move).
+   - **Coverage never decides placement.** A torn section can move during capture, leaving regions uncaptured (real
+     holes) and others captured twice (duplicate tissue, often rotated). Do not add rules that keep or revert a tile
+     because of the hole or overlap it creates; a strong match at a large overlap with a settled tile is a valid
+     placement. crosscheck_pairs.py scores every offset with at least 3,000 px of overlap, large overlaps included.
+   - **Pass order:** pass 1 places loose tiles by translation only (wide search, high overlaps included). Pass 2, only
+     for tiles still unplaced, tries rotation: log-polar (StosBrute path, `search_scale=False`, optional +/-5% scale
+     only as an off-by-default fallback) against the tile's 2-4 nearest settled tiles, then NCC at that angle, accepted
+     with the same multi-neighbour standard. Pass 2 is under study (`scripts/rotation_study.py`, detection only, writes
+     no mosaic; log-polar costs 15-130 s per pair at ds8). The normal translate path never produces rotation; rotation
+     is only ever for the repair path.
+   - Memory: the workstation runs at its commit limit; set `MAX_PYTHON_THREADS=8` and start heavy jobs only with 20-25 GB
+     of commit free. A MemoryError/1455 result is not real: wait and re-run.
 5. **Refine each half on its own** (`scripts/refine_half.py left|right`): `RefineGridMosaic` with the Mosaic
    pipeline's grid settings (cell 128, mesh 8x8, 10 iterations, threshold 0.25, ds4). Merge the two results
    into one `Grid_*.mosaic` (disjoint tile sets). Both halves converged in 4 passes (mean displacement
@@ -85,7 +127,9 @@ be registered by correlation**; plan on a manual merge in Pyre.
    (folds, white tear strip) and did not move the tissue; look at before/after crops before worrying.
 6. **Review the assembled image** (`Assemble` at ds8/ds16 from the copy, or `tile_overlap_stats`) before
    installing. Put images on `Y:\_nornir_work\<section>\` and give the `Y:` path: do not upload images to
-   chat (30 MiB and 8000 px limits, and the user reads from another device).
+   chat (30 MiB and 8000 px limits, and the user reads from another device). **Standard (user, 2026-11-04):**
+   deliver a before/after pair at ds16: `before_Grid_2015_ds16.png` (the section's current production Grid) and
+   `after_Grid_repaired_ds16.png`, both from `scripts/assemble_mosaic.py`.
 7. **Annotations first (policy, set by the user 2026-11-04 for every repaired mosaic).** Before a repaired
    mosaic is installed, the section's annotations are rescued: their mosaic-space positions are mapped from the
    old mosaic coordinates to the new ones, through the tiles both mosaics share
@@ -101,9 +145,19 @@ be registered by correlation**; plan on a manual merge in Pyre.
    (no tile in both mosaics covers it; look at these by hand), plus an overlap disagreement: how far apart two
    overlapping tiles put the same point in the new mosaic, which exposes annotations drawn where the old mosaic
    was misregistered. On 1240 the sample round trip for MAPPED points was 0.20 px median. Run
-   `scripts/remap_mosaic_points.py --sample` first when no annotation export exists yet. Still open: exporting a
-   section's mosaic-space annotations from Viking and importing the result, and recomputing volume-space
-   positions from the volume transform afterwards.
+   `scripts/remap_mosaic_points.py --sample` first when no annotation export exists yet. Decision (user, 2026-11-04): annotations are **not exported**. The mapping is applied in place by a
+   VikingAU option / an Update-Volume-Positions-style tool (gRPC or WPF service) that, for one section, maps every
+   location's mosaic geometry old mosaic -> tile pixel -> new mosaic through the saved `Grid_old.mosaic` and
+   `Grid_new.mosaic` of the annotation transfer map (tiles do not change, so positions stay stable), then rewrites the
+   volume cache under the default transform. Not built yet (VikingAU already has `--translate`, a per-section shift).
+   **Standard output of every repair (user, 2026-11-04): an annotation transfer map.** When a repaired mosaic is
+   finished, whether or not it will be installed soon, build the map from the section's *current production*
+   Translated and Grid mosaics (the old mosaics) to the repaired ones: keep a copy of both old mosaics next to the
+   new ones (`Translated_old.mosaic`, `Grid_old.mosaic`), run `remap_mosaic_points.py <old> <new> --sample <prefix>`
+   for each pair, and deliver the folder `Y:\_nornir_work\<section>\annotation_transfer\` with the old and new
+   mosaics, the sample reports and a short `README.txt` (tile counts, shared tiles, points with no shared tile).
+   Applying the map to real annotations later needs only those files. Do this before asking to install; the
+   report is what `install_rescue.py --annotation-rescue-report` takes once real annotations have been mapped.
 8. **Install in production** (needs the user's approval for the section, and step 7 done).
    1. Back up everything you will change to `Y:\_nornir_backups\RC2\<date>-section<N>-rescue\` with the same
       relative layout: the channel `VolumeData.xml` (and `.backup.xml`), `Stage`, `Prune_*`,
