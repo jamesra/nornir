@@ -22,3 +22,19 @@ self-describing. Not started; needs your decision (it touches Viking and the pla
 
 Also not done: per-section INFO progress for TileGains (RC1: the "overlaps ... gain p5-p95" line only appears at the
 end of a multi-section run through a tee'd pipe, so monitoring a run is blind).
+
+## Result (RC1, 2026-11-06, image 0873345)
+
+- All 343 RC1_Crush sections have `TileGains_*.json` (RABBIT sections on `Translated_Stage`, 5 and 6 on `Translated_Prune`;
+  Stage is ~300 px RMS off). Gain p5-p95 0.942-1.064 (widest: section 10).
+- No-op rerun (sections 10, 198, 300, already stamped): ~5 s per section vs ~109 s for a first stamp; tile mtimes
+  unchanged, no `.gainstamp` files, gains reproduce exactly. Header-only check works.
+- First stamp on the new image: ~103 s per section (the directory-listing fix does not change first-stamp wall time).
+  Flamegraph: 55% `stamp_gain_png` streaming copy (irreducible while gains live in every PNG at every level),
+  ~40% `measure_overlaps` on ds4 tiles (PIL decode 17%, strip_statistic 12%), existence check 0.2% (was 56% of
+  non-idle samples), solve under 2%.
+- Remaining lever if first-stamp time matters: read overlaps at `-Downsample 8` (the docstring records ds8 matching ds1
+  on RC3); not tried on RC1. The stamping copy stays unless the gain moves out of the tiles (James decided against).
+- Precision of the gain baked into assembled tilesets: float32 error <= 5e-6 code; sub-pixel placements round once
+  (0.29 code rms, unbiased, same as gain 1); integer-offset (pure copy) tiles get a second rounding (bias up to +0.33
+  code at gain 0.96, histogram gaps). Dither costs +7-18% PNG size; not applied. RC1 is spot-checking assembled tiles.
