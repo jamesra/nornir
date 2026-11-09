@@ -12,8 +12,22 @@ Older installers remain on the repository
 `Releases page <https://github.com/jamesra/nornir/releases>`_
 (look for tags ``pyre-*``).
 
-1.8.9 — not yet released
-------------------------
+1.8.12 — not yet released
+-------------------------
+
+* **Fix: Pyre would not start on Windows ARM64 (Snapdragon) and other strict OpenGL drivers.** Pyre stopped while opening its first window with "Buffers not initialized" because one of its drawing shaders was rejected with "gl_FragDepth redeclared". The shader now follows the OpenGL standard, so Pyre opens on these devices, including Snapdragon Surface laptops.
+<!-- Root cause: pyre/gl_engine/shaders/color_shader.py redeclared the gl_FragDepth built-in; NVIDIA accepts it, glslang/Qualcomm/Mesa reject it. The compile error aborted GLContextManager's context-added listener chain (QtEventManager.invoke stops at the first exception) before TransformControllerGLBufferManager initialized its buffers, so the user saw only the secondary ValueError. Guard: tests/test_shader_glsl_portability.py. -->
+
+1.8.11 — 2026-11-08
+-------------------
+
+
+1.8.10 — 2026-11-08
+-------------------
+
+
+1.8.9 — 2026-11-08
+------------------
 
 
 1.8.8 — 2026-11-04
