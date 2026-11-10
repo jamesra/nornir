@@ -254,6 +254,10 @@ Template ``example.nornir-build.run.env``. Read by ``start-nornir-build.ps1``.
      - ``64g``
      -
      - ``docker run --shm-size``. Multiprocessing pools fail with Docker's 64 MB default.
+   * - ``NORNIR_DOCKER_PROJECTS_ROOT``
+     - ``<root>/Projects``
+     -
+     - Host folder mounted at ``/projects`` in ``nornir-build`` (survives rebuilds; never pruned).
    * - ``NORNIR_DOCKER_NOFILE_SOFT`` / ``_HARD``
      - ``65536`` / ``65536``
      -

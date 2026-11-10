@@ -82,6 +82,11 @@ What goes where
      - Host-side log folders. ``nornir-build`` mounts ``Logs/nornir-build`` at
        ``/var/log/nornir`` and sets ``NORNIR_LOG_ROOT=/var/log/nornir``. Exported to compose as
        ``STACK_LOGS_DIR``.
+   * - ``Projects/``
+     - Scripts, records and state that must outlive a ``nornir-build`` rebuild. Mounted at ``/projects`` in every
+       ``nornir-build`` container (one folder per topic: ``/projects/<topic>``). ``/workspace`` is scratch only, and
+       ``stack.ps1 prune`` removes old ``Work`` sessions but never this folder. Volume backups go to the NAS, not here.
+       ``NORNIR_DOCKER_PROJECTS_ROOT`` overrides the host path.
 
 Checkouts are outside the root: ``/srv/connectomes-deploy``, ``/srv/src/nornir`` and
 ``/srv/src/Viking`` on Ubuntu (``bootstrap-ubuntu.sh`` creates the folders; you clone into them),
