@@ -15,6 +15,8 @@ Procedures for agents. Policy/guardrails live in [`.cursor/rules/`](../rules/). 
 | [deploy-compute-host](deploy-compute-host/SKILL.md) | First-time bring-up of a new Ubuntu GPU compute host (nornir-build, segmentation, viking-certs): inputs, bootstrap, certs, macvlan, verify, symptom table | [nornir-docker-conventions](../rules/nornir-docker-conventions.mdc) |
 | [docker-build-run-phases](docker-build-run-phases/SKILL.md) | Build vs run scripts, env layering | [nornir-docker-conventions](../rules/nornir-docker-conventions.mdc) |
 | [docker-machine-layout](docker-machine-layout/SKILL.md) | Host layout `Run` / `Builds` / `Data` / `Certs` / `Work` / `Logs` | [nornir-docker-conventions](../rules/nornir-docker-conventions.mdc) |
+| [notify-dont-poll](notify-dont-poll/SKILL.md) | Wait for a long job without polling: a host-side watcher messages your session once on failure or completion (bash and PowerShell scripts in `nornir-docker/agent/host-scripts`) | — |
+| [nornir-host-benchmark](nornir-host-benchmark/SKILL.md) | Profile a build host once (numpy vs cupy, worker counts, GPU/RAM/disk) per image and write a recommendation table; rerun after upgrades that touch GPU-path stages | [Nornir-performance-envelope](../rules/Nornir-performance-envelope.mdc), [Performance-evidence](../rules/Performance-evidence.mdc) |
 | [hypothesis-testing](hypothesis-testing/SKILL.md) | Property-based tests with Hypothesis | — |
 | [nornir-docker-devcontainer](nornir-docker-devcontainer/SKILL.md) | cursor-dev / Dev Containers | [nornir-docker-conventions](../rules/nornir-docker-conventions.mdc) |
 | [nornir-docker-images-ci](nornir-docker-images-ci/SKILL.md) | Image matrix, OCI/BOM, Docker CI review | [nornir-docker-conventions](../rules/nornir-docker-conventions.mdc) |

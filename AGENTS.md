@@ -73,6 +73,8 @@ Full catalog: [`.cursor/skills/README.md`](.cursor/skills/README.md).
 | [deploy-compute-host](.cursor/skills/deploy-compute-host/SKILL.md) | Bringing up a NEW Ubuntu GPU compute host from a bare OS (nornir-build, segmentation, viking-certs); first-deploy failures |
 | [docker-build-run-phases](.cursor/skills/docker-build-run-phases/SKILL.md) | Build vs run scripts and env layering |
 | [docker-machine-layout](.cursor/skills/docker-machine-layout/SKILL.md) | `D:\Docker` / `/srv/docker`: `Run` / `Builds` / `Data` / `Certs` / `Work` / `Logs` |
+| [notify-dont-poll](.cursor/skills/notify-dont-poll/SKILL.md) | Long jobs (builds, image builds, re-imports): start a host watcher that messages your session once on failure or completion; never poll |
+| [nornir-host-benchmark](.cursor/skills/nornir-host-benchmark/SKILL.md) | Profile a build host once per image (numpy vs cupy, worker counts, GPU/RAM/disk); rerun after upgrades touching GPU-path stages |
 | [hypothesis-testing](.cursor/skills/hypothesis-testing/SKILL.md) | Property-based tests with Hypothesis |
 | [nornir-docker-devcontainer](.cursor/skills/nornir-docker-devcontainer/SKILL.md) | cursor-dev / Dev Containers setup |
 | [nornir-docker-images-ci](.cursor/skills/nornir-docker-images-ci/SKILL.md) | Image matrix, OCI/BOM, Docker CI |
