@@ -6,7 +6,7 @@ Inside the build container (:doc:`../deployment/nornir_build_appliance`) the lab
 Run them in this order:
 
 * ``TEMImport`` when the volume has not been imported.
-* ``TEMBuild`` to build mosaics. It assumes ``VolumeData.xml`` already exists. ``TEMBuild-import`` is import plus the same mosaic stages.
+* ``TEMBuild`` to build mosaics. It assumes ``VolumeData.xml`` already exists. It runs ``TEMBuildLegacy`` and then ``TEMBuildCrushed`` (two ``nornir-build`` processes). ``TEMBuild-import`` is ``TEMImport`` followed by ``TEMBuild``.
 * ``TEMAlign`` after the mosaics exist. It produces the slice-to-volume transforms Viking reads.
 
 The science for these stages is :doc:`../overview_alignment_theory`. Flags below are the ones in ``nornir-buildmanager/scripts``. ``nornir-build <Pipeline> --help`` lists every flag; the pipeline catalogue (:doc:`../pipelines`) is not this recipe.
@@ -38,7 +38,7 @@ TEMImport
 
    TEMImport /path/to/idoc /path/to/volume
 
-Tiles deeper than 8 bits are **noise-crushed** by default (``ImportIDoc`` and ``ImportMRC``): each section's detector noise is estimated from up to 16 tiles (Haar wavelet MAD), and every tile is stored as ``floor(counts / step)`` with ``step = 2.5 x sigma`` counts, in 8-bit PNGs of the ``Quantized`` filter (legacy imports use ``Raw8``/``Raw16``, so one volume can hold both kinds). That keeps about 35-40 intensity levels and is about 86% smaller than raw 16-bit. The tiles are not contrast-stretched; ``AdjustContrast`` levels them as usual. The step and estimate are stored on the filter (``Crush*`` attributes) and in each PNG (``nornir_crush`` text chunk), so ``counts ~= code x step + step / 2``.
+Tiles deeper than 8 bits are **noise-crushed** by default (``ImportIDoc`` and ``ImportMRC``): each section's detector noise is estimated from up to 16 tiles (Haar wavelet MAD), and every tile is stored as ``floor(counts / step)`` with ``step = 2.5 x sigma`` counts, in 8-bit PNGs of the ``Quantized`` filter (legacy imports use ``Raw8``/``Raw16``, so one volume can hold both kinds). That keeps about 35-40 intensity levels and is about 86% smaller than raw 16-bit. The tiles are not contrast-stretched; the import records a display range in codes (``CrushDisplayMin``/``CrushDisplayMax``, at the ``-Min``/``-Max`` cutoffs) that ``AdjustAssembledContrast`` maps to 8 bits after assembly. The step and estimate are stored on the filter (``Crush*`` attributes) and in each PNG (``nornir_crush`` text chunk), so ``counts ~= code x step + step / 2``.
 
 * ``-NoCrush`` keeps the previous contrast-stretched 8-bit tiles (MRC: the stretched ``Raw16`` filter).
 * ``ImportMRC`` copies the next two MRCs to local disk while the current section exports, and exports from the copy, deleting each when its section is done. Over a network share this keeps more reads in flight than the export's memmap does (RC1 from storage3: 89-100 MB/s in place). It needs local space for three MRCs (~100 GB for RC1); ``NORNIR_IMPORT_STAGE_DIR`` sets the folder (default ``<tmp>/nornir_import_stage``) and ``NORNIR_IMPORT_STAGE=0`` turns it off. Sources already on the staging disk are read in place.
@@ -53,7 +53,9 @@ Tiles deeper than 8 bits are **noise-crushed** by default (``ImportIDoc`` and ``
 TEMBuild
 --------
 
-Same chain as the VS Code launch configuration "TEM Build: full sequence (sequential)". Pass the volume directory, or let the script prompt. For crushed volumes use ``TEMBuildCrushed.sh`` (and ``TEMBuild-import.sh`` after an ImportIDoc): the same chain with ``Quantized`` as the input of Prune, Histogram, AdjustContrast and Mosaic, so every section ends up with a ``Leveled`` filter for TEMAlign.
+Pass the volume directory, or let the script prompt. ``TEMBuild`` runs two chains, and each skips the sections it does not apply to, so one volume can hold both kinds of section. Both end with a ``Leveled`` filter that TEMAlign reads. Options such as ``-start-at`` go to both chains, so name a stage both have (``Prune``, ``Mosaic``, ``Assemble``, ``MosaicReport``, ``CreateVikingXML``) or run one chain's script directly.
+
+``TEMBuildLegacy`` builds sections whose tiles are in ``Raw8`` (``-NoCrush`` imports and volumes imported before crushing). It is the chain of the VS Code launch configuration "TEM Build: full sequence (sequential)":
 
 * ``Prune -InputFilter Raw8 -Downsample 4 -Channels TEM -DefaultThreshold 10.0`` — drop tiles that do not have enough texture to align.
 * ``Histogram -Filters Raw8 -InputTransform Prune -Downsample 4 -Channels TEM`` — contrast statistics for the tiles that remain.
@@ -62,6 +64,17 @@ Same chain as the VS Code launch configuration "TEM Build: full sequence (sequen
 * ``Assemble -Channels TEM -Filters Leveled -Downsample 8,16,32 -NoInterlace -Transform Grid`` — build pyramid images from that layout.
 * ``MosaicReport -PruneFilter Raw8 -ContrastFilter Raw8 -AssembleFilter Leveled -AssembleDownsample 16 -Output MosaicReport`` — QA report for the mosaic.
 * ``CreateVikingXML -OutputFile Mosaic`` — a mosaic manifest. This is not a slice-to-volume group yet.
+
+``TEMBuildCrushed`` builds sections whose tiles are in ``Quantized``. The mosaic is built and assembled on the codes, and the contrast is applied to the assembled images only, so ``Leveled`` holds images and no tiles in these sections:
+
+* ``Prune -InputFilter Quantized -Downsample 4 -Channels TEM -DefaultThreshold 10.0``
+* ``Mosaic -InputFilter Quantized -RegistrationDownsample 4 -InputTransform Prune -OutputTransform Grid -Channels TEM``
+* ``Assemble -Channels TEM -Filters Quantized -Downsample 8,16,32 -NoInterlace -Transform Grid``
+* ``AdjustAssembledContrast -InputFilter Quantized -OutputFilter Leveled -Channels TEM`` — each assembled level becomes an 8-bit ``Leveled`` image, mapped linearly over the import's display range. Edit ``CrushDisplayMin``/``CrushDisplayMax`` on the ``Quantized`` filter to change it (a reimport of the section recomputes them); the next run rebuilds the images.
+* ``MosaicReport -PruneFilter Quantized -ContrastFilter Quantized -AssembleFilter Leveled -AssembleDownsample 16 -Output MosaicReport``
+* ``CreateVikingXML -OutputFile Mosaic``
+
+There is no Histogram or AdjustContrast stage: the import stores the code histogram and display range.
 
 TEMAlign
 --------
