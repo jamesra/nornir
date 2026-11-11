@@ -71,7 +71,7 @@ Pass the volume directory, or let the script prompt. ``TEMBuild`` runs two chain
 * ``Prune -InputFilter Quantized -Downsample 4 -Channels TEM -DefaultThreshold 10.0``
 * ``Mosaic -InputFilter Quantized -RegistrationDownsample 4 -InputTransform Prune -OutputTransform Grid -Channels TEM``
 * ``Assemble -Channels TEM -Filters Quantized -Downsample 8,16,32 -NoInterlace -Transform Grid``
-* ``AdjustAssembledContrast -InputFilter Quantized -OutputFilter Leveled -Channels TEM`` — each assembled level becomes an 8-bit ``Leveled`` image, mapped linearly over the import's display range. Edit ``CrushDisplayMin``/``CrushDisplayMax`` on the ``Quantized`` filter to change it (a reimport of the section recomputes them); the next run rebuilds the images.
+* ``AdjustAssembledContrast -InputFilter Quantized -OutputFilter Leveled -Downsample 8,16,32 -Channels TEM`` — each assembled level passed to Assemble becomes an 8-bit ``Leveled`` image, mapped linearly over the import's display range. Edit ``CrushDisplayMin``/``CrushDisplayMax`` on the ``Quantized`` filter to change it (a reimport of the section recomputes them); the next run rebuilds the images.
 * ``MosaicReport -PruneFilter Quantized -ContrastFilter Quantized -AssembleFilter Leveled -AssembleDownsample 16 -Output MosaicReport``
 * ``CreateVikingXML -OutputFile Mosaic``
 
