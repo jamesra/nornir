@@ -59,7 +59,7 @@ From each package's `pyproject.toml` / `setup.py` dependencies and imports:
 4. `nornir-imageregistration` (shared, pools)
 5. `nornir-volumemodel` (shared, imageregistration), then `nornir-volumecontroller` (imageregistration, volumemodel), `nornir-web`
 6. `nornir-buildmanager` (shared, pools, imageregistration, dm4)
-7. `nornir-pyre` (shared, pools, imageregistration; `requirements-qt.txt` pins buildmanager for the installer)
+7. `nornir-pyre` (shared, pools, imageregistration, buildmanager)
 8. `nornir-builddashboard` (optional `nornir_shared`), `nornir-docker` (builds images from the packages)
 9. umbrella, last
 
