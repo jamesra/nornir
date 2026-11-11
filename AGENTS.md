@@ -64,6 +64,7 @@ Full catalog: [`.cursor/skills/README.md`](.cursor/skills/README.md).
 |-------|-------------|
 | [nornir-commit-push](.cursor/skills/nornir-commit-push/SKILL.md) | "Commit (and push) everything incl. submodules", pointer refresh, release, lost-work audit; push order |
 | [nornir-verify-change](.cursor/skills/nornir-verify-change/SKILL.md) | Before claiming done: test commands, known flaky/baseline failures, lint/type delta on touched files |
+| [nornir-pipelines-xml](.cursor/skills/nornir-pipelines-xml/SKILL.md) | Before adding or changing a buildmanager pipeline, or writing stage Python that loops over sections/filters/levels/transforms: let Pipelines.xml select and skip |
 | [segmentation-training-export](.cursor/skills/segmentation-training-export/SKILL.md) | `ExportTrainingData` / SAM2 crop export: flags, re-export vs update, OData paging, trainer handoff |
 | [docker-publish-ghcr](.cursor/skills/docker-publish-ghcr/SKILL.md) | Ship new code to the build hosts (push, clean-clone build, publish, verify, notify); build, push, verify and pull Nornir images on GHCR; "users get the old image" |
 | [nornir-realworld-refine-benchmark](.cursor/skills/nornir-realworld-refine-benchmark/SKILL.md) | Real-data refine-grid A/B: fixture semantics, baseline runner, acceptance criteria |

@@ -6,6 +6,7 @@ Procedures for agents. Policy/guardrails live in [`.cursor/rules/`](../rules/). 
 |-------|-------------|--------------|
 | [nornir-commit-push](nornir-commit-push/SKILL.md) | Commit (and push) across umbrella + submodules in dependency order; pointer refresh; lost-work audit | [Monorepo-submodule-changes](../rules/Monorepo-submodule-changes.mdc), [Shared-checkout-safety](../rules/Shared-checkout-safety.mdc) |
 | [nornir-verify-change](nornir-verify-change/SKILL.md) | Verify before claiming done: tests, known flaky/baseline failures, lint/type delta | [Questions-and-proving-fixes](../rules/Questions-and-proving-fixes.mdc) |
+| [nornir-pipelines-xml](nornir-pipelines-xml/SKILL.md) | Pipelines.xml elements, patterns and testing; let the XML select and skip, Python handles one node | - |
 | [segmentation-training-export](segmentation-training-export/SKILL.md) | `ExportTrainingData` / SAM2 crop export and trainer handoff | [Training-set-naming](../rules/Training-set-naming.mdc) |
 | [docker-publish-ghcr](docker-publish-ghcr/SKILL.md) | Ship code to build hosts end to end; build, push, verify, pull images on GHCR | [nornir-docker-conventions](../rules/nornir-docker-conventions.mdc) |
 | [nornir-realworld-refine-benchmark](nornir-realworld-refine-benchmark/SKILL.md) | Real-data refine-grid A/B and acceptance criteria | [Refine-grid-trust-questions](../rules/Refine-grid-trust-questions.mdc), [Performance-evidence](../rules/Performance-evidence.mdc) |
