@@ -57,7 +57,7 @@ the next seam.
 | 1190 | no | 1.000 -> 0.999 | 1.014 -> 1.002 | 0.95-1.03 | 1.2% | 5-22 s |
 
 Times vary with machine load. The seam numbers after correction are close to 1 partly by construction (the same
-overlaps are solved and scored); the independent check is the images: `Y:\_nornir_work\white_stripe\gain_test\`
+overlaps are solved and scored); the independent check is the images: `Y:\Volumes\_nornir_work\white_stripe\gain_test\`
 (`<section>_before_ds16.png`, `_after_ds16.png`, side by side in `<section>_before_after_preview.png`). The stripe is
 gone in 1140 and 1150; 1145 and 1190 are nearly unchanged (the per-tile checkerboard is reduced). The pair residual
 MAD (about 1%) is larger than RC3's 0.07-0.36% because the quadratic convention does not let the gains follow the

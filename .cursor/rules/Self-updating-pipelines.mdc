@@ -16,6 +16,6 @@ needs no management by hand.
   "clean up" after an input change; the stage that owns them replaces them.
 - **Keep volumes in their normal form.** No parallel copies of filters, extra VikingXML files or backups inside
   a volume; anything outside a volume's usual layout becomes manual cleanup later. Backups and experiments go
-  outside the volume (e.g. `Y:\_nornir_work\<topic>\`).
+  outside the volume (e.g. `Y:\Volumes\_nornir_work\<topic>\`).
 - **A stage that misses an input change is a bug.** Report it (or fix it in the stage's validity check); do not
   work around it with manual deletions, which hides the bug and breaks the self-updating design.

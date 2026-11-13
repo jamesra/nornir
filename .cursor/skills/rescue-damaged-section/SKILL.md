@@ -126,7 +126,7 @@ be registered by correlation**; plan on a manual merge in Pyre.
    about 1.3-1.6 px down to 0.15-0.19). Large single-vertex shifts (up to 160 px) sat over blank regions
    (folds, white tear strip) and did not move the tissue; look at before/after crops before worrying.
 6. **Review the assembled image** (`Assemble` at ds8/ds16 from the copy, or `tile_overlap_stats`) before
-   installing. Put images on `Y:\_nornir_work\<section>\` and give the `Y:` path: do not upload images to
+   installing. Put images on `Y:\Volumes\_nornir_work\<section>\` and give the `Y:` path: do not upload images to
    chat (30 MiB and 8000 px limits, and the user reads from another device). **Standard (user, 2026-11-04):**
    deliver a before/after pair at ds16: `before_Grid_2015_ds16.png` (the section's current production Grid) and
    `after_Grid_repaired_ds16.png`, both from `scripts/assemble_mosaic.py`.
@@ -154,7 +154,7 @@ be registered by correlation**; plan on a manual merge in Pyre.
    finished, whether or not it will be installed soon, build the map from the section's *current production*
    Translated and Grid mosaics (the old mosaics) to the repaired ones: keep a copy of both old mosaics next to the
    new ones (`Translated_old.mosaic`, `Grid_old.mosaic`), run `remap_mosaic_points.py <old> <new> --sample <prefix>`
-   for each pair, and deliver the folder `Y:\_nornir_work\<section>\annotation_transfer\` with the old and new
+   for each pair, and deliver the folder `Y:\Volumes\_nornir_work\<section>\annotation_transfer\` with the old and new
    mosaics, the sample reports and a short `README.txt` (tile counts, shared tiles, points with no shared tile).
    Applying the map to real annotations later needs only those files. Do this before asking to install; the
    report is what `install_rescue.py --annotation-rescue-report` takes once real annotations have been mapped.
@@ -240,6 +240,6 @@ Prune cutoff 2200 plus the flat-tile rule; 1,363 tiles of 1,441. Translated: two
 in `RC2\TEM\1240\TEM\` **at the new coordinates, not anchored** (that run predates the anchor step; a dry run
 of the anchor afterwards gave a shift of -75,325 px in Y, so annotations on 1240 would need to be translated
 from the old mosaic coordinates); backup in `Y:\_nornir_backups\RC2\2026-11-04-section1240-rescue\`; working files
-and images in `Y:\_nornir_work\section1240\`. `Blob` regenerated at levels 16/32/64 with the TEMAlign values.
+and images in `Y:\Volumes\_nornir_work\section1240\`. `Blob` regenerated at levels 16/32/64 with the TEMAlign values.
 Open: manual merge of the two halves in Pyre, stos to the neighbours (a manual StosBrute, so the Blob images
 matter less).
