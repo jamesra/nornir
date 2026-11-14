@@ -149,7 +149,13 @@ be registered by correlation**; plan on a manual merge in Pyre.
    VikingAU option / an Update-Volume-Positions-style tool (gRPC or WPF service) that, for one section, maps every
    location's mosaic geometry old mosaic -> tile pixel -> new mosaic through the saved `Grid_old.mosaic` and
    `Grid_new.mosaic` of the annotation transfer map (tiles do not change, so positions stay stable), then rewrites the
-   volume cache under the default transform. Not built yet (VikingAU already has `--translate`, a per-section shift).
+   volume cache under the default transform. Built as two Viking `VikingAU` verbs (review rights; same tile rule as
+   `MosaicPointRemapper`):
+   `VikingAU remap-to-tiles -v <VolumeXML url> -s <section> --mosaic Grid_old.mosaic -o tiles.json` (reads the server,
+   writes every vertex as tile, x, y), then
+   `VikingAU remap-from-tiles -v <url> -s <section> --mosaic Grid_new.mosaic -i tiles.json --dry-run` and, after reading
+   `tiles.json.report.txt`, the same without `--dry-run`. A location with a vertex no shared tile covers, or edited
+   after the export, is left unchanged and listed in the report.
    **Standard output of every repair (user, 2026-11-04): an annotation transfer map.** When a repaired mosaic is
    finished, whether or not it will be installed soon, build the map from the section's *current production*
    Translated and Grid mosaics (the old mosaics) to the repaired ones: keep a copy of both old mosaics next to the
