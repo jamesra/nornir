@@ -155,7 +155,9 @@ be registered by correlation**; plan on a manual merge in Pyre.
    writes every vertex as tile, x, y), then
    `VikingAU remap-from-tiles -v <url> -s <section> --mosaic Grid_new.mosaic -i tiles.json --dry-run` and, after reading
    `tiles.json.report.txt`, the same without `--dry-run`. A location with a vertex no shared tile covers, or edited
-   after the export, is left unchanged and listed in the report.
+   after the export, is left unchanged and listed in the report. Follow Viking's `mosaic-annotation-remap` skill
+   (`D:\src\git\Viking\.cursor\skills\mosaic-annotation-remap\SKILL.md`) for the checks, which mosaics to use, the
+   report and undo.
    **Standard output of every repair (user, 2026-11-04): an annotation transfer map.** When a repaired mosaic is
    finished, whether or not it will be installed soon, build the map from the section's *current production*
    Translated and Grid mosaics (the old mosaics) to the repaired ones: keep a copy of both old mosaics next to the
