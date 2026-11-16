@@ -48,7 +48,7 @@ Tiles deeper than 8 bits are **noise-crushed** by default (``ImportIDoc`` and ``
 * An existing uncrushed ``Raw8`` (or MRC ``Raw16``) filter is never replaced, so re-importing to add sections leaves imported sections alone. Remove a section's filter to crush it.
 * Crushed and legacy tiles never share a filter name, so a volume can hold sections of both kinds. Volumes crushed before this change keep their codes in ``Raw8``/``Raw16``: rename that filter to ``Quantized`` (``RenameFilter``) before importing more sections, or reimport.
 * Changing ``-CrushK`` or turning crushing off rebuilds the affected filter and everything built from it.
-* Prune scores of crushed tiles are scaled to the stretched 8-bit range, so ``-DefaultThreshold`` values mean the same for both kinds of tile.
+* Prune scores of crushed tiles are in noise steps (the stored codes, unscaled), so a featureless tile scores about the same in every section and volume. They are not on the 8-bit scale of legacy tiles: crushed sections use their own ``-DefaultThreshold`` (400).
 * Train and run segmentation models on the same representation: a model trained on crushed tiles should see crushed tiles at inference.
 
 TEMBuild
@@ -68,7 +68,7 @@ Pass the volume directory, or let the script prompt. There are two build scripts
 
 ``TEMBuildQuantized`` (what ``TEMBuild`` runs) builds sections whose tiles are in ``Quantized``. The mosaic is built and assembled on the codes, and the contrast is applied to the assembled images only, so ``Leveled`` holds images and no tiles in these sections:
 
-* ``Prune -InputFilter Quantized -Downsample 4 -Channels TEM -DefaultThreshold 2000``. Crushed prune scores are scaled to the stretched 8-bit range and match legacy scores within about 1%. The threshold is 2000 rather than the legacy 10.0, which removed no tile in the crushed sections measured (lowest score 1151).
+* ``Prune -InputFilter Quantized -Downsample 4 -Channels TEM -DefaultThreshold 400``. Crushed prune scores are in noise steps. On seven RC3 sections, blank, resin and fold tiles scored 130-510 and full tissue at least 686; 400 keeps the low-contrast tissue of RC3 1005 (median 579). Sections whose tissue is low-contrast throughout (RC3 516) have no gap between blank and tissue tiles, so no threshold separates them.
 * ``Mosaic -InputFilter Quantized -RegistrationDownsample 4 -InputTransform Prune -OutputTransform Grid -Channels TEM``
 * ``Assemble -Channels TEM -Filters Quantized -Downsample 8,16,32 -NoInterlace -Transform Grid``
 * ``AdjustAssembledContrast -InputFilter Quantized -OutputFilter Leveled -Downsample 8,16,32 -Channels TEM`` — each assembled level passed to Assemble becomes an 8-bit ``Leveled`` image, mapped linearly over the import's display range. Edit ``CrushDisplayMin``/``CrushDisplayMax`` on the ``Quantized`` filter to change it (a reimport of the section recomputes them); the next run rebuilds the images.
