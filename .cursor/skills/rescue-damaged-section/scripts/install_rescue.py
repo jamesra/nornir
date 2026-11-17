@@ -101,6 +101,11 @@ def main() -> None:
     vol = VolumeManager.Load(args.root)
     channel = vol.find(f"Block/Section[@Number='{args.section}']").find("Channel[@Name='TEM']")
     nodes = {name: channel.GetChildByAttrib("Transform", "Name", name) for name in ("Stage", "Prune", "Translated_Prune", "Grid")}
+    missing = [name for name, node in nodes.items() if node is None]
+    if missing:
+        present = sorted(t.attrib.get("Name") for t in channel.findall("Transform"))
+        raise SystemExit(f"Section {args.section} has no {', '.join(missing)} transform (it has {', '.join(present)}). "
+                         "This script installs onto the Stage -> Prune -> Translated_Prune -> Grid chain only.")
     for name, node in nodes.items():
         print(f"{name:18s} {node.Path:55s} locked={node.Locked} checksum={node.attrib.get('Checksum')}")
     prune, translated, grid = nodes["Prune"], nodes["Translated_Prune"], nodes["Grid"]
