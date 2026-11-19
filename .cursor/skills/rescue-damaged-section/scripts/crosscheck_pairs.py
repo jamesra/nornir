@@ -97,27 +97,57 @@ def work(job):
     return rows
 
 
+def expected_offset(a, b, corner_offset: np.ndarray) -> tuple:
+    """Where the layout puts tile b's image origin in tile a's image frame, in ds16 px.
+
+    Points in the two tiles' target-space overlap are mapped back through each tile's own transform; for a point
+    seen at source pa in a and pb in b, b's origin sits at pa - pb. For a translation this equals the difference of
+    the bounding-box corners, but a warped (Grid) tile's corners move with the mesh, so corners give wrong offsets
+    there. Tiles whose boxes don't overlap fall back to the corner difference (their NCC at the layout has no overlap
+    to score anyway)."""
+    ba, bb = a.TargetSpaceBoundingBox, b.TargetSpaceBoundingBox
+    y0, x0 = max(ba.MinY, bb.MinY), max(ba.MinX, bb.MinX)
+    y1, x1 = min(ba.MaxY, bb.MaxY), min(ba.MaxX, bb.MaxX)
+    if y1 > y0 and x1 > x0:
+        gy, gx = np.meshgrid(np.linspace(y0, y1, 9), np.linspace(x0, x1, 9), indexing="ij")
+        pts = np.column_stack((gy.ravel(), gx.ravel()))
+        pa = np.asarray(a.Transform.InverseTransform(pts), dtype=float)
+        pb = np.asarray(b.Transform.InverseTransform(pts), dtype=float)
+
+        def inside(p, box):
+            return (np.isfinite(p).all(axis=1) & (p[:, 0] >= box.MinY) & (p[:, 0] <= box.MaxY)
+                    & (p[:, 1] >= box.MinX) & (p[:, 1] <= box.MaxX))
+
+        ok = inside(pa, a.SourceSpaceBoundingBox) & inside(pb, b.SourceSpaceBoundingBox)
+        if ok.any():
+            return tuple(np.median(pa[ok] - pb[ok], axis=0) / DS)
+    return tuple(corner_offset / DS)
+
+
 def main() -> None:
     import nornir_imageregistration.mosaic_tileset
     from nornir_imageregistration import Mosaic
 
-    def centres(name):
-        ts = nornir_imageregistration.mosaic_tileset.CreateFromMosaic(
+    def tileset(name):
+        return nornir_imageregistration.mosaic_tileset.CreateFromMosaic(
             Mosaic.LoadFromMosaicFile(os.path.join(SECTION, name)), image_folder=IMG, image_to_source_space_scale=DS)
-        ids = sorted(ts)
-        c = np.array([[ts[i].TargetSpaceBoundingBox.MinY, ts[i].TargetSpaceBoundingBox.MinX] for i in ids])
-        return ids, c
+
+    def corners(ts, ids):
+        return np.array([[ts[i].TargetSpaceBoundingBox.MinY, ts[i].TargetSpaceBoundingBox.MinX] for i in ids])
 
     # The pre-2026-11-04 pruned mosaic (moved to the backup folder), so the pair list matches the earlier run.
-    ids, stage = centres(os.environ["CROSSCHECK_STAGE_MOSAIC"])
-    _, layout = centres(LAYOUT)
+    stage_ts = tileset(os.environ["CROSSCHECK_STAGE_MOSAIC"])
+    ids = sorted(stage_ts)
+    stage = corners(stage_ts, ids)
+    layout_ts = tileset(LAYOUT)
+    layout = corners(layout_ts, ids)
     d = np.linalg.norm(stage[:, None] - stage[None], axis=2)
     pitch = np.median(np.sort(d, axis=1)[:, 1])
     jobs = []
     for i, ta in enumerate(ids):
         near = [j for j in range(i + 1, len(ids)) if d[i, j] <= RADIUS * pitch]
         if near:
-            exp = {ids[j]: tuple((layout[j] - layout[i]) / DS) for j in near}
+            exp = {ids[j]: expected_offset(layout_ts[ta], layout_ts[ids[j]], layout[j] - layout[i]) for j in near}
             jobs.append((ta, [ids[j] for j in near], exp))
     print("tiles", len(ids), "pairs", sum(len(j[1]) for j in jobs), "pitch", pitch, flush=True)
 
