@@ -105,14 +105,15 @@ def expected_offset(a, b, corner_offset: np.ndarray) -> tuple:
     the bounding-box corners, but a warped (Grid) tile's corners move with the mesh, so corners give wrong offsets
     there. Tiles whose boxes don't overlap fall back to the corner difference (their NCC at the layout has no overlap
     to score anyway)."""
+    import nornir_imageregistration
     ba, bb = a.TargetSpaceBoundingBox, b.TargetSpaceBoundingBox
     y0, x0 = max(ba.MinY, bb.MinY), max(ba.MinX, bb.MinX)
     y1, x1 = min(ba.MaxY, bb.MaxY), min(ba.MaxX, bb.MaxX)
     if y1 > y0 and x1 > x0:
         gy, gx = np.meshgrid(np.linspace(y0, y1, 9), np.linspace(x0, x1, 9), indexing="ij")
         pts = np.column_stack((gy.ravel(), gx.ravel()))
-        pa = np.asarray(a.Transform.InverseTransform(pts), dtype=float)
-        pb = np.asarray(b.Transform.InverseTransform(pts), dtype=float)
+        pa = nornir_imageregistration.EnsureNumpyArray(a.Transform.InverseTransform(pts)).astype(float)
+        pb = nornir_imageregistration.EnsureNumpyArray(b.Transform.InverseTransform(pts)).astype(float)
 
         def inside(p, box):
             return (np.isfinite(p).all(axis=1) & (p[:, 0] >= box.MinY) & (p[:, 0] <= box.MaxY)
