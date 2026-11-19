@@ -44,7 +44,28 @@ Pyre composite view, display to camera solve (`nornir-pyre/pyre/views/composite_
 by $\ell_0 = T^{-1}(d)$, $\ell_{k+1} = \ell_k + T^{-1}(d) - T^{-1}(T(\ell_k))$, keeping the best $\ell_k$ and stopping
 when $\lVert T(\ell_k) - d \rVert_\infty \le 0.01$ px or after 8 steps ($T$ maps source to target).
 
+Masked registration (`nornir_imageregistration/masked_correlation.py`). Band-pass on valid pixels by normalized
+convolution: $L_\sigma = G_\sigma * (I M) / G_\sigma * M$, $B = L_{\sigma_{lo}} - L_{\sigma_{hi}}$, valid where $M$ and
+$G_{\sigma_{hi}} * M \ge 0.1$; defaults $\sigma_{lo} = 1$, $\sigma_{hi} = \max(4, \text{short side}/16)$ (provisional).
+Masked NCC at shift $u$ over the pixels valid in both images, from six FFTs: with $f, g$ zeroed outside masks $m_f, m_g$
+and $\star$ the cross-correlation, $n = m_f \star m_g$, $S_f = f \star m_g$, $S_{f^2} = f^2 \star m_g$, $S_g = m_f \star g$,
+$S_{g^2} = m_f \star g^2$, $S_{fg} = f \star g$;
+$r = (S_{fg} - S_f S_g/n) / \sqrt{(S_{f^2} - S_f^2/n)(S_{g^2} - S_g^2/n)}$, invalid where
+$n < 0.25 \min(|m_f|, |m_g|)$ or either variance is flat. The peak is found on $(r + 1)/2$ with the existing
+`find_peak`, so `weight` and `peak_ratio` keep their definitions on a new surface.
+
 ## Algorithmic decisions
+
+- **2026-11-19 Registration leaves masked pixels out instead of filling them with noise.** Every path used to replace
+  masked pixels, padding and rotation corners with random noise and then run a partly whitened phase correlation
+  ($|F|^{0.65}$). Near a tissue edge the window is then part noise: the true peak weakens, edge and noise peaks can
+  win, and the result is random (StosBrute angle weights varied 11-17% run to run). Pyre's Spacebar was reported
+  "terrible around the edges". Chosen: band-pass by normalized convolution, then masked NCC (Padfield 2012).
+  Rejected: masked whitened correlation (dividing by the mask overlap after whitening spreads the mask edge over the
+  whole surface, since whitening is a frequency-domain operation and the mask is spatial); plain masked NCC (no
+  band-pass, so brightness gradients and large structures dominate the peak). Rolled out per path (Pyre Space,
+  StosBrute, refine grid, mosaic translate/refine), recalibrating each path's gates on named pairs. The log-polar
+  angle/scale estimate keeps noise fill (a Fourier magnitude has no masked form); its candidates are scored masked.
 
 - **2026-11-01 Translate does not move misplaced blocks automatically; it flags them.** Tried: for each block of
   $\ge 10$ tiles that no matching overlap connects to the main block, assemble both near the seam at ~32 px/pixel,
@@ -218,7 +239,11 @@ when $\lVert T(\ell_k) - d \rVert_\infty \le 0.01$ px or after 8 steps ($T$ maps
   425-455. doi:10.1093/biomet/81.3.425 (verify). Used for: the MAD/0.6745 noise estimate on the finest wavelet subband.
 - Padfield, D. (2012). Masked object registration in the Fourier domain. *IEEE Transactions on Image Processing*
   21(5), 2706-2718. doi:10.1109/TIP.2011.2181402 (verify). Used for: masked NCC over every shift in the set-aside
-  translate block recovery (`.cursor/issue-handoff/translate-block-recovery.md`).
+  translate block recovery (`.cursor/issue-handoff/translate-block-recovery.md`), and the masked registration surface
+  (`nornir_imageregistration/masked_correlation.py`).
+- Knutsson, H., & Westin, C.-F. (1993). Normalized and differential convolution: methods for interpolation and
+  filtering of incomplete and uncertain data. *Proc. IEEE CVPR*, 515-523. doi:10.1109/CVPR.1993.341081 (verify).
+  Used for: band-passing only the valid pixels before masked NCC.
 
 ## Open questions for a paper
 

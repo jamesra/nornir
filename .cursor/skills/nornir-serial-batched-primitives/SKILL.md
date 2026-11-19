@@ -38,6 +38,7 @@ When adding, removing, or renaming a script or pytest module that benchmarks, pr
 | STOS / refine | `tests/test_*stos*.py` (incl. `test_stos_registration_debug.py`, `test_stos_brute_pad_shape_gates.py`), `tests/test_*refine*.py`, `tests/test_best_effort_refine.py`, `tests/test_SliceToSliceBrute_budget.py`, `tests/test_brute_decimated_ranking.py`, `tests/test_brute_coarse_grid_search.py` |
 | RBF / transform composition | `tests/test_rbf_singular_recovery.py`, `tests/transforms/test_addition.py`, `tests/transforms/test_rbf_precompute_and_duplicates.py` |
 | Arrange / masks | `tests/test_arrange.py`, `tests/test_overlapmasking.py` |
+| Masked correlation | `tests/test_masked_correlation.py` (Padfield surface vs a direct loop, known shift under 30-60% masks, fill invariance, stack vs single, NumPy/CuPy parity) |
 
 ### Verification matrix (minimum)
 
@@ -47,6 +48,7 @@ When adding, removing, or renaming a script or pytest module that benchmarks, pr
 | `stos_brute` / refine shared | Relevant `test_*stos*` / `test_*refine*`; ≥100-tile section for final perf sign-off |
 | `arrange_mosaic` / overlap masking | `test_arrange` / `test_overlapmasking` as applicable |
 | RBF weight solve / degeneracy recovery | `tests/test_rbf_singular_recovery.py`; `tests/transforms` as a whole (CPU **and** `_GPUComponent` mirrors must change together) |
+| `masked_correlation` (band-pass + masked NCC) | `tests/test_masked_correlation.py`; for each path switched to it, old-vs-new on that path's named pairs and its gates rechecked (see `docs/publication_notes.md`, 2026-11-19) |
 | New script or gate | Add row here; run it once before merge |
 
 ### Known gaps
