@@ -12,9 +12,30 @@ Older installers remain on the repository
 `Releases page <https://github.com/jamesra/nornir/releases>`_
 (look for tags ``pyre-*``).
 
-1.8.13 — not yet released
+1.8.15 — not yet released
 -------------------------
 
+
+1.8.14 — 2026-11-17
+-------------------
+
+* **Fix: large grid transforms froze after Space or a point drag.** After each registration or drag on a grid transform, Pyre settles the masked and exterior grid points. On a large grid this kept the window busy for many seconds, so you could not move or register the next point. Settling now runs in the background, and the result appears in one step when it finishes. If you move or register another point first, Pyre starts the settling again from the new positions.
+<!-- 2026-11-16. Two causes. (1) grid_layout_relax.set_local_similarity_rest_offsets found each free edge's nearest fixed-fixed sample with a linear scan, O(edges x samples): 12.6 s on a 126x126 grid, now a KD-tree with the same tie-break (0.30 s); guard: nornir-imageregistration tests/test_grid_layout_relax.py test_rest_offsets_match_the_linear_scan. (2) The wave committed partial points every 8 nodes, each a Delaunay rebuild and redraw on the UI thread (1224 commits on 126x126), and the fixed/free classification ran on the UI thread; now the worker classifies and the wave commits once. UI-thread time for one post-registration relax, 126x126 grid, redraws not counted: 36.9 s before, 0.03 s after (worker 13.4 s -> 0.85 s); 64x64: 2.54 s -> 0.01 s. Guards: tests/test_masked_grid_relax.py. -->
+
+1.8.13 — 2026-11-15
+-------------------
+
+* **Quantized images open with Auto contrast.** Images from Nornir's crushed (Quantized) filter store small codes, so they used to look almost black. When a STOS file opens a Quantized image, Pyre now sets that image's contrast the way the **Auto** button in the Contrast Adjustment window does, keeping your gamma. Other images keep the contrast you set.
+<!-- Detection: the PNG's nornir_crush text chunk (pyre.image_contrast.image_file_is_crushed). Applied in StosWindow.apply_stos_load_result, so browser loads and File > Open both get it. Registration uses the same contrast, as with manual Auto. Guard: tests/test_image_contrast.py TestCrushedImageAutoContrast. -->
+
+* **Fix: Save STOS could save the previous pair after switching Stos Directory folders.** While the Stos Directory is still opening a pair, the STOS windows' status bars show **Loading <name>…** and **File > Save STOS File…** (Ctrl+S) is unavailable until the pair is on screen. If a pair cannot be opened, Pyre now says so and tells you the previously open pair is still shown, instead of failing silently. Changing the Stos Directory folder clears the highlighted row and the window title until you open a pair from the new folder. When you save a STOS into a different volume than the one its images come from, Pyre asks before saving (**Save anyway** or **Cancel**).
+<!-- 2026-11-12: an RC3 pair was saved into RC1_Crush/TEM/Brute32/Manual because the browser load had not applied yet (load errors were only printed). Load state: StosWindow.begin_browser_load/end_browser_load, driven by StosFileBrowserWindow (_notify_load_started/_notify_load_finished; superseded loads stay silent). The pending load now keeps the folder it was picked from. Volume check: stos_manual_paths.find_volume_root / stos_volume_mismatch (nearest VolumeData.xml). Guards: tests/test_stos_browser_load_state.py, tests/test_stos_volume_mismatch.py. -->
+
+* **Fix: placing a point on a mesh or RBF transform could make the image jump.** A point placed in the Composite or Target view now pins the source pixel that is drawn under the cursor, so the image there stays put. Before, Pyre picked the source pixel with a separately fitted reverse mapping, which on a strongly warped mesh could be more than 200 pixels away, and the image jumped by that amount. Images can still shift a little further from the new point, because adding a point changes how the mesh's triangles connect.
+<!-- 2026-11-13, RC1 0004/0005 Quantized ds32 mesh: InverseTransform (target Delaunay) vs the drawn forward map (source Delaunay) differed by up to 235 px. TransformController.map_pair_for_control_point_create refines the inverse answer with mesh_hull_affine.source_under_target (damped Newton on the forward map). Residual movement within 100 px of the click on that mesh: worst 62 px (was 245), median 3.7 px; it comes from Delaunay re-triangulation. Guard: tests/test_create_point_forward_map.py. -->
+
+* **Space now says why it registered nothing.** When Space finds no control point under the cursor and none selected, or skips a mesh or RBF point because less than 25% of its alignment window is unmasked tissue in the STOS masks, the status bar says so for a few seconds. Before, nothing happened and nothing explained why. Grid points in masked tissue still relax from their neighbours instead.
+<!-- Notice: RegistrationJobRunner.show_notice -> CameraStatusBar.show_notice (own label; also logged at WARNING so it reaches the session log). Callers: TransformController.enqueue_point_registrations (mask gate, non-grid only) and DefaultTransformCommand.check_for_new_command (RequiresSelectionError on REGISTER). Guards: tests/test_masked_grid_relax.py, tests/test_registration_progress_cancel.py. -->
 
 1.8.12 — 2026-11-09
 -------------------

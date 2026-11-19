@@ -66,6 +66,18 @@ $n < 0.25 \min(|m_f|, |m_g|)$ or either variance is flat. The peak is found on $
   band-pass, so brightness gradients and large structures dominate the peak). Rolled out per path (Pyre Space,
   StosBrute, refine grid, mosaic translate/refine), recalibrating each path's gates on named pairs. The log-polar
   angle/scale estimate keeps noise fill (a Fourier magnitude has no masked form); its candidates are scored masked.
+- **2026-11-16 Crushed prune scores are in noise steps, threshold 400.** Why: scores (sums of block standard
+  deviations in the tile overlaps, Lev4, overlap 0.1) used to be rescaled by 255 / CrushCodeSpan to imitate
+  the legacy 8-bit scale. On RC3 the code span (0.01-99.99% of the section's codes) was 3-5x wider than the 2022
+  contrast cutoffs, some of which were hand-set, so scores came out 3-5x lower than in 2022 by a different factor
+  in each section (5 sections, score ratio matching span ratio within 1-5%) and no threshold meant the same thing
+  twice. Scored in the stored codes, one unit is one noise step ($k\sigma$ counts), independent of brightness and
+  span. On 7 RC3 sections blank, resin and fold tiles scored 130-510 and full tissue at least 686, apart from
+  low-contrast sections (1005 median 579; 516 has no gap at all). James chose 400 (drops 1409's blank tiles but 12,
+  25's fold tiles, 1005's 8 worst fold tiles; nothing in 300, 1380, 1382). Rejected: tighter percentiles for the span
+  (still per-section), the 2022 cutoffs per section (only where a legacy build exists), 450 and 500 (closer to
+  1005's tissue). Where: `nornir-buildmanager/nornir_buildmanager/operations/pruneobj.py` (`CrushedScoreUnits`),
+  `scripts/TEMBuildQuantized.sh`.
 
 - **2026-11-01 Translate does not move misplaced blocks automatically; it flags them.** Tried: for each block of
   $\ge 10$ tiles that no matching overlap connects to the main block, assemble both near the seam at ~32 px/pixel,

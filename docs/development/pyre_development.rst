@@ -50,9 +50,6 @@ override local sources (same pattern as :doc:`../deployment/nornir_dev_and_worke
    pip install -e nornir-pyre --no-deps
    pip install PyQt6 PyOpenGL matplotlib rtree PyYAML dependency-injector six
 
-Or use ``nornir-pyre/requirements-qt.txt`` as a baseline after editable siblings
-are installed.
-
 Run and debug
 ~~~~~~~~~~~~~
 

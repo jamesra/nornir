@@ -6,7 +6,7 @@ Inside the build container (:doc:`../deployment/nornir_build_appliance`) the lab
 Run them in this order:
 
 * ``TEMImport`` when the volume has not been imported.
-* ``TEMBuild`` to build mosaics. It assumes ``VolumeData.xml`` already exists. It runs ``TEMBuildLegacy`` and then ``TEMBuildCrushed`` (two ``nornir-build`` processes). ``TEMBuild-import`` is ``TEMImport`` followed by ``TEMBuild``.
+* ``TEMBuild`` to build mosaics of crushed sections (``Quantized``); it runs ``TEMBuildQuantized``. It assumes ``VolumeData.xml`` already exists. ``TEMBuildLegacy`` builds legacy sections (``Raw8``). ``TEMBuild-import`` is ``TEMImport`` followed by ``TEMBuild``.
 * ``TEMAlign`` after the mosaics exist. It produces the slice-to-volume transforms Viking reads.
 
 The science for these stages is :doc:`../overview_alignment_theory`. Flags below are the ones in ``nornir-buildmanager/scripts``. ``nornir-build <Pipeline> --help`` lists every flag; the pipeline catalogue (:doc:`../pipelines`) is not this recipe.
@@ -45,15 +45,16 @@ Tiles deeper than 8 bits are **noise-crushed** by default (``ImportIDoc`` and ``
 * A read-only source works: set ``NORNIR_IMPORT_CACHE_PATH`` to a writable folder for the histogram and noise caches. An existing ``Histogram-N.xml`` beside an MRC that is newer than the MRC is reused.
 * ``-CrushK`` sets the step in noise sigmas (default 2.5); larger values give smaller files and coarser steps.
 * Crushed tiles are gain-corrected before they are quantized. The importer solves a brightness gain per tile from the overlaps of the Stage placements (one pass over the section, the statistics measured on tiles reduced by 8), divides each tile by its gain, then quantizes. A tile dimmed by the beam keeps its texture instead of collapsing into a few codes, because its noise falls only as the square root of its gain while its texture falls with the gain. Each tile records its gain in its ``nornir_crush`` chunk as ``import_gain`` for diagnosis; nothing downstream applies it, and ``TileGains`` leaves the filter alone (``CrushGainFirst="1"`` on the filter). A tile whose gain is below 0.05 has essentially no beam: it is flagged (``import_gain_corrected`` false) and quantized as captured, not amplified. There is no option to quantize tiles as captured. A section whose crushed filter was imported without gain correction keeps its kind, so re-importing does not change finished sections.
+* An existing uncrushed ``Raw8`` (or MRC ``Raw16``) filter is never replaced, so re-importing to add sections leaves imported sections alone. Remove a section's filter to crush it.
 * Crushed and legacy tiles never share a filter name, so a volume can hold sections of both kinds. Volumes crushed before this change keep their codes in ``Raw8``/``Raw16``: rename that filter to ``Quantized`` (``RenameFilter``) before importing more sections, or reimport.
 * Changing ``-CrushK`` or turning crushing off rebuilds the affected filter and everything built from it.
-* Prune scores of crushed tiles are scaled to the stretched 8-bit range, so existing ``-DefaultThreshold`` values keep their meaning.
+* Prune scores of crushed tiles are in noise steps (the stored codes, unscaled), so a featureless tile scores about the same in every section and volume. They are not on the 8-bit scale of legacy tiles: crushed sections use their own ``-DefaultThreshold`` (400).
 * Train and run segmentation models on the same representation: a model trained on crushed tiles should see crushed tiles at inference.
 
 TEMBuild
 --------
 
-Pass the volume directory, or let the script prompt. ``TEMBuild`` runs two chains, and each skips the sections it does not apply to, so one volume can hold both kinds of section. Both end with a ``Leveled`` filter that TEMAlign reads. Options such as ``-start-at`` go to both chains, so name a stage both have (``Prune``, ``Mosaic``, ``Assemble``, ``MosaicReport``, ``CreateVikingXML``) or run one chain's script directly.
+Pass the volume directory, or let the script prompt. There are two build scripts, and each skips the sections it does not apply to: ``TEMBuild`` builds crushed sections (``Quantized``) by running ``TEMBuildQuantized``, and ``TEMBuildLegacy`` builds legacy sections (``Raw8``). Both end with a ``Leveled`` filter that TEMAlign reads. A volume holding both kinds needs both scripts. Do not run both on a section that has both filters (imported twice): each writes ``Leveled``, so the section ends up with images from both imports. Remove one import first.
 
 ``TEMBuildLegacy`` builds sections whose tiles are in ``Raw8`` (``-NoCrush`` imports and volumes imported before crushing). It is the chain of the VS Code launch configuration "TEM Build: full sequence (sequential)":
 
@@ -65,12 +66,12 @@ Pass the volume directory, or let the script prompt. ``TEMBuild`` runs two chain
 * ``MosaicReport -PruneFilter Raw8 -ContrastFilter Raw8 -AssembleFilter Leveled -AssembleDownsample 16 -Output MosaicReport`` — QA report for the mosaic.
 * ``CreateVikingXML -OutputFile Mosaic`` — a mosaic manifest. This is not a slice-to-volume group yet.
 
-``TEMBuildCrushed`` builds sections whose tiles are in ``Quantized``. The mosaic is built and assembled on the codes, and the contrast is applied to the assembled images only, so ``Leveled`` holds images and no tiles in these sections:
+``TEMBuildQuantized`` (what ``TEMBuild`` runs) builds sections whose tiles are in ``Quantized``. The mosaic is built and assembled on the codes, and the contrast is applied to the assembled images only, so ``Leveled`` holds images and no tiles in these sections:
 
-* ``Prune -InputFilter Quantized -Downsample 4 -Channels TEM -DefaultThreshold 10.0``
+* ``Prune -InputFilter Quantized -Downsample 4 -Channels TEM -DefaultThreshold 400``. Crushed prune scores are in noise steps. On seven RC3 sections, blank, resin and fold tiles scored 130-510 and full tissue at least 686; 400 keeps the low-contrast tissue of RC3 1005 (median 579). Sections whose tissue is low-contrast throughout (RC3 516) have no gap between blank and tissue tiles, so no threshold separates them.
 * ``Mosaic -InputFilter Quantized -RegistrationDownsample 4 -InputTransform Prune -OutputTransform Grid -Channels TEM``
 * ``Assemble -Channels TEM -Filters Quantized -Downsample 8,16,32 -NoInterlace -Transform Grid``
-* ``AdjustAssembledContrast -InputFilter Quantized -OutputFilter Leveled -Channels TEM`` — each assembled level becomes an 8-bit ``Leveled`` image, mapped linearly over the import's display range. Edit ``CrushDisplayMin``/``CrushDisplayMax`` on the ``Quantized`` filter to change it (a reimport of the section recomputes them); the next run rebuilds the images.
+* ``AdjustAssembledContrast -InputFilter Quantized -OutputFilter Leveled -Downsample 8,16,32 -Channels TEM`` — each assembled level passed to Assemble becomes an 8-bit ``Leveled`` image, mapped linearly over the import's display range. Edit ``CrushDisplayMin``/``CrushDisplayMax`` on the ``Quantized`` filter to change it (a reimport of the section recomputes them); the next run rebuilds the images.
 * ``MosaicReport -PruneFilter Quantized -ContrastFilter Quantized -AssembleFilter Leveled -AssembleDownsample 16 -Output MosaicReport``
 * ``CreateVikingXML -OutputFile Mosaic``
 
