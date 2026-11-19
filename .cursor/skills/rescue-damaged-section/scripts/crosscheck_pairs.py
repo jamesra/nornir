@@ -21,6 +21,10 @@ DS = 16
 N = 512                # padded size for 255 px tiles
 MIN_OVERLAP_PX = 3000  # ~4.6% of a ds16 tile; smaller overlaps are noise
 RADIUS = 4.5           # in stage pitches
+# Memory: each cached tile holds about 6.5 MB (image, mask, three rfft2 arrays), so a worker holds about
+# CACHE_TILES * 6.5 MB. 64 workers x 600 tiles took srv (750 GB) out of memory on 2026-11-18.
+WORKERS = 16
+CACHE_TILES = 50
 LAYOUT = os.environ.get("CROSSCHECK_LAYOUT", "Translated_final.mosaic")
 _cache: dict = {}
 
@@ -37,7 +41,7 @@ def tile_ffts(tid: int):
         m = valid.astype(np.float32)
         a = a * m
         _cache[tid] = (a, m, fft.rfft2(a, (N, N)), fft.rfft2(a * a, (N, N)), fft.rfft2(m, (N, N)))
-        if len(_cache) > 600:
+        if len(_cache) > CACHE_TILES:
             _cache.pop(next(iter(_cache)))
     return _cache[tid]
 
@@ -105,7 +109,7 @@ def main() -> None:
             exp = {ids[j]: tuple((layout[j] - layout[i]) / DS) for j in near}
             jobs.append((ta, [ids[j] for j in near], exp))
     print("tiles", len(ids), "pairs", sum(len(j[1]) for j in jobs), "pitch", pitch, flush=True)
-    workers = max(1, (os.cpu_count() or 4) // 2)
+    workers = min(WORKERS, os.cpu_count() or 4)
     t0 = time.perf_counter()
     out = os.path.join(OUT, os.environ.get("CROSSCHECK_OUT", "crosscheck_pairs.tsv"))
     with open(out, "w", encoding="ascii") as f, ProcessPoolExecutor(workers) as pool:
