@@ -1,8 +1,8 @@
-# Pyre "Estimate Scale" (set aside 2026-11-20)
+# Pyre "Estimate Scale": the scale measurement is rough
 
 James asked for Registration > Estimate Scale on rigid transforms: measure the scale, apply only it, Ctrl+Z undoes it.
-The UI and undo work (`pyre-estimate-scale.patch` against nornir-pyre 5c1d1be, tests in `pyre-estimate-scale-test.py`),
-but the measurement is not trustworthy, so it was not committed.
+Shipped in nornir-pyre 241bb75 at James's request ("The user wants to try it. If the user disagrees they'll undo").
+It uses the scale RefineRigidTransformLocal finds, which is not reliable yet:
 
 Measured on the RC3 pack (`C:\Temp\Nornir\rc3_pyre_pack\RC3v2_pyre`, ds32), StosBrute at the transform's angle:
 
