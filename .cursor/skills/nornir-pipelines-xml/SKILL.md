@@ -30,9 +30,9 @@ already via the pipelines").
 
 | Element | What it does | Skip / failure behaviour |
 |---------|--------------|---------------------------|
-| `<Arguments><Argument flag dest default type help/>` | argparse options. `dest` becomes a kwarg for every `PythonCall` and a `#dest` variable. `type` names a parser in `nornir_shared.argparse_helpers` (`IntegerList` takes `1,3,5-7`); `action="store_true/false"` for flags. Omitted with no default -> `None` | - |
+| `<Arguments><Argument flag dest default type help/>` | argparse options. `dest` becomes a kwarg for every `PythonCall` and a `#dest` variable. `type` names a parser in `nornir_shared.argparse_helpers` (`IntegerList` takes `1,3,5-7`); `action="store_true/false"` for flags. `type="pkg.module.EnumType"` parses a member name (any case). Omitted with no default -> `None` | - |
 | `<Iterate VariableName XPath [Root] [Validate] [SortAttribute]>` | Runs its children once per node matching `XPath` under the current node (or under variable `Root`). Binds the node to `VariableName` | Each candidate is validated first (`CleanIfInvalid`): an invalid node is **deleted** and skipped. Use `Validate="False"` when you must see nodes that may be invalid (e.g. renaming what they reference) |
-| `<Select VariableName XPath [Root]>` | Binds the first match to `VariableName` | No match -> the enclosing Iterate skips this iteration (PipelineSelectFailed). This is the "tries, node missing, skips" behaviour; no Python guard needed |
+| `<Select VariableName XPath [Root]>` | Binds the first match to `VariableName` | No match -> the enclosing Iterate skips this iteration (PipelineSelectFailed). This is the "tries, node missing, skips" behaviour; no Python guard needed. Outside an Iterate it silently skips the rest of the pipeline and exits 0, so a Select of something the previous PythonCall just created must use the same name that call wrote (AlignSections -OutputStosMap, 2026-11-21) |
 | `<RequireMatch Attribute RegEx [Root]>` | Regex on an attribute of the current node | No match -> skip this iteration |
 | `<RequireSetMembership Attribute List [Root]>` | Attribute value must be in the list variable (e.g. `#Sections`, `#Levels`) | Not in list -> skip. List argument omitted (`None`) -> everything passes |
 | `<PythonCall Function="module.func" [Module] attr="#var"...>` | Calls `nornir_buildmanager.operations.<module>.<func>`. kwargs = all Arguments + all bound variables + this element's attributes (`#name` substituted) + `Parameters` (`<Parameters><Entry Name Value/></Parameters>`) + `Logger`, `VolumeElement`, `VolumeNode` | Return or yield the nodes that changed; the engine saves each one's container. Return `None` when nothing changed. An exception stops the pipeline |
@@ -75,6 +75,8 @@ setup call.
 
 - Signature: the kwargs named in the `PythonCall` plus `**kwargs` (the engine passes everything). Name the
   parameter after the attribute (`level_node="#LevelNode"` -> `def f(level_node: LevelNode, ..., **kwargs)`).
+- Read `PythonCall` attributes from the function's kwargs, never from `Parameters`: `Parameters` holds only
+  `<Entry>` items. Reading an attribute from `Parameters` silently falls back to its default.
 - Reach parents with `node.FindParent('Filter')`, `FindParent('Channel')`, rather than passing them separately.
 - Return/yield changed nodes so they are saved; yield a newly created parent (e.g. the channel after
   `GetOrCreateFilter`) before the child.

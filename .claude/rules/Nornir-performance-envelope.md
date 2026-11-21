@@ -24,3 +24,8 @@ Execution locality and transfer cost: [Numpy-CuPy-compatibility.mdc](../../.curs
 - If using `/tmp`, is capacity (up to **512 GB–1 TB**) documented for operators?
 - Does parallelism × working set fit **~2–3 GB/core** without pathological swapping?
 - Does a GPU path pay for itself after transfer cost on Ada-4500-class hardware?
+- **The GPU is shared.** srv runs several pipelines on one card (RC1 StosBrute beside RC3 AssembleTiles), and a
+  CuPy pool keeps its peak for the life of the process. Every CuPy stage must survive another process holding
+  memory for hours: cap its pool, retry after `free_all_blocks`, then finish that unit on NumPy rather than fail
+  the batch (`tile._optimized_tiles_with_numpy_fallback`). Size per-worker budgets from a measured pool peak on
+  the current scorer (`stos_brute_pairs.GPU_WORKER_DEVICE_BYTES`), and re-measure when the scorer changes.

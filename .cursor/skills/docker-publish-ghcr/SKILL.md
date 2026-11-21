@@ -29,7 +29,15 @@ Run every command from the monorepo root in PowerShell 7. Owner defaults to `jam
 ## 0. Ship a code change to the build hosts (end to end)
 
 Use when new package code must reach `nornir-build` (srv-45, opr-marc-build2). Done 2026-10-31 for
-umbrella `dev` 815dd69. Ask before pushing commits or images unless the user already said to.
+umbrella `dev` 815dd69. Finished, tested images are published without asking (James, 2026-11-21: "stop
+asking about publishing"); a release that resets servers or causes an outage still follows its own rules.
+
+- **Bump root `VERSION` before every publish** (`release/verify_package_versions.py` must pass), so a
+  versioned tag never names two digests (1.7.6 named two on 2026-11-21). Do not push a `v<VERSION>` git tag
+  unless a Pyre installer release is wanted: `v*` triggers `pyre-windows-release.yml`.
+- **Reuse the release clone** for the next publish: `git -C $d pull` then the same `submodule update`.
+- **Report** to the dispatcher and each host session: release, cupy and prod digests, revision, and one line
+  per fix with its commit.
 
 1. **Commit and push the code** with **nornir-commit-push** (submodules first, then the umbrella
    pointer; the remote must hold every recorded submodule SHA). Wait for CI on each pushed repo.

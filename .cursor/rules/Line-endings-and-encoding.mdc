@@ -12,4 +12,8 @@ alwaysApply: true
 - **`.ps1` run by Windows PowerShell 5.1** (release, installer, host scripts): ASCII only (no em dashes, smart quotes, ellipses) unless saved UTF-8 with BOM. 5.1 reads BOM-less files as ANSI, so `—` becomes `â€”` and parsing fails ("Unexpected token").
 - **Inline Python** (`python -c`, heredocs): Windows paths with forward slashes or raw strings (`"C:\Users\..."` is a `unicodeescape` SyntaxError); better, pass paths as arguments.
 - `PYTHONIOENCODING=utf-8` before printing non-ASCII on a Windows console (else cp1252 `UnicodeEncodeError`).
+- **Inline Python that edits text:** `open(p, encoding='utf-8', newline='')`; Windows defaults to cp1252 and fails
+  on UTF-8 files (`UnicodeDecodeError`). Put replacement text in raw strings: in a normal string `\t`, `\n`, `\b`
+  become control characters (`$\times$` turned into a tab + `imes`, 2026-11-21). For one or two replacements,
+  prefer the Edit tool.
 - Byte-exact `git show HEAD:<path> > file` needs bash or PowerShell 7; 5.1 writes `>` as UTF-16.
