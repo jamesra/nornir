@@ -253,6 +253,22 @@ be registered by correlation**; plan on a manual merge in Pyre.
    page with `review_page.py <spec.json>` under `/storage4/MosaicRecovery/RC2/<N>/` (served as
    http://rogue1.codepharm.net/MosaicRecovery/RC2/<N>/...), then report: sha, backup path, review URL.
 
+## Re-registering a repaired section to its neighbours (RC2-mirror, 2026-11-21: 1034, 510)
+
+- Only the repaired sections' own pairs go stale (they are never controls). `scripts/rebrute_pairs.py <vol> check`
+  lists them; `run <mapped>:<control> ...` re-runs masked StosBrute64 for just those pairs (AlignSections would redo
+  every stale pair, including sections still waiting on Pyre merges). Leave `AngleSearchRange` None: an empty string
+  restricted the search and gave a wrong 110-degree pose.
+- Then `RefineSectionAlignment ... -MappedSections <list>` for Grid32 (CellArea 512, Spacing 384) and Grid16 (from
+  Grid 32; CellArea 256, Spacing 192), as RC2's 2026-09 runs did.
+- **Check `Grid32/Manual/` first.** A hand fix there always wins (the refine skips the pair), and it is in the OLD
+  mosaic frame. `scripts/pose_check.py` carries it through the old->new tile mapping and compares any pose against
+  it; `--write-carried` writes the carried fix. If the repair barely moved the frame (1034: 0.3 ds32 px) the fix still
+  applies; if it moved (510, re-translated), propose the carried file to James before replacing his Manual file.
+- Score with `scripts/score_stos.py` (Leveled + Assemble masks, high-passed and stretched over tissue, per the
+  Stos-overlay-contrast rule), old .stos on the old images from the section backup vs new on new, and look at a
+  full-resolution centre crop of the overlays: ds64 brute scores are near zero and cannot rank poses.
+
 ## Check what was dropped at each stage
 
 Compare tile sets Stage, Prune, Translated, Grid before deciding what is wrong. A drop can be correct (blank

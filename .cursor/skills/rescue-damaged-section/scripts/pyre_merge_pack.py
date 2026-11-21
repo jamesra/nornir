@@ -74,7 +74,7 @@ def main() -> None:
             os.path.join(out, "main_mask.png"), os.path.join(out, f"{name}_mask.png"))
         stos.Save(os.path.join(out, f"{name}.stos"))
     json.dump({"layout": os.path.join(SECTION, layout), "downsample": ds, "origin_full_res_yx": origin.tolist(),
-               "canvas_shape": shape, "pieces": {k: sorted(int(t[:3]) for t in v) for k, v in pieces.items()}},
+               "canvas_shape": shape, "pieces": {k: sorted(int(t.split(".")[0]) for t in v) for k, v in pieces.items()}},
               open(os.path.join(out, "pieces.json"), "w"), indent=1)
 
 
