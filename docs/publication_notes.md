@@ -56,6 +56,21 @@ $n < 0.25 \min(|m_f|, |m_g|)$ or either variance is flat. The peak is found on $
 
 ## Algorithmic decisions
 
+- **2026-11-21 Mosaic translate keeps a tile pair only if its masked NCC is at least half the section median.**
+  Stage 5 of masked registration: translate measures each overlap by band-pass + masked NCC (Padfield 2012) instead
+  of noise-filled phase correlation. The phase weight could not separate seam pairs with no match anywhere in their
+  overlap (RC1_Crush 4: weight 0.38-0.44, masked NCC 0.12-0.18) from real matches (weight 0.6-2.2), and a whole tile
+  column followed the seam pairs 600-750 px out. Gate: NCC $\ge$ `MATCH_NCC_RATIO` (0.5) $\times$ the median NCC of
+  every pair measured so far in the translate. True matches measured 0.74-1.10 of the median. A/B against HEAD
+  (gross error = more than 250 px from a reference layout): RC1 s3 confident pairs improved (41-49 648 to 37 px,
+  48-49 292 to 29 px, median 96 to 66 px); RC1 s4's seam column still moved (step 4052-4135 px against ~3300 in the
+  2022 layout, HEAD ~3940), cause not found; RC2 0400's worst pair worsened (66 to 152 px), 0800's improved (226 to
+  135 px). James chose to publish with these mixed results (2026-11-21); seams are fixed with pins. Rejected: peak
+  uniqueness (peak_ratio) as the gate, which did not separate the labelled pairs; 0.65, which dropped more true
+  matches on RC1 s3. The translate report now calls an overlap matched when its NCC is significantly above zero,
+  using the effective sample size of Clifford et al. (1989) and a 5% false discovery rate over the section
+  (Benjamini & Hochberg 1995), replacing half the median, which left 6-9 false seams in each of RC2 0400 and 0800.
+  Where: `nornir_imageregistration/arrange_mosaic.py` (`_FindTileOffsets`), `translate_report.py`.
 - **2026-11-19 Registration leaves masked pixels out instead of filling them with noise.** Every path used to replace
   masked pixels, padding and rotation corners with random noise and then run a partly whitened phase correlation
   ($|F|^{0.65}$). Near a tissue edge the window is then part noise: the true peak weakens, edge and noise peaks can
@@ -247,6 +262,12 @@ $n < 0.25 \min(|m_f|, |m_g|)$ or either variance is flat. The peak is found on $
   Biology* 7(3), e1000074. (verify) Used for: the serial-section registration workflow nornir continues.
 - Anscombe, F. J. (1948). The transformation of Poisson, binomial and negative-binomial data. *Biometrika* 35(3/4),
   246-254. doi:10.2307/2332343 (verify). Used for: the planned variance-stabilised crush ($2\sqrt{N + 3/8}$).
+- Benjamini, Y., & Hochberg, Y. (1995). Controlling the false discovery rate: a practical and powerful approach to
+  multiple testing. *J. R. Stat. Soc. B* 57(1), 289-300. doi:10.1111/j.2517-6161.1995.tb02031.x (verify). Used for:
+  calling a section's overlaps matched at a 5% false discovery rate in the translate report.
+- Clifford, P., Richardson, S., & Hemon, D. (1989). Assessing the significance of the correlation between two
+  spatial processes. *Biometrics* 45(1), 123-134. doi:10.2307/2531734 (verify). Used for: the effective sample size
+  of an overlap NCC, since neighbouring pixels are correlated.
 - Donoho, D. L., & Johnstone, I. M. (1994). Ideal spatial adaptation by wavelet shrinkage. *Biometrika* 81(3),
   425-455. doi:10.1093/biomet/81.3.425 (verify). Used for: the MAD/0.6745 noise estimate on the finest wavelet subband.
 - Padfield, D. (2012). Masked object registration in the Fourier domain. *IEEE Transactions on Image Processing*
