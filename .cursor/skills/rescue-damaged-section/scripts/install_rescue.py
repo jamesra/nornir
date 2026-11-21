@@ -12,11 +12,16 @@ and GridTransform leave them.
 usage: install_rescue.py <volume root> <section> <translated.mosaic> <grid.mosaic>
            (--annotation-rescue-report PATH | --no-annotations)
            [--anchor-tile N] [--allow-negative-origin] [--no-anchor] [--dry-run]
-           [--old-translated PATH] [--old-grid PATH]
+           [--old-translated PATH] [--old-grid PATH] [--create-translated-node]
 
 POLICY (set by the user 2026-11-04): a repaired mosaic is not installed until the section's annotations have been
 rescued, i.e. mapped from the old mosaic coordinates to the new (scripts/remap_mosaic_points.py), or the user has
 confirmed the section has none. A real install therefore needs --annotation-rescue-report or --no-annotations.
+
+--create-translated-node: for a section whose Grid names a Translated_Prune input that the channel does not have
+(510 and 1034: the 2015 build translated Stage or kept only the files), add a Translated_Prune node
+(Translated_Prune_Max0.5.mosaic, input Prune) before installing, as TranslateTransform would. Without the flag a
+missing node is still an error. There is then no old Translated mosaic, so anchoring needs --old-translated.
 
 --old-translated/--old-grid name the mosaics being replaced when they are no longer the files behind the nodes
 (for example the backups, to see what the shift would have been). --no-anchor installs at the new coordinates.
@@ -35,6 +40,7 @@ import numpy as np
 import nornir_imageregistration
 import nornir_imageregistration.mosaic_tileset
 from nornir_buildmanager.volumemanager import VolumeManager
+from nornir_buildmanager.volumemanager.transformnode import TransformNode
 
 NEGATIVE_ORIGIN_LIMIT_PX = 64.0  # the same limit Assemble warns at
 
@@ -90,6 +96,8 @@ def main() -> None:
     parser.add_argument("--old-grid")
     parser.add_argument("--annotation-rescue-report", help="path to the report written by remap_mosaic_points.py for this section's annotations")
     parser.add_argument("--no-annotations", action="store_true", help="the user confirmed this section has no annotations to rescue")
+    parser.add_argument("--create-translated-node", action="store_true",
+                        help="add a Translated_Prune node (input Prune) when the channel has none")
     args = parser.parse_args()
     if not args.dry_run and not args.annotation_rescue_report and not args.no_annotations:
         raise SystemExit("Policy: annotations must be rescued before a repaired mosaic is installed. Pass "
@@ -102,6 +110,15 @@ def main() -> None:
     channel = vol.find(f"Block/Section[@Number='{args.section}']").find("Channel[@Name='TEM']")
     nodes = {name: channel.GetChildByAttrib("Transform", "Name", name) for name in ("Stage", "Prune", "Translated_Prune", "Grid")}
     missing = [name for name, node in nodes.items() if node is None]
+    if missing == ["Translated_Prune"] and args.create_translated_node:
+        nodes["Translated_Prune"] = TransformNode.Create(
+            Name="Translated_Prune", Type="_Max0.5", Path="Translated_Prune_Max0.5.mosaic",
+            attrib={"InputImageDir": os.path.join(channel.FullPath, "Leveled", "TilePyramid", "004")})
+        nodes["Translated_Prune"].SetTransform(nodes["Prune"])
+        if not args.dry_run:
+            channel.UpdateOrAddChildByAttrib(nodes["Translated_Prune"], "Path")
+        print("Translated_Prune node missing: " + ("would add" if args.dry_run else "added") + " Translated_Prune_Max0.5.mosaic (input Prune)")
+        missing = []
     if missing:
         present = sorted(t.attrib.get("Name") for t in channel.findall("Transform"))
         raise SystemExit(f"Section {args.section} has no {', '.join(missing)} transform (it has {', '.join(present)}). "
@@ -110,6 +127,8 @@ def main() -> None:
         print(f"{name:18s} {node.Path:55s} locked={node.Locked} checksum={node.attrib.get('Checksum')}")
     prune, translated, grid = nodes["Prune"], nodes["Translated_Prune"], nodes["Grid"]
     old_translated = args.old_translated or translated.FullPath
+    if not args.no_anchor and not os.path.exists(old_translated):
+        raise SystemExit(f"No old Translated mosaic at {old_translated} to anchor on: pass --old-translated or --no-anchor")
     old_grid = args.old_grid or grid.FullPath
     image_dir = os.path.join(channel.FullPath, "Leveled", "TilePyramid", "004")
 

@@ -208,6 +208,22 @@ be registered by correlation**; plan on a manual merge in Pyre.
    `ChannelToVolume.mosaic`. The user merges the two halves and registers the section to its neighbours in
    Pyre; slice-to-volume follows from that.
 
+## Placement-only fixes and Pyre merge packs (user, 2026-11-20: no grid step in repairs)
+
+- `scripts/place_tiles.py diagnose <layout> <tiles>` measures each tile against its neighbours within +-600 px;
+  `apply <layout> <out> <plan.json>` moves groups rigidly, every other tile pinned: by the neighbours' agreed
+  correction (2+ agreeing), or `"fixed"` to the offset a reference tile had in another layout (pairs the user says
+  were right before; the group's first tile is the one matched). Section 11 (2026-11-21): the strip 29-31/47-49 above a
+  crack and tile 148 went back to their 2015 offsets against 46 and 131. Check whether to move the small side or the
+  large one from the per-tile displacement (new minus old) relative to each side of the crack.
+- `scripts/pyre_merge_pack.py <layout> 8 <out> pieceB=<tiles> ...` writes main.png and one image per loose piece on one
+  canvas (mosaic origin, as Assemble draws), masks, and an identity rigid `.stos` per piece, for the user to align in
+  Pyre. Pieces across a tear (no correlation) go here instead of being moved by guess.
+- Sections whose Grid names a Translated_Prune node the channel lacks (510, 1034): `install_rescue.py
+  --create-translated-node` adds it (input Prune).
+- `remap_mosaic_points.py` needs `NORNIR_COMPUTATIONAL_LIBRARY=numpy` (on CuPy, `mosaic_remap` hits an implicit
+  CuPy-to-NumPy conversion).
+
 ## Check what was dropped at each stage
 
 Compare tile sets Stage, Prune, Translated, Grid before deciding what is wrong. A drop can be correct (blank
