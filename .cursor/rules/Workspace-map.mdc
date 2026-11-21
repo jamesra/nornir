@@ -19,6 +19,7 @@ alwaysApply: true
 | Test output / scratch | `TESTOUTPUTPATH` = `C:\Temp\Nornir` | Never the repo root |
 | Docker host layout | `D:\Docker` (`/srv/docker` on Linux) | `docker-machine-layout` skill |
 | Python | Windows `venv\pyre314`; dev container `/opt/venv` | `Virtual-Env` rule |
+| Volumes in the dev container | `Y:\Volumes` = `/storage4` (CIFS `//192.168.0.199/Data/Volumes`); `RC2-mirror`, `_nornir_work`, `MosaicRecovery` (served as `http://rogue1.codepharm.net/MosaicRecovery/`) | No `jq`, `docker` or `ruff` in the container; use `python3` |
 
 If a path above no longer exists, say so and update this table; do not guess a replacement.
 

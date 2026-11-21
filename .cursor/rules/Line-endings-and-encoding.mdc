@@ -17,3 +17,6 @@ alwaysApply: true
   become control characters (`$\times$` turned into a tab + `imes`, 2026-11-21). For one or two replacements,
   prefer the Edit tool.
 - Byte-exact `git show HEAD:<path> > file` needs bash or PowerShell 7; 5.1 writes `>` as UTF-16.
+- **Linux dev container** (same checkout over `/workspace`, `core.autocrlf` unset): Windows-written files show as
+  modified there (CRLF on disk, LF in the index); `git diff --ignore-cr-at-eol` shows the real change. `git add` would
+  commit CRLF, so stage such a file as LF: `git update-index --cacheinfo 100644,$(tr -d '\r' < f | git hash-object -w --stdin),f`.

@@ -17,6 +17,8 @@ alwaysApply: true
   control point, peak RSS) before and after.
 - If you could not run the reproduction (needs the GUI, real data, a server), say so, give the exact
   steps to confirm it, and do not write "fixed".
+- A fix handed to you by another session, a plan or a review is a hypothesis too: re-measure it on the real
+  data before applying, and if it makes things worse, skip it and report the numbers instead of applying it.
 
 ## Stop circling
 

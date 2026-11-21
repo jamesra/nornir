@@ -223,6 +223,35 @@ be registered by correlation**; plan on a manual merge in Pyre.
   --create-translated-node` adds it (input Prune).
 - `remap_mosaic_points.py` needs `NORNIR_COMPUTATIONAL_LIBRARY=numpy` (on CuPy, `mosaic_remap` hits an implicit
   CuPy-to-NumPy conversion).
+- **Hard check every proposed move, including moves relayed from a review or a plan:** `scripts/seam_table.py <tiles>
+  <before.mosaic> <after.mosaic>`. A move that fixes its own seam but breaks the tile's other seams is not evidence
+  (515, 2026-11-21: all three proposed pair fixes did that); skip it and say why with the numbers.
+
+## Installing a repair into RC2-mirror (dev container; one section, in order)
+
+`NB="/opt/venv/bin/python /workspace/nornir-buildmanager/nornir_buildmanager/__main__.py"`,
+`V=/storage4/RC2-mirror`, scripts from `scripts/`, `NORNIR_COMPUTATIONAL_LIBRARY=numpy` throughout.
+1. Translated pair: if only the Grid changed, move the same tiles of the installed Translated by the same vectors.
+2. Annotation map: copy the new pair to `<work>\section<NNNN>\annotation_transfer\{Grid,Translated}_new.mosaic` (keep
+   the previous as `*_new_<tag>.mosaic`) and run `remap_mosaic_points.py <old> <new> --sample <prefix>` for each.
+3. `backup_section.sh $V <NNNN>` (refuses to overwrite; checks sizes).
+4. Missing Leveled tiles: `RESCUE_PRODUCTION_SECTION_DIR=$V/TEM/<NNNN>/TEM RESCUE_MINMAX=<min,max> RESCUE_GAMMA=<g>
+   rebuild_leveled_tiles.py $V/TEM/<NNNN>/TEM <tiles>`, with the values from `Leveled/VolumeData.xml`. James (#167,
+   2026-11-21): rebuild Leveled tiles when the volume is not quantized; for quantized (crushed) volumes, build Leveled
+   assembled images only if needed.
+5. Prune: delete `Raw8/PruneScores_*` (they are in the backup), `$NB SetPruneCutoff ... -Value <c>`, `$NB Prune ...
+   -DefaultThreshold <c>`; check the Prune mosaic equals the rescue copy's and holds every Grid tile.
+6. `install_rescue.py $V <N> <translated> <grid> --annotation-rescue-report <sample_Grid.report.txt> --no-anchor`
+   (`--create-translated-node` when the channel lacks Translated_Prune). Record the Grid's sha256.
+7. `$NB -computational_library numpy Assemble ... && CreateBlobFilter ... && AssembleTiles ...` (step 8.6 values), in
+   the background. **Run one pipeline at a time per volume:** parallel runs on the same volume collide on
+   `StageTimings.json` and `VolumeData.xml.backup.xml` (CIFS lock, `BlockingIOError`), and the chain can stop after
+   Assemble while still exiting 0. Grep the log for `Traceback` as well as the stage timings.
+8. Verify: the mirror's `Leveled/Images/016` image against an `assemble_mosaic.py` render of the new Grid (mean
+   absolute difference about 1.5 grey levels, against more than 2.5 for the old Grid).
+9. `remap_entry.py <batch remap folder> /storage4/RC2 $V <N> "<note>"`, notes in the section's `REVIEW.md`, review
+   page with `review_page.py <spec.json>` under `/storage4/MosaicRecovery/RC2/<N>/` (served as
+   http://rogue1.codepharm.net/MosaicRecovery/RC2/<N>/...), then report: sha, backup path, review URL.
 
 ## Check what was dropped at each stage
 

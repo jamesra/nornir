@@ -113,6 +113,11 @@ git -C nornir-<pkg> commit -m "<what and why>" -- <every path you changed>
 
 `git commit -- <paths>` commits only those paths, even if another session staged other files.
 
+The umbrella's `.gitignore` ignores every `scripts/` folder, including `.cursor/skills/*/scripts/`: a new script there
+needs `git add -f -- <path>` (check `git check-ignore -v <path>` when `git add` says "ignored"). The dev container has
+no GitHub credentials, so a push from it fails ("could not read Username"): commit, then ask the dispatcher or the
+host to push.
+
 **Commit-only mode ends here.** Report per repo: commits made, `ahead=` count, and pointer bumps
 still needed.
 

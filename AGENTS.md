@@ -86,6 +86,7 @@ Full catalog: [`.cursor/skills/README.md`](.cursor/skills/README.md).
 | [nornir-headless-unit-tests](.cursor/skills/nornir-headless-unit-tests/SKILL.md) | `NORNIR_HEADLESS`, plot artifact triage |
 | [nornir-review-issue-fixing](.cursor/skills/nornir-review-issue-fixing/SKILL.md) | Working the bug-review queue end to end |
 | [nornir-improve-loop](.cursor/skills/nornir-improve-loop/SKILL.md) | Only when the user launches it: timed improvement loop over the monorepo, incl. the XML-to-SQLite metadata port |
+| [session-handoff](.cursor/skills/session-handoff/SKILL.md) | Replacing an earlier session (restart, handover): read its transcript cheaply, find its commands, files and pending items |
 | [rescue-damaged-section](.cursor/skills/rescue-damaged-section/SKILL.md) | A torn/folded section's mosaic is wrong: isolated-copy prune, re-translate, per-half grid refine, diagnostics, then install, lock and re-assemble for Pyre (worked example: RC2 1240) |
 | [nornir-serial-batched-primitives](.cursor/skills/nornir-serial-batched-primitives/SKILL.md) | Serial/batched registration verification |
 | [refine-grid-trust-review](.cursor/skills/refine-grid-trust-review/SKILL.md) | Trust-question review of refine-grid gates and mesh membership |
